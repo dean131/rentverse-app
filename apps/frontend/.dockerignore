@@ -1,0 +1,9 @@
+# Ignore dependencies - these will be installed inside the container
+node_modules
+#Ignore build output
+.next
+#Ignore local environment files and logs
+.env
+*.log
+#Ignore Dockerfile itself
+Dockerfile

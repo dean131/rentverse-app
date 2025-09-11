@@ -1,0 +1,54 @@
+services:
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:15-alpine
+    container_name: rentverse_db
+    environment:
+      POSTGRES_USER: amoeba
+      POSTGRES_PASSWORD: pass123
+      POSTGRES_DB: rentversedb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rentverse_network
+
+  # Core Service (Express.js Backend)
+  core-service:
+    build:
+      context: ./apps/core-service
+      dockerfile: Dockerfile
+    container_name: rentverse_core_service
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: "postgresql://amoeba:pass123@localhost:5432/rentversedb?schema=public"
+      PORT: 8080
+      JWT_SECRET: "YOUR_SUPER_SECRET_JWT_KEY_CHANGE_ME"
+    depends_on:
+      - postgres
+    networks:
+      - rentverse_network
+
+  # Frontend Service (Next.js UI)
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    container_name: rentverse_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:8080/api" # This will be the API Gateway URL later
+    depends_on:
+      - core-service
+    networks:
+      - rentverse_network
+
+volumes:
+  postgres_data:
+
+networks:
+  rentverse_network:
+    driver: bridge

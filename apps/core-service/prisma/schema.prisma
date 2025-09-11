@@ -1,0 +1,265 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===================================
+// ENUMERATIONS
+// ===================================
+
+enum Role {
+  PROPERTY_OWNER
+  TENANT
+  ADMIN
+}
+
+enum ListingType {
+  SALE
+  RENT
+  BOTH
+}
+
+enum PropertyStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RENTED
+  SOLD
+}
+
+enum DocumentType {
+  OWNERSHIP_CERTIFICATE
+  TAX_RECORD
+  UTILITY_BILL
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum PropertyType {
+  APARTMENT
+  HOUSE
+  PENTHOUSE
+  STUDIO
+  COMMERCIAL
+}
+
+enum Furnishing {
+  UNFURNISHED
+  PARTIALLY_FURNISHED
+  FULLY_FURNISHED
+}
+
+enum PaymentPeriod {
+  MONTHLY
+  QUARTERLY
+  BI_ANNUALLY
+  YEARLY
+}
+
+enum AgreementStatus {
+  ACTIVE
+  EXPIRED
+  TERMINATED
+}
+
+// ===================================
+// MODELS
+// ===================================
+
+// --- Core User and Property Models ---
+
+model User {
+  id                Int      @id @default(autoincrement())
+  fullName          String
+  email             String   @unique
+  password          String
+  phone             String?
+  country           String?
+  profilePictureUrl String?
+  role              Role     @default(TENANT)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  properties       Property[]
+  reviews          Review[]
+  favorites        Favorite[]
+  ownedAgreements  RentalAgreement[] @relation("OwnerAgreements")
+  rentedAgreements RentalAgreement[] @relation("TenantAgreements")
+}
+
+model Project {
+  id             Int       @id @default(autoincrement())
+  projectName    String
+  developer      String?
+  address        String
+  completionDate DateTime?
+
+  properties Property[]
+}
+
+model Property {
+  id               Int            @id @default(autoincrement())
+  title            String
+  description      String         @db.Text
+  listingType      ListingType
+  propertyType     PropertyType
+  rentalPrice      Float?
+  paymentPeriod    PaymentPeriod?
+  salePrice        Float?
+  maintenanceFee   Float?
+  sizeSqft         Int
+  bedrooms         Int
+  bathrooms        Int
+  furnishingStatus Furnishing
+  latitude         Float
+  longitude        Float
+  status           PropertyStatus @default(PENDING)
+
+  listedById Int
+  listedBy   User @relation(fields: [listedById], references: [id])
+
+  projectId Int?
+  project   Project? @relation(fields: [projectId], references: [id])
+
+  documents        PropertyDocument[]
+  images           PropertyImage[]
+  amenities        PropertyAmenity[]
+  views            PropertyView[]
+  nearbyFacilities NearbyFacility[]
+  reviews          Review[]
+  favoritedBy      Favorite[]
+  agreements       RentalAgreement[]
+}
+
+// --- Property-related Detail Models ---
+
+model PropertyDocument {
+  id                 Int                @id @default(autoincrement())
+  fileUrl            String
+  documentType       DocumentType
+  verificationStatus VerificationStatus @default(PENDING)
+  uploadedAt         DateTime           @default(now())
+
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id])
+}
+
+model PropertyImage {
+  id           Int    @id @default(autoincrement())
+  imageUrl     String
+  displayOrder Int    @default(0)
+
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id])
+}
+
+model Amenity {
+  id   Int     @id @default(autoincrement())
+  name String  @unique
+  icon String?
+
+  properties PropertyAmenity[]
+}
+
+model PropertyAmenity {
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id])
+  amenityId  Int
+  amenity    Amenity  @relation(fields: [amenityId], references: [id])
+
+  @@id([propertyId, amenityId])
+}
+
+model View {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  properties PropertyView[]
+}
+
+model PropertyView {
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id])
+  viewId     Int
+  view       View     @relation(fields: [viewId], references: [id])
+
+  @@id([propertyId, viewId])
+}
+
+// --- Location-based Models ---
+
+model FacilityCategory {
+  id   Int     @id @default(autoincrement())
+  name String  @unique
+  icon String?
+
+  facilities NearbyFacility[]
+}
+
+model NearbyFacility {
+  id               Int    @id @default(autoincrement())
+  name             String
+  distanceInMeters Int
+
+  propertyId Int
+  property   Property         @relation(fields: [propertyId], references: [id])
+  categoryId Int
+  category   FacilityCategory @relation(fields: [categoryId], references: [id])
+}
+
+// --- User Engagement Models ---
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id])
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Favorite {
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  @@id([userId, propertyId])
+}
+
+// --- Challenge 3: Agreement Model ---
+
+model RentalAgreement {
+  id              Int             @id @default(autoincrement())
+  startDate       DateTime
+  endDate         DateTime
+  rentalAmount    Float
+  status          AgreementStatus @default(ACTIVE)
+  generatedPdfUrl String?
+
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  tenantId Int
+  tenant   User @relation("TenantAgreements", fields: [tenantId], references: [id])
+
+  ownerId Int
+  owner   User @relation("OwnerAgreements", fields: [ownerId], references: [id])
+}

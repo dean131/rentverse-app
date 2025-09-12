@@ -4,7 +4,15 @@ WORKDIR /app
 
 # Copy package.json and install dependencies
 COPY package*.json ./
+# Note: Using npm install as per the scripts in your package.json
 RUN npm install
+
+# Copy the Prisma schema. This is needed to generate the client.
+COPY prisma ./prisma
+
+# Generate the Prisma Client
+# THIS IS THE CRITICAL NEW STEP
+RUN npx prisma generate
 
 # Copy the rest of the application code
 COPY . .
@@ -21,9 +29,6 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 
-# Copy Prisma schema needed by the client to run migrations
-COPY prisma ./prisma
-
 EXPOSE 8080
-CMD ["npm", "run", "start"]
-
+# The start command should use the compiled JS files in dist
+CMD ["node", "dist/index.js"]

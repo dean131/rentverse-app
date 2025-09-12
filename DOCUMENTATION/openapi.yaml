@@ -1,28 +1,3 @@
-# API Contract Documentation: RENTVERSE Project
-
-**Version: 2.4**
-**Date: September 12, 2025**
-**Status: Approved for Implementation**
-
----
-
-## 1. Introduction
-
-### 1.1. Document Purpose
-
-This document is the single source of truth for all API interactions within the RENTVERSE ecosystem. It provides a strict definition for every endpoint, including methods, request structures, and response schemas. Its purpose is to enable parallel development between frontend and backend teams and minimize integration errors.
-
-### 1.2. Specification Format
-
-This specification is written using **OpenAPI Specification (OAS) v3.0.0** in **YAML** format for human readability.
-
----
-
-## 2. OpenAPI Specification (Version 2.4)
-
-This specification reflects a mature authentication system using access and refresh tokens, alongside the full feature set including geolocation, property views, and nearby facilities.
-
-```yaml
 openapi: "3.0.0"
 info:
   title: RENTVERSE API v2.4
@@ -44,20 +19,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserRegister"
+              $ref: '#/components/schemas/UserRegister'
       responses:
-        "201":
+        '201':
           description: User created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserResponse"
-        "409":
+                $ref: '#/components/schemas/UserResponse'
+        '409':
           description: Email already exists
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /auth/login:
     post:
       summary: Log in a user and receive tokens
@@ -68,9 +43,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserLogin"
+              $ref: '#/components/schemas/UserLogin'
       responses:
-        "200":
+        '200':
           description: Login successful. Returns an access token in the body and a refresh token in a secure, HttpOnly cookie.
           headers:
             Set-Cookie:
@@ -80,13 +55,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
-        "401":
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
           description: Invalid credentials
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /auth/refresh:
     post:
       summary: Obtain a new access token using a refresh token
@@ -94,18 +69,18 @@ paths:
       operationId: refreshToken
       description: This endpoint relies on the HttpOnly refresh token cookie sent by the browser. No request body is needed.
       responses:
-        "200":
+        '200':
           description: A new access token is issued.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
-        "401":
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
           description: Invalid or expired refresh token.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /auth/logout:
     post:
       summary: Log out a user
@@ -113,9 +88,9 @@ paths:
       operationId: logoutUser
       description: Invalidates the user's refresh token by deleting it from the database and clearing the cookie.
       responses:
-        "204":
+        '204':
           description: Logout successful. No content returned.
-        "401":
+        '401':
           description: No active session to log out from.
   /users/me:
     get:
@@ -124,12 +99,12 @@ paths:
       operationId: getCurrentUser
       security: [{ bearerAuth: [] }]
       responses:
-        "200":
+        '200':
           description: User profile data
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: '#/components/schemas/UserResponse'
     patch:
       summary: Update current user's profile
       tags: [Users]
@@ -139,14 +114,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserProfileUpdate"
+              $ref: '#/components/schemas/UserProfileUpdate'
       responses:
-        "200":
+        '200':
           description: Profile updated successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: '#/components/schemas/UserResponse'
 
   # --- Property & Project Management ---
   /projects:
@@ -156,28 +131,28 @@ paths:
       operationId: getAllProjects
       security: [{ bearerAuth: [] }]
       responses:
-        "200":
+        '200':
           description: A list of projects
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ProjectSummary"
+                  $ref: '#/components/schemas/ProjectSummary'
   /properties:
     get:
       summary: Get all approved properties (for public view)
       tags: [Properties]
       operationId: getPublicProperties
       responses:
-        "200":
+        '200':
           description: A list of public properties
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/PropertySummary"
+                  $ref: '#/components/schemas/PropertySummary'
     post:
       summary: Submit a new property listing
       tags: [Properties]
@@ -188,14 +163,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PropertyCreate"
+              $ref: '#/components/schemas/PropertyCreate'
       responses:
-        "201":
+        '201':
           description: Property submitted for approval
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PropertyDetailed"
+                $ref: '#/components/schemas/PropertyDetailed'
   /properties/{id}:
     get:
       summary: Get details for a single property
@@ -207,15 +182,15 @@ paths:
           required: true
           schema: { type: integer }
       responses:
-        "200":
+        '200':
           description: Detailed property information
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PropertyDetailed"
-        "404":
+                $ref: '#/components/schemas/PropertyDetailed'
+        '404':
           description: Property not found
-
+  
   # --- Property Attributes ---
   /views:
     get:
@@ -224,14 +199,14 @@ paths:
       operationId: getAllViews
       security: [{ bearerAuth: [] }]
       responses:
-        "200":
+        '200':
           description: A list of available views
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ViewResponse"
+                  $ref: '#/components/schemas/ViewResponse'
   /properties/{id}/nearby-facilities:
     get:
       summary: Get nearby facilities for a specific property
@@ -243,14 +218,14 @@ paths:
           required: true
           schema: { type: integer }
       responses:
-        "200":
+        '200':
           description: A list of nearby facilities, grouped by category
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/NearbyFacilityCategory"
+                  $ref: '#/components/schemas/NearbyFacilityCategory'
 
   # --- Admin Endpoints ---
   /admin/properties/pending:
@@ -260,15 +235,15 @@ paths:
       operationId: getPendingPropertiesAdmin
       security: [{ bearerAuth: [] }]
       responses:
-        "200":
+        '200':
           description: A list of pending properties
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/PropertySummary"
-        "403":
+                  $ref: '#/components/schemas/PropertySummary'
+        '403':
           description: Forbidden (user is not an Admin)
   /admin/properties/{id}/status:
     patch:
@@ -286,14 +261,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/StatusUpdate"
+              $ref: '#/components/schemas/StatusUpdate'
       responses:
-        "200":
+        '200':
           description: Property status updated
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PropertyDetailed"
+                $ref: '#/components/schemas/PropertyDetailed'
 
   # --- Engagement & Uploads ---
   /properties/{id}/favorite:
@@ -308,7 +283,7 @@ paths:
           required: true
           schema: { type: integer }
       responses:
-        "200":
+        '200':
           description: Property added to favorites
     delete:
       summary: Remove a property from favorites
@@ -321,7 +296,7 @@ paths:
           required: true
           schema: { type: integer }
       responses:
-        "204":
+        '204':
           description: Property removed from favorites
   /properties/{id}/reviews:
     post:
@@ -339,14 +314,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReviewCreate"
+              $ref: '#/components/schemas/ReviewCreate'
       responses:
-        "201":
+        '201':
           description: Review submitted successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ReviewResponse"
+                $ref: '#/components/schemas/ReviewResponse'
   /uploads/signed-url:
     get:
       summary: Get a secure URL for file uploads
@@ -363,12 +338,12 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        "200":
+        '200':
           description: Secure upload URL provided
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SignedUrlResponse"
+                $ref: '#/components/schemas/SignedUrlResponse'
 
   # --- Prediction Service ---
   /predict:
@@ -382,14 +357,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PredictionRequest"
+              $ref: '#/components/schemas/PredictionRequest'
       responses:
-        "200":
+        '200':
           description: Successful price prediction
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PredictionResponse"
+                $ref: '#/components/schemas/PredictionResponse'
 
 components:
   securitySchemes:
@@ -404,10 +379,8 @@ components:
       required: [fullName, email, password, role]
       properties:
         fullName: { type: string, example: "Budi Siregar" }
-        email:
-          { type: string, format: email, example: "budi.siregar@example.com" }
-        password:
-          { type: string, format: password, example: "SecurePassword123" }
+        email: { type: string, format: email, example: "budi.siregar@example.com" }
+        password: { type: string, format: password, example: "SecurePassword123" }
         role: { type: string, enum: [PROPERTY_OWNER, TENANT] }
     UserLogin:
       type: object
@@ -443,43 +416,24 @@ components:
         projectName: { type: string }
     PropertyCreate:
       type: object
-      required:
-        [title, listingType, propertyType, sizeSqft, latitude, longitude]
+      required: [title, listingType, propertyType, sizeSqft, latitude, longitude]
       properties:
         title: { type: string }
         description: { type: string }
         listingType: { type: string, enum: [SALE, RENT, BOTH] }
-        propertyType:
-          {
-            type: string,
-            enum: [APARTMENT, HOUSE, PENTHOUSE, STUDIO, COMMERCIAL],
-          }
+        propertyType: { type: string, enum: [APARTMENT, HOUSE, PENTHOUSE, STUDIO, COMMERCIAL] }
         rentalPrice: { type: number, nullable: true }
-        paymentPeriod:
-          {
-            type: string,
-            enum: [MONTHLY, QUARTERLY, BI_ANNUALLY, YEARLY],
-            nullable: true,
-          }
+        paymentPeriod: { type: string, enum: [MONTHLY, QUARTERLY, BI_ANNUALLY, YEARLY], nullable: true }
         salePrice: { type: number, nullable: true }
         maintenanceFee: { type: number, nullable: true }
         sizeSqft: { type: integer }
         bedrooms: { type: integer }
         bathrooms: { type: integer }
-        furnishingStatus:
-          {
-            type: string,
-            enum: [UNFURNISHED, PARTIALLY_FURNISHED, FULLY_FURNISHED],
-          }
+        furnishingStatus: { type: string, enum: [UNFURNISHED, PARTIALLY_FURNISHED, FULLY_FURNISHED] }
         latitude: { type: number, format: float, example: -6.2088 }
         longitude: { type: number, format: float, example: 106.8456 }
         projectId: { type: integer, nullable: true }
-        ownershipDocumentUrl:
-          {
-            type: string,
-            format: uri,
-            description: "URL from signed-url endpoint",
-          }
+        ownershipDocumentUrl: { type: string, format: uri, description: "URL from signed-url endpoint" }
         viewIds:
           type: array
           items:
@@ -499,26 +453,14 @@ components:
         imageUrl: { type: string, format: uri } # Primary image
     PropertyDetailed:
       allOf:
-        - $ref: "#/components/schemas/PropertySummary"
+        - $ref: '#/components/schemas/PropertySummary'
         - type: object
           properties:
             description: { type: string }
             listingType: { type: string, enum: [SALE, RENT, BOTH] }
-            propertyType:
-              {
-                type: string,
-                enum: [APARTMENT, HOUSE, PENTHOUSE, STUDIO, COMMERCIAL],
-              }
-            furnishingStatus:
-              {
-                type: string,
-                enum: [UNFURNISHED, PARTIALLY_FURNISHED, FULLY_FURNISHED],
-              }
-            status:
-              {
-                type: string,
-                enum: [PENDING, APPROVED, REJECTED, RENTED, SOLD],
-              }
+            propertyType: { type: string, enum: [APARTMENT, HOUSE, PENTHOUSE, STUDIO, COMMERCIAL] }
+            furnishingStatus: { type: string, enum: [UNFURNISHED, PARTIALLY_FURNISHED, FULLY_FURNISHED] }
+            status: { type: string, enum: [PENDING, APPROVED, REJECTED, RENTED, SOLD] }
             images:
               type: array
               items:
@@ -529,11 +471,11 @@ components:
             reviews:
               type: array
               items:
-                $ref: "#/components/schemas/ReviewResponse"
+                $ref: '#/components/schemas/ReviewResponse'
             views:
               type: array
               items:
-                $ref: "#/components/schemas/ViewResponse"
+                $ref: '#/components/schemas/ViewResponse'
     StatusUpdate:
       type: object
       required: [status]
@@ -559,13 +501,12 @@ components:
         facilities:
           type: array
           items:
-            $ref: "#/components/schemas/NearbyFacility"
+            $ref: '#/components/schemas/NearbyFacility'
 
     # --- Prediction & Engagement Schemas ---
     PredictionRequest:
       type: object
-      required:
-        [sizeSqft, bedrooms, bathrooms, propertyType, latitude, longitude]
+      required: [sizeSqft, bedrooms, bathrooms, propertyType, latitude, longitude]
       properties:
         sizeSqft: { type: number }
         bedrooms: { type: number }
@@ -601,37 +542,9 @@ components:
     SignedUrlResponse:
       type: object
       properties:
-        uploadUrl:
-          { type: string, description: "The pre-signed URL to PUT the file to" }
-        fileUrl:
-          {
-            type: string,
-            description: "The final URL of the file after upload",
-          }
+        uploadUrl: { type: string, description: "The pre-signed URL to PUT the file to" }
+        fileUrl: { type: string, description: "The final URL of the file after upload" }
     ErrorResponse:
       type: object
       properties:
         message: { type: string }
-```
-
-## 3. Key Implementation Notes (Version 2.4)
-
-### 3.1. Authentication Flow
-
-The system uses a refresh token rotation mechanism.
-
-Upon login, the client receives a short-lived accessToken in the JSON body and a long-lived refreshToken in a secure, HttpOnly cookie.
-
-The client uses the accessToken for regular API requests. When it expires (resulting in a 401 error), the client calls the /auth/refresh endpoint.
-
-The /auth/refresh endpoint validates the refreshToken from the cookie and issues a new accessToken.
-
-Logout is handled by the /auth/logout endpoint, which invalidates the refresh token on the server.
-
-### 3.2. File Upload Workflow (Pre-signed URL)
-
-To upload files (e.g., ownership documents, profile pictures), the client must follow a two-step process: request a secure link from GET /uploads/signed-url, PUT the file to that URL, and then use the returned fileUrl when submitting the main form data. This enhances security and performance.
-
-### 3.3. Geolocation-Based Automation
-
-The latitude and longitude provided during property creation are critical. They will be used not only for map display but also as the primary input for the Prediction Service and to trigger a background job that automatically populates the NearbyFacilities data for that property.

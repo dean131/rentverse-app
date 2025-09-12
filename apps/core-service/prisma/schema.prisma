@@ -94,8 +94,20 @@ model User {
   properties       Property[]
   reviews          Review[]
   favorites        Favorite[]
+  refreshTokens    RefreshToken[] // Relation to refresh tokens
   ownedAgreements  RentalAgreement[] @relation("OwnerAgreements")
   rentedAgreements RentalAgreement[] @relation("TenantAgreements")
+}
+
+// NEW TABLE for Refresh Token Mechanism
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 }
 
 model Project {

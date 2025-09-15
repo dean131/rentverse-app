@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { AuthService } from "./auth.service.js";
-import cookieParser from "cookie-parser"; // We will need to install this dependency
+import { ApiResponse } from "../../utils/response.helper.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import cookieParser from "cookie-parser";
 
-// Use cookie parser middleware to read cookies
 export const useCookieParser = cookieParser();
 
 export class AuthController {
@@ -12,68 +13,43 @@ export class AuthController {
     this.authService = authService;
   }
 
-  registerUser = async (req: Request, res: Response) => {
-    try {
-      const newUser = await this.authService.registerUser(req.body);
-      const { password, ...userWithoutPassword } = newUser;
-      res.status(201).json(userWithoutPassword);
-    } catch (error: any) {
-      if (error.code === "P2002") {
-        return res.status(409).json({ message: "Email already exists." });
-      }
-      res
-        .status(500)
-        .json({
-          message: "An error occurred during registration.",
-          error: error.message,
-        });
-    }
-  };
+  // Notice the `asyncHandler` wrapper and the removal of try/catch blocks
+  registerUser = asyncHandler(async (req: Request, res: Response) => {
+    const newUser = await this.authService.registerUser(req.body);
+    const { password, ...userWithoutPassword } = newUser;
+    ApiResponse.created(res, userWithoutPassword);
+  });
 
-  loginUser = async (req: Request, res: Response) => {
-    try {
-      const { email, password } = req.body;
-      const { accessToken, refreshToken } = await this.authService.loginUser(
-        email,
-        password
-      );
+  loginUser = asyncHandler(async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    const { accessToken, refreshToken } = await this.authService.loginUser(
+      email,
+      password
+    );
 
-      // Send the refresh token in a secure, HttpOnly cookie
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        path: "/",
-      });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
 
-      res.status(200).json({ accessToken });
-    } catch (error: any) {
-      res.status(401).json({ message: error.message });
-    }
-  };
+    ApiResponse.success(res, { accessToken });
+  });
 
-  refreshToken = async (req: Request, res: Response) => {
-    try {
-      const { refreshToken } = req.cookies;
-      const { accessToken } =
-        await this.authService.refreshAccessToken(refreshToken);
-      res.status(200).json({ accessToken });
-    } catch (error: any) {
-      res.status(401).json({ message: error.message });
-    }
-  };
+  refreshToken = asyncHandler(async (req: Request, res: Response) => {
+    const { refreshToken } = req.cookies;
+    const { accessToken } =
+      await this.authService.refreshAccessToken(refreshToken);
+    ApiResponse.success(res, { accessToken });
+  });
 
-  logoutUser = async (req: Request, res: Response) => {
-    try {
-      const { refreshToken } = req.cookies;
-      await this.authService.logoutUser(refreshToken);
+  logoutUser = asyncHandler(async (req: Request, res: Response) => {
+    const { refreshToken } = req.cookies;
+    await this.authService.logoutUser(refreshToken);
 
-      // Clear the cookie on the client side
-      res.clearCookie("refreshToken", { path: "/" });
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: "An error occurred during logout." });
-    }
-  };
+    res.clearCookie("refreshToken", { path: "/" });
+    ApiResponse.noContent(res);
+  });
 }

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { User } from "@prisma/client";
 import { AuthRepository } from "./auth.repository.js";
+import { ApiError } from "../../utils/ApiError.js";
 
 // Define token expiration times
 const ACCESS_TOKEN_EXPIPIRES_IN = "15m"; // Short-lived
@@ -49,7 +50,7 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await this.authRepository.findUserByEmail(email);
     if (!user || !(await bcrypt.compare(pass, user.password))) {
-      throw new Error("Invalid credentials.");
+      throw new ApiError(401, "Invalid credentials.");
     }
 
     const accessToken = this.generateAccessToken(user);
@@ -86,7 +87,7 @@ export class AuthService {
       await this.authRepository.findRefreshToken(hashedRefreshToken);
 
     if (!storedToken || new Date() > storedToken.expiresAt) {
-      throw new Error("Invalid or expired refresh token.");
+      throw new ApiError(401, "Invalid or expired refresh token.");
     }
 
     // FIXED: Use the repository to find the user, not prisma directly.

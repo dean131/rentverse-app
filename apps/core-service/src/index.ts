@@ -4,6 +4,7 @@ import { AuthRepository } from "./api/auth/auth.repository.js";
 import { AuthService } from "./api/auth/auth.service.js";
 import { AuthController, useCookieParser } from "./api/auth/auth.controller.js";
 import { createAuthRouter } from "./api/auth/auth.routes.js";
+import { errorHandler } from "./middleware/errorHandler.middleware.js";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -24,6 +25,9 @@ app.use("/api/auth", authRouter);
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", service: "Core Service" });
 });
+
+// --- Global Error Handler ---
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Core Service is running on http://localhost:${PORT}`);

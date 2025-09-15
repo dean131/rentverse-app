@@ -6,7 +6,6 @@ export default {
     // Handle ES module file extensions
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
-  // This is important for ts-jest with ES Modules
   transform: {
     "^.+\\.tsx?$": [
       "ts-jest",
@@ -15,4 +14,6 @@ export default {
       },
     ],
   },
+  // NEW: Tell Jest to ignore our setup utility file during test runs.
+  testPathIgnorePatterns: ["/node_modules/", "/__tests__/setup.ts"],
 };

@@ -10,15 +10,24 @@ export class PropertyService {
   }
 
   async createProperty(propertyData: any, userId: number): Promise<Property> {
-    const { viewIds, ownershipDocumentUrl, ...restOfData } = propertyData;
+    // FIXED: Destructure projectId along with the other special fields.
+    const { viewIds, ownershipDocumentUrl, projectId, ...restOfData } =
+      propertyData;
 
-    // Construct the data payload for Prisma
+    // Construct the data payload for Prisma's nested write capabilities
     const dataToCreate = {
       ...restOfData,
+      // Connect the property to the user who is creating it
       listedBy: {
-        connect: { id: userId }, // Connect to the logged-in user
+        connect: { id: userId },
       },
-      // Connect to views if they were provided
+      // FIXED: If a projectId is provided, create the correct 'connect' object.
+      ...(projectId && {
+        project: {
+          connect: { id: projectId },
+        },
+      }),
+      // If viewIds were provided, create the links in the PropertyView join table
       ...(viewIds &&
         viewIds.length > 0 && {
           views: {
@@ -27,11 +36,11 @@ export class PropertyService {
             })),
           },
         }),
-      // Create the ownership document record
+      // Create the related ownership document record
       documents: {
         create: {
           fileUrl: ownershipDocumentUrl,
-          documentType: "OWNERSHIP_CERTIFICATE", // Defaulting for now
+          documentType: "OWNERSHIP_CERTIFICATE", // Defaulting to this type for now
         },
       },
     };

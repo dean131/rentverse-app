@@ -4,34 +4,27 @@ import crypto from "crypto";
 import { User } from "@prisma/client";
 import { AuthRepository } from "./auth.repository.js";
 import { ApiError } from "../../utils/ApiError.js";
+import { config } from "../../config/index.js";
 
-// Define token expiration times
-const ACCESS_TOKEN_EXPIPIRES_IN = "15m"; // Short-lived
-const REFRESH_TOKEN_EXPIRES_IN_DAYS = 7; // Long-lived
+const ACCESS_TOKEN_EXPIRES_IN = "15m";
+const REFRESH_TOKEN_EXPIRES_IN_DAYS = 7;
 
 export class AuthService {
   private authRepository: AuthRepository;
-  private jwtSecret: string;
 
   constructor(authRepository: AuthRepository) {
     this.authRepository = authRepository;
-    this.jwtSecret = process.env.JWT_SECRET || "DEFAULT_SECRET";
-    if (this.jwtSecret === "DEFAULT_SECRET") {
-      console.warn("Warning: JWT_SECRET is not set in environment variables.");
-    }
   }
 
   private generateAccessToken(user: User): string {
-    return jwt.sign({ userId: user.id, role: user.role }, this.jwtSecret, {
-      expiresIn: ACCESS_TOKEN_EXPIPIRES_IN,
+    return jwt.sign({ userId: user.id, role: user.role }, config.JWT_SECRET, {
+      expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     });
   }
 
   async registerUser(userData: any): Promise<User> {
     const { fullName, email, password, role } = userData;
-    if (!fullName || !email || !password || !role) {
-      throw new Error("Missing required fields");
-    }
+    // The initial check for missing fields is now removed, as Zod handles it.
 
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -48,20 +41,18 @@ export class AuthService {
     email: string,
     pass: string
   ): Promise<{ accessToken: string; refreshToken: string }> {
+    // The check for missing email/pass is removed, as Zod handles it.
     const user = await this.authRepository.findUserByEmail(email);
     if (!user || !(await bcrypt.compare(pass, user.password))) {
       throw new ApiError(401, "Invalid credentials.");
     }
 
     const accessToken = this.generateAccessToken(user);
-
-    // Generate a secure, random refresh token
     const refreshToken = crypto.randomBytes(64).toString("hex");
     const hashedRefreshToken = crypto
       .createHash("sha256")
       .update(refreshToken)
       .digest("hex");
-
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRES_IN_DAYS);
 
@@ -76,7 +67,7 @@ export class AuthService {
 
   async refreshAccessToken(token: string): Promise<{ accessToken: string }> {
     if (!token) {
-      throw new Error("Refresh token not provided.");
+      throw new ApiError(401, "Refresh token not provided.");
     }
 
     const hashedRefreshToken = crypto
@@ -90,10 +81,9 @@ export class AuthService {
       throw new ApiError(401, "Invalid or expired refresh token.");
     }
 
-    // FIXED: Use the repository to find the user, not prisma directly.
     const user = await this.authRepository.findUserById(storedToken.userId);
     if (!user) {
-      throw new Error("User not found for this token.");
+      throw new ApiError(401, "User for this token not found.");
     }
 
     const accessToken = this.generateAccessToken(user);
@@ -102,7 +92,7 @@ export class AuthService {
 
   async logoutUser(token: string): Promise<void> {
     if (!token) {
-      return; // No token, nothing to do
+      return;
     }
     const hashedRefreshToken = crypto
       .createHash("sha256")
@@ -110,6 +100,6 @@ export class AuthService {
       .digest("hex");
     await this.authRepository
       .deleteRefreshToken(hashedRefreshToken)
-      .catch(() => {}); // Ignore errors if token doesn't exist
+      .catch(() => {});
   }
 }

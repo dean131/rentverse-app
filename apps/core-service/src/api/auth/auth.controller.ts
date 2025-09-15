@@ -13,7 +13,6 @@ export class AuthController {
     this.authService = authService;
   }
 
-  // Notice the `asyncHandler` wrapper and the removal of try/catch blocks
   registerUser = asyncHandler(async (req: Request, res: Response) => {
     const newUser = await this.authService.registerUser(req.body);
     const { password, ...userWithoutPassword } = newUser;
@@ -31,7 +30,7 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/",
     });
 

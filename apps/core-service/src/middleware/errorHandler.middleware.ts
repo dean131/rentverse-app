@@ -1,26 +1,26 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/ApiError.js";
+import { Prisma } from "@prisma/client";
 
 export const errorHandler = (
-  err: Error,
+  err: ApiError | Error, // Can now be ApiError
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  // Log the error for debugging purposes (you can integrate a real logger here later)
-  console.error(`Error: ${err.message}`, { stack: err.stack });
+  console.error(err);
 
   if (err instanceof ApiError) {
     return res.status(err.statusCode).json({
       success: false,
       message: err.message,
+      // Include validation errors if they exist
+      errors: (err as any).errors || undefined,
     });
   }
 
-  // Handle Prisma-specific errors
-  if (err.name === "PrismaClientKnownRequestError") {
-    // Example: Unique constraint violation
-    if ((err as any).code === "P2002") {
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === "P2002") {
       return res.status(409).json({
         success: false,
         message: "A record with this identifier already exists.",
@@ -28,7 +28,6 @@ export const errorHandler = (
     }
   }
 
-  // For any other unexpected error, send a generic 500 response
   return res.status(500).json({
     success: false,
     message: "An internal server error occurred.",

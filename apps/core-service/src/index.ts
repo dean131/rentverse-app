@@ -5,13 +5,15 @@ import { AuthService } from "./api/auth/auth.service.js";
 import { AuthController, useCookieParser } from "./api/auth/auth.controller.js";
 import { createAuthRouter } from "./api/auth/auth.routes.js";
 import { errorHandler } from "./middleware/errorHandler.middleware.js";
+import { config } from "./config/index.js"; // Import the new config
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = config.PORT; // Use the type-safe port from our config
 
+// --- Core Middlewares ---
 app.use(cors());
 app.use(express.json());
-app.use(useCookieParser); // Add cookie parser middleware
+app.use(useCookieParser);
 
 // --- Dependency Injection Setup ---
 const authRepository = new AuthRepository();
@@ -27,6 +29,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // --- Global Error Handler ---
+// This middleware MUST be the last one registered.
 app.use(errorHandler);
 
 app.listen(PORT, () => {

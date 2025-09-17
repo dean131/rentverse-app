@@ -27,13 +27,13 @@ import { createPropertyRouter } from "./api/properties/properties.routes.js";
 
 const app = express();
 
+const corsOptions = {
+  origin: "http://127.0.0.1:3000",
+  credentials: true,
+};
+
 // --- Core Middlewares ---
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(useCookieParser);
 

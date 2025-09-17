@@ -1,29 +1,30 @@
+// File Path: apps/frontend/src/contexts/AuthContext.tsx
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import apiClient from '../lib/apiClient';
+import React, { createContext, useState, ReactNode, useEffect } from 'react';
+import apiClient, { setAuthHeader } from '@/lib/apiClient';
 import { jwtDecode } from 'jwt-decode';
+import { User, LoginCredentials, RegisterCredentials } from '@/lib/definitions'; // Import RegisterCredentials
 
-interface User {
-  userId: number;
-  role: string;
-}
-
+// Update the context type to include the register function
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, pass: string) => Promise<void>; // Updated login signature
+  login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
+  register: (credentials: Omit<RegisterCredentials, 'confirmPassword'>) => Promise<void>; // Add register function
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Export context so it can be used in the useAuth hook
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleLogin = (accessToken: string) => {
-    apiClient.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+  // Helper function to handle session updates
+  const updateUserSession = (accessToken: string) => {
+    setAuthHeader(accessToken);
     const decodedUser: User = jwtDecode(accessToken);
     setUser(decodedUser);
   };
@@ -34,11 +35,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const response = await apiClient.post('/auth/refresh');
         const { accessToken } = response.data.data;
         if (accessToken) {
-          handleLogin(accessToken);
+          updateUserSession(accessToken);
         }
       } catch (error) {
-        // FIXED: Use the error variable to provide more context when debugging.
-        console.error('No active session found or refresh failed:', error);
+        console.error('No active session found or refresh failed.');
       } finally {
         setIsLoading(false);
       }
@@ -46,13 +46,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initializeAuth();
   }, []);
 
-  const login = async (email: string, pass: string) => {
-    // API call is now handled inside the context
-    const response = await apiClient.post('/auth/login', { email, password: pass });
+  const login = async (credentials: LoginCredentials) => {
+    const response = await apiClient.post('/auth/login', credentials);
     const { accessToken } = response.data.data;
     if (accessToken) {
-      handleLogin(accessToken);
+      updateUserSession(accessToken);
     }
+  };
+
+  // New register function
+  const register = async (credentials: Omit<RegisterCredentials, 'confirmPassword'>) => {
+    await apiClient.post('/auth/register', credentials);
+    // After successful registration, we don't automatically log in.
+    // The user will be redirected to the login page.
   };
 
   const logout = async () => {
@@ -62,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error('Logout failed', error);
     } finally {
       setUser(null);
-      delete apiClient.defaults.headers.common['Authorization'];
+      setAuthHeader(null);
     }
   };
 
@@ -71,16 +77,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isLoading,
     login,
     logout,
+    register, // Expose the register function
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };
 

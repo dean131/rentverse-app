@@ -1,21 +1,14 @@
+// File Path: apps/frontend/src/components/auth/LoginForm.tsx
 'use client';
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AxiosError } from 'axios'; // FIXED: Import AxiosError for proper typing
-
-// 1. Define the validation schema using Zod, matching our backend rules
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-// Infer the TypeScript type from the schema
-type LoginFormData = z.infer<typeof loginSchema>;
+import { AxiosError } from 'axios';
+import { useAuth } from '@/hooks/useAuth';
+import { LoginCredentials, loginSchema } from '@/lib/definitions';
+import { Button } from '@/components/ui/Button'; // <-- Updated import path
 
 export const LoginForm = () => {
   const [error, setError] = useState<string | null>(null);
@@ -26,17 +19,16 @@ export const LoginForm = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>({
+  } = useForm<LoginCredentials>({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: LoginCredentials) => {
     setError(null);
     try {
-      await login(data.email, data.password);
+      await login(data);
       router.push('/dashboard');
     } catch (err) {
-      // FIXED: Properly type the error object
       if (err instanceof AxiosError && err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
@@ -80,13 +72,12 @@ export const LoginForm = () => {
       {/* Submit Button & Messages */}
       <div>
         {error && <div className="text-red-600 text-sm text-center p-2 mb-4 rounded-md bg-red-50">{error}</div>}
-        <button
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
         >
           {isSubmitting ? 'Signing in...' : 'Sign in'}
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -1,20 +1,15 @@
+// File Path: apps/frontend/src/app/(auth)/register/page.tsx
+import { AuthLayout } from '@/components/auth/AuthLayout';
 import { RegisterForm } from '@/components/auth/RegisterForm';
-import { Card } from '@/components/ui/Card';
-import Link from 'next/link';
 
 export default function RegisterPage() {
+  const title = "Create Your Rentverse Account";
+  const subtitle = "Join our community to find your next home or list your property with ease. Let's get you started.";
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-      <Card title="Create a new account">
-        <RegisterForm />
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Already have an account?{' '}
-          <Link href="/login" className="font-medium text-orange-600 hover:text-orange-500">
-            Sign in
-          </Link>
-        </p>
-      </Card>
-    </div>
+    <AuthLayout title={title} subtitle={subtitle}>
+      <RegisterForm />
+    </AuthLayout>
   );
 }
 

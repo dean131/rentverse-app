@@ -1,16 +1,25 @@
+'use client'; // Required to use the usePathname hook
+
 import { Navbar } from "@/components/layout/Navbar";
 import { ReactNode } from "react";
-
-// No need to import globals.css here, it's inherited from the root layout.
+import { usePathname } from 'next/navigation';
 
 export default function MainAppLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  // Check if the current route is part of the admin section
+  const isAdminRoute = pathname.startsWith('/admin');
+
   return (
-    <div className="bg-white">
-      <Navbar />
-      <main className="p-4 sm:p-6 lg:p-8">
+    <div>
+      {/* Only render the public Navbar if it's NOT an admin route */}
+      {!isAdminRoute && <Navbar />}
+      
+      {/* Conditionally apply padding. 
+        The AdminLayout will handle its own padding.
+      */}
+      <main className={!isAdminRoute ? "p-4 sm:p-6 lg:p-8" : ""}>
         {children}
       </main>
-      {/* You could add a shared footer for the main app here */}
     </div>
   );
 }

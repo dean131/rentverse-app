@@ -1,15 +1,17 @@
 // File Path: apps/frontend/src/components/properties/PropertySubmissionForm.tsx
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
-import { propertySubmissionSchema, PropertySubmission } from '@/lib/definitions';
+import { propertySubmissionSchema, PropertySubmission, Project, View } from '@/lib/definitions';
 import { Button } from '@/components/ui/Button';
+import { InputField } from '@/components/ui/InputField';
+import { getProjects, getViews, submitProperty } from '@/services/propertyService'; // <-- Import submitProperty
 
-// Dummy data for dropdowns - in a real app, this would come from an API
+// Dummy data for dropdowns
 const propertyTypes = ['APARTMENT', 'HOUSE', 'PENTHOUSE', 'STUDIO', 'COMMERCIAL'];
 const listingTypes = ['RENT', 'SALE', 'BOTH'];
 const furnishingStatusOptions = ['UNFURNISHED', 'PARTIALLY_FURNISHED', 'FULLY_FURNISHED'];
@@ -17,50 +19,76 @@ const paymentPeriods = ['MONTHLY', 'QUARTERLY', 'BI_ANNUALLY', 'YEARLY'];
 
 
 export const PropertySubmissionForm = () => {
-  const [error, setError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
   const router = useRouter();
+
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [views, setViews] = useState<View[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<PropertySubmission>({
     resolver: zodResolver(propertySubmissionSchema),
-    // TODO: Add defaultValues if needed for editing a property
+    defaultValues: {
+        viewIds: []
+    }
   });
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoadingData(true);
+        const [projectsData, viewsData] = await Promise.all([
+          getProjects(),
+          getViews()
+        ]);
+        setProjects(projectsData);
+        setViews(viewsData);
+      } catch (error) {
+        console.error("Failed to fetch form data:", error);
+        setApiError("Could not load necessary data. Please refresh the page.");
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+
   const onSubmit = async (data: PropertySubmission) => {
-    setError(null);
+    setApiError(null);
     try {
-      // TODO: Implement the API call to submit the property data
-      console.log('Form data submitted:', data);
-      alert('Property submitted successfully! (See console for data)');
-      // On success, redirect to the dashboard or the new property's page
+      // Call the new service function to submit the data
+      await submitProperty(data);
+      alert('Property submitted successfully!');
       router.push('/dashboard');
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.message) {
-        setError(err.response.data.message);
+        setApiError(err.response.data.message);
       } else {
-        setError('An unexpected error occurred. Please try again.');
+        setApiError('An unexpected error occurred. Please try again.');
       }
     }
   };
   
-  // Helper function for consistent input styling
-  const inputClass = "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm";
-  const labelClass = "block text-sm font-medium text-gray-700";
+  const inputClass = "w-full px-4 py-3 bg-gray-100 border-2 border-transparent rounded-lg focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition";
+  const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
 
+
+  if (isLoadingData) {
+      return <p>Loading form...</p>
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Section 1: Basic Information */}
       <fieldset className="space-y-4">
         <legend className="text-lg font-semibold border-b pb-2 mb-4 w-full">Basic Information</legend>
-        <div>
-          <label htmlFor="title" className={labelClass}>Title</label>
-          <input id="title" type="text" {...register('title')} className={inputClass} />
-          {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
-        </div>
+        <InputField label="Title" id="title" type="text" registration={register('title')} error={errors.title} />
         <div>
           <label htmlFor="description" className={labelClass}>Description</label>
           <textarea id="description" {...register('description')} className={inputClass} rows={4}></textarea>
@@ -86,11 +114,7 @@ export const PropertySubmissionForm = () => {
             </select>
             {errors.propertyType && <p className="mt-1 text-sm text-red-600">{errors.propertyType.message}</p>}
           </div>
-          <div>
-            <label htmlFor="rentalPrice" className={labelClass}>Rental Price (Optional)</label>
-            <input id="rentalPrice" type="number" {...register('rentalPrice')} className={inputClass} />
-            {errors.rentalPrice && <p className="mt-1 text-sm text-red-600">{errors.rentalPrice.message}</p>}
-          </div>
+          <InputField label="Rental Price (Optional)" id="rentalPrice" type="number" registration={register('rentalPrice')} error={errors.rentalPrice} />
            <div>
             <label htmlFor="paymentPeriod" className={labelClass}>Payment Period</label>
             <select id="paymentPeriod" {...register('paymentPeriod')} className={inputClass}>
@@ -105,21 +129,9 @@ export const PropertySubmissionForm = () => {
       <fieldset className="space-y-4">
         <legend className="text-lg font-semibold border-b pb-2 mb-4 w-full">Specifications</legend>
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label htmlFor="sizeSqft" className={labelClass}>Size (sqft)</label>
-              <input id="sizeSqft" type="number" {...register('sizeSqft')} className={inputClass} />
-              {errors.sizeSqft && <p className="mt-1 text-sm text-red-600">{errors.sizeSqft.message}</p>}
-            </div>
-            <div>
-              <label htmlFor="bedrooms" className={labelClass}>Bedrooms</label>
-              <input id="bedrooms" type="number" {...register('bedrooms')} className={inputClass} />
-              {errors.bedrooms && <p className="mt-1 text-sm text-red-600">{errors.bedrooms.message}</p>}
-            </div>
-            <div>
-              <label htmlFor="bathrooms" className={labelClass}>Bathrooms</label>
-              <input id="bathrooms" type="number" {...register('bathrooms')} className={inputClass} />
-              {errors.bathrooms && <p className="mt-1 text-sm text-red-600">{errors.bathrooms.message}</p>}
-            </div>
+            <InputField label="Size (sqft)" id="sizeSqft" type="number" registration={register('sizeSqft')} error={errors.sizeSqft} />
+            <InputField label="Bedrooms" id="bedrooms" type="number" registration={register('bedrooms')} error={errors.bedrooms} />
+            <InputField label="Bathrooms" id="bathrooms" type="number" registration={register('bathrooms')} error={errors.bathrooms} />
         </div>
          <div>
             <label htmlFor="furnishingStatus" className={labelClass}>Furnishing Status</label>
@@ -130,14 +142,55 @@ export const PropertySubmissionForm = () => {
           </div>
       </fieldset>
       
-      {/* TODO: Add sections for Location, Documents, Views, and Amenities */}
+      {/* Section 4: Project and Views */}
+      <fieldset className="space-y-4">
+          <legend className="text-lg font-semibold border-b pb-2 mb-4 w-full">Project & Views</legend>
+            <div>
+              <label htmlFor="projectId" className={labelClass}>Project (Optional)</label>
+              <select id="projectId" {...register('projectId')} className={inputClass}>
+                <option value="">None</option>
+                {projects.map(project => <option key={project.id} value={project.id}>{project.projectName}</option>)}
+              </select>
+              {errors.projectId && <p className="mt-1 text-sm text-red-600">{errors.projectId.message}</p>}
+            </div>
+            <div>
+                <label className={labelClass}>Property Views</label>
+                 <Controller
+                    name="viewIds"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {views.map(view => (
+                          <div key={view.id} className="flex items-center">
+                            <input
+                              id={`view-${view.id}`}
+                              type="checkbox"
+                              className="h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                              checked={field.value?.includes(view.id)}
+                              onChange={(e) => {
+                                const newValues = e.target.checked
+                                  ? [...(field.value || []), view.id]
+                                  : (field.value || []).filter(id => id !== view.id);
+                                field.onChange(newValues);
+                              }}
+                            />
+                            <label htmlFor={`view-${view.id}`} className="ml-3 text-sm text-gray-700">{view.name}</label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  />
+                {errors.viewIds && <p className="mt-1 text-sm text-red-600">{errors.viewIds.message}</p>}
+            </div>
+      </fieldset>
+      
+      {/* TODO: Add sections for Location and Documents */}
 
-      {/* Submit Button & Messages */}
       <div className="pt-4">
-        {error && <div className="text-red-600 text-sm text-center p-2 mb-4 rounded-md bg-red-50">{error}</div>}
+        {apiError && <div className="text-sm text-red-600 text-center mb-4">{apiError}</div>}
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isLoadingData}
           className="w-full"
         >
           {isSubmitting ? 'Submitting...' : 'Submit Property'}

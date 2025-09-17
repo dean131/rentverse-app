@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 
 export default function MainAppLayout({ children }: { children: ReactNode }) {
   return (
-    <div>
+    <div className="bg-white">
       <Navbar />
       <main className="p-4 sm:p-6 lg:p-8">
         {children}

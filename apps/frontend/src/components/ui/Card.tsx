@@ -1,16 +1,26 @@
-import { type ReactNode } from 'react';
+// File Path: apps/frontend/src/components/ui/Card.tsx
+import { ReactNode } from "react";
 
 interface CardProps {
   children: ReactNode;
-  title: string;
   className?: string;
+  title?: string; // Made the title optional
 }
 
 export const Card = ({ children, title, className }: CardProps) => {
+  const combinedClassName = `
+    bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10
+    ${className}
+  `;
+  
   return (
-    <div className={`w-full max-w-md bg-white p-8 shadow-md rounded-lg ${className}`}>
-      <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">{title}</h2>
+    <div className={combinedClassName}>
+      {/* Conditionally render the title only if it's provided */}
+      {title && (
+        <h2 className="text-2xl font-bold text-center mb-6">{title}</h2>
+      )}
       {children}
     </div>
   );
 };
+

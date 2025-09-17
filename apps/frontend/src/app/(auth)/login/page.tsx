@@ -1,19 +1,36 @@
+// File Path: apps/frontend/src/app/(auth)/login/page.tsx
 import { LoginForm } from '@/components/auth/LoginForm';
-import { Card } from '@/components/ui/Card'; // <-- Updated import path
-import Link from 'next/link';
+import Image from 'next/image';
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-      <Card title="Sign in to your account">
+    <div className="min-h-screen flex text-gray-800">
+      {/* Left side with background image and text */}
+      <div className="relative hidden lg:flex w-1/2 bg-cover bg-center items-center justify-center">
+        {/* Using the Next.js Image component for optimized background images */}
+        <Image
+          src="/login-bg.jpg" // Corrected the path to use your background image
+          alt="Comfortable modern living room"
+          layout="fill"
+          objectFit="cover"
+          quality={100}
+          priority
+        />
+        <div className="absolute inset-0 bg-black opacity-40" />
+        <div className="relative z-10 p-12 max-w-md text-white">
+          <h1 className="text-4xl font-bold mb-4 leading-tight">
+            Welcome to Rentverse
+          </h1>
+          <p className="text-lg">
+            Realize your dream home. We craft spaces that are functional, inspiring joy, tranquility, and connection.
+          </p>
+        </div>
+      </div>
+
+      {/* Right side with the form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
         <LoginForm />
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Don&apos;t have an account yet?{' '}
-          <Link href="/register" className="font-medium text-orange-600 hover:text-orange-500">
-            Sign up
-          </Link>
-        </p>
-      </Card>
+      </div>
     </div>
   );
 }

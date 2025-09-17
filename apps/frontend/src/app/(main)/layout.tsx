@@ -1,14 +1,17 @@
-import { Navbar } from '../../components/layout/Navbar';
+import { Navbar } from "@/components/layout/Navbar";
+import { ReactNode } from "react";
 
-export default function MainLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// No need to import globals.css here, it's inherited from the root layout.
+
+export default function MainAppLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div>
       <Navbar />
-      <main className="container mx-auto p-4">{children}</main>
+      <main className="p-4 sm:p-6 lg:p-8">
+        {children}
+      </main>
+      {/* You could add a shared footer for the main app here */}
     </div>
   );
 }
+

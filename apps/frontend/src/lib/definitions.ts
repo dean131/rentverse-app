@@ -56,8 +56,8 @@ export type PropertySubmission = z.infer<typeof propertySubmissionSchema>;
 
 export type User = {
   userId: number;
-  role: string;
   email: string;
+  role: string;
 };
 
 export type Project = {
@@ -73,11 +73,14 @@ export type View = {
 export type PropertyWithLister = {
   id: number;
   title: string;
-  status: string;
   propertyType: string;
-  listedById: number;
+  rentalPrice: number | null;
   listedBy: {
     fullName: string;
     email: string;
   };
+};
+
+export type StatusUpdatePayload = {
+  status: "APPROVED" | "REJECTED";
 };

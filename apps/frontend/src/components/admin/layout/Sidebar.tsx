@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { Icon } from './Icon'; // We'll create this helper component next
+import { Icon } from './Icon';
 
 export const Sidebar = () => {
   const pathname = usePathname();
@@ -28,10 +28,10 @@ export const Sidebar = () => {
             <Link
               key={item.label}
               href={item.href}
-              className={`flex items-center px-4 py-2 text-gray-700 rounded-md transition-colors duration-200 
+              className={`flex items-center px-4 py-2 rounded-md transition-colors duration-200 
                 ${pathname === item.href
                   ? 'bg-orange-500 text-white'
-                  : 'hover:bg-gray-200'
+                  : 'text-gray-700 hover:bg-gray-200'
                 }`}
             >
               <Icon d={item.iconD} />
@@ -40,18 +40,20 @@ export const Sidebar = () => {
           ))}
         </nav>
         <div className="px-4 py-6 border-t">
+          {/* UPDATED: Added text-red-600 and hover states for the logout button */}
           <button
             onClick={logout}
-            className="w-full flex items-center px-4 py-2 text-gray-700 rounded-md hover:bg-gray-200 transition-colors duration-200"
+            className="w-full flex items-center px-4 py-2 text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
           >
             <Icon d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            <span className="ml-3">Logout</span>
+            <span className="ml-3 font-medium">Logout</span>
           </button>
         </div>
         <div className="px-4 py-2 text-center text-xs text-gray-400">
-          � 2025 Rentverse
+          © 2025 Rentverse
         </div>
       </div>
     </aside>
   );
 };
+

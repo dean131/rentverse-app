@@ -18,6 +18,12 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handlePropertyUpdate = (propertyId: number) => {
+    // This function is called by the child component when an update is successful.
+    // It filters out the updated property from the state, causing the UI to re-render.
+    setProperties(currentProperties => currentProperties.filter(p => p.id !== propertyId));
+  };
+
   useEffect(() => {
     if (isAuthLoading) return;
 
@@ -67,7 +73,7 @@ export default function AdminDashboardPage() {
         {/* Pending Properties Table Section */}
         <div className="bg-white p-6 rounded-lg shadow">
              <h2 className="text-xl font-semibold mb-4 text-gray-800">Pending Approvals</h2>
-             <PendingPropertiesList initialProperties={properties} />
+             <PendingPropertiesList initialProperties={properties} onUpdate={handlePropertyUpdate} />
         </div>
     </AdminLayout>
   );

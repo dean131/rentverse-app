@@ -1,27 +1,24 @@
 // File Path: apps/frontend/src/components/ui/Button.tsx
-import { ReactNode, ButtonHTMLAttributes } from 'react';
+import { type ComponentProps } from "react";
 
-// Extend the props to include all standard button attributes
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  children: ReactNode;
-  className?: string;
-  variant?: 'default' | 'outline'; // Add a variant prop
+interface ButtonProps extends ComponentProps<'button'> {
+  variant?: 'solid' | 'outline';
 }
 
-export const Button = ({ children, className, variant = 'default', ...props }: ButtonProps) => {
-  // Define base styles that apply to all variants
-  const baseStyles = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+export const Button = ({ children, className, variant = 'solid', ...props }: ButtonProps) => {
+  const baseClasses = "px-6 py-2 rounded-md font-semibold text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
 
-  // Define styles specific to each variant
-  const variantStyles = {
-    default: 'bg-orange-400 text-white hover:bg-orange-700',
-    outline: 'border border-orange-400 bg-transparent text-orange-400 hover:bg-orange-50',
+  // UPDATED: Reverted from brandOrange to standard orange-400 classes for better contrast
+  const variantClasses = {
+    solid: 'bg-orange-400 text-white hover:bg-orange-700 focus:ring-orange-400',
+    outline: 'bg-transparent border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white focus:ring-orange-400',
   };
 
-  const combinedClassName = `${baseStyles} ${variantStyles[variant]} ${className} py-2 px-4`;
-  
   return (
-    <button className={combinedClassName} {...props}>
+    <button
+      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+      {...props}
+    >
       {children}
     </button>
   );

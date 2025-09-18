@@ -10,10 +10,10 @@ export const createPropertyRouter = (
 ): Router => {
   const router = Router();
 
-  // New Public Route to get approved properties
+  // Public route to get approved properties (with optional search)
   router.get("/", controller.getPublicProperties);
 
-  // Protected route to create a new property
+  // Protected route for property owners to submit a new listing
   router.post(
     "/",
     protect,

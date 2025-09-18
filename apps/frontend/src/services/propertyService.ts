@@ -4,8 +4,9 @@ import {
   PropertySubmission,
   Project,
   View,
-  PropertyWithLister,
+  PropertyPublic,
   PropertyDetailed,
+  RawPropertyFromAPI, // Import the new type
 } from "@/lib/definitions";
 
 // --- Fetch Functions (for dropdowns, etc.) ---
@@ -22,18 +23,20 @@ export const getViews = async (): Promise<View[]> => {
 
 // --- Mutation Functions (for submitting data) ---
 
-// CORRECTED: Replaced 'any' with the specific 'PropertyDetailed' type for type safety.
 export const submitProperty = async (
   data: PropertySubmission
 ): Promise<PropertyDetailed> => {
-  // The payload now directly matches the PropertySubmission type
   const response = await apiClient.post("/properties", data);
   return response.data.data;
 };
 
 // --- Public Fetch Functions ---
 
-export const getPublicProperties = async (): Promise<PropertyWithLister[]> => {
+export const getPublicProperties = async (): Promise<PropertyPublic[]> => {
   const response = await apiClient.get("/properties");
-  return response.data.data;
+  // CORRECTED: Replaced 'any' with the specific 'RawPropertyFromAPI' type.
+  return response.data.data.map((p: RawPropertyFromAPI) => ({
+    ...p,
+    address: p.project?.address || null, // Safely access nested address
+  }));
 };

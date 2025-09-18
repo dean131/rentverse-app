@@ -1,7 +1,6 @@
 // File Path: apps/core-service/src/api/properties/properties.service.ts
 import { Property } from "@prisma/client";
 import { PropertyRepository } from "./properties.repository.js";
-import { ApiError } from "../../utils/ApiError.js";
 
 export class PropertyService {
   private propertyRepository: PropertyRepository;
@@ -43,8 +42,7 @@ export class PropertyService {
     return this.propertyRepository.createProperty(dataToCreate);
   }
 
-  // New method to fetch only approved properties
-  async getApprovedProperties(): Promise<any[]> {
-    return this.propertyRepository.findApprovedProperties();
+  async getPublicProperties(searchQuery?: string): Promise<any[]> {
+    return this.propertyRepository.findAllPublic(searchQuery);
   }
 }

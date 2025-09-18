@@ -9,29 +9,45 @@ export class PropertyRepository {
     });
   }
 
-  // New method to find only properties with 'APPROVED' status
-  async findApprovedProperties(): Promise<any[]> {
+  async findAllPublic(searchQuery?: string): Promise<any[]> {
+    const whereClause: Prisma.PropertyWhereInput = {
+      status: PropertyStatus.APPROVED,
+    };
+
+    if (searchQuery) {
+      whereClause.OR = [
+        { title: { contains: searchQuery, mode: "insensitive" } },
+        { description: { contains: searchQuery, mode: "insensitive" } },
+        {
+          project: { address: { contains: searchQuery, mode: "insensitive" } },
+        },
+      ];
+    }
+
     return prisma.property.findMany({
-      where: {
-        status: PropertyStatus.APPROVED,
-      },
+      where: whereClause,
       select: {
         id: true,
         title: true,
+        listingType: true,
         rentalPrice: true,
+        paymentPeriod: true,
         bedrooms: true,
         bathrooms: true,
         sizeSqft: true,
-        // Include the first image as a preview
+        project: {
+          select: {
+            address: true,
+          },
+        },
         images: {
           select: {
             imageUrl: true,
           },
-          take: 1,
+          orderBy: {
+            displayOrder: "asc",
+          },
         },
-      },
-      orderBy: {
-        id: "desc",
       },
     });
   }

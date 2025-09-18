@@ -19,7 +19,7 @@ export const registerSchema = z
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
-    path: ["confirmPassword"],
+    path: ["confirmPassword"], // path of error
   });
 export type RegisterCredentials = z.infer<typeof registerSchema>;
 
@@ -48,7 +48,6 @@ export const propertySubmissionSchema = z.object({
   ]),
   projectId: z.coerce.number().int().optional(),
   viewIds: z.array(z.number()).optional(),
-  ownershipDocumentUrl: z.string().url("A valid document URL is required."),
 });
 
 export type PropertySubmission = z.infer<typeof propertySubmissionSchema>;
@@ -71,25 +70,43 @@ export type View = {
   name: string;
 };
 
+// For the admin list of pending properties
 export type PropertyWithLister = {
   id: number;
   title: string;
   propertyType: string;
   rentalPrice: number | null;
-  bedrooms: number;
-  bathrooms: number;
-  sizeSqft: number;
-  images: { imageUrl: string }[];
-  listedBy?: {
+  listedBy: {
     fullName: string;
     email: string;
   };
+  images?: { imageUrl: string }[];
 };
 
-export type PropertyDetailed = PropertyWithLister & {
-  description: string;
-  listingType: string;
-  status: string;
+// For a detailed property view after creation or when fetching a single property
+export type PropertyDetailed = {
+  id: number;
+  title: string;
+  // Add other fields as needed from the backend response
+};
+
+// NEW: This type represents the raw data structure from the public properties API
+export type RawPropertyFromAPI = Omit<PropertyPublic, "address"> & {
+  project: { address: string } | null;
+};
+
+// For the public property cards on the homepage
+export type PropertyPublic = {
+  id: number;
+  title: string;
+  listingType: "RENT" | "SALE" | "BOTH";
+  rentalPrice: number | null;
+  paymentPeriod: string | null;
+  bedrooms: number;
+  bathrooms: number;
+  sizeSqft: number;
+  address: string | null;
+  images: { imageUrl: string }[];
 };
 
 export type StatusUpdatePayload = {

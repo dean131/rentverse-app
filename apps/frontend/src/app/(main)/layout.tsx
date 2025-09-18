@@ -1,4 +1,5 @@
-'use client'; // Required to use the usePathname hook
+// File Path: apps/frontend/src/app/(main)/layout.tsx
+'use client'; 
 
 import { Navbar } from "@/components/layout/Navbar";
 import { ReactNode } from "react";
@@ -6,18 +7,19 @@ import { usePathname } from 'next/navigation';
 
 export default function MainAppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  // Check if the current route is part of the admin section
   const isAdminRoute = pathname.startsWith('/admin');
+  // Check if the current route is the homepage
+  const isHomePage = pathname === '/';
 
   return (
     <div>
-      {/* Only render the public Navbar if it's NOT an admin route */}
       {!isAdminRoute && <Navbar />}
       
-      {/* Conditionally apply padding. 
-        The AdminLayout will handle its own padding.
+      {/* CORRECTED: 
+        - Apply padding to all main-layout pages EXCEPT the homepage and admin routes.
+        - The homepage and admin layout handle their own padding.
       */}
-      <main className={!isAdminRoute ? "p-4 sm:p-6 lg:p-8" : ""}>
+      <main className={!isHomePage && !isAdminRoute ? "p-4 sm:p-6 lg:p-8" : ""}>
         {children}
       </main>
     </div>

@@ -6,7 +6,7 @@ export const Hero = () => {
     return (
         <div className="relative h-[600px] text-white">
             <Image
-                src="/login-bg.jpg" // Reusing the same beautiful image
+                src="/hero-bg.jpg" // Reusing the same beautiful image
                 alt="Luxurious property background"
                 layout="fill"
                 objectFit="cover"

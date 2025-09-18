@@ -1,4 +1,5 @@
-import { Response } from "express";
+// File Path: apps/core-service/src/api/properties/properties.controller.ts
+import { Response, Request } from "express";
 import { PropertyService } from "./properties.service.js";
 import { ApiResponse } from "../../utils/response.helper.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
@@ -14,7 +15,6 @@ export class PropertyController {
 
   createProperty = asyncHandler(
     async (req: AuthenticatedRequest, res: Response) => {
-      // Get the user ID from the token payload (attached by the `protect` middleware)
       const userId = req.user?.userId;
       if (!userId) {
         throw new ApiError(401, "User not authenticated");
@@ -27,4 +27,10 @@ export class PropertyController {
       ApiResponse.created(res, newProperty);
     }
   );
+
+  // New method for the public endpoint
+  getPublicProperties = asyncHandler(async (req: Request, res: Response) => {
+    const properties = await this.propertyService.getApprovedProperties();
+    ApiResponse.success(res, properties);
+  });
 }

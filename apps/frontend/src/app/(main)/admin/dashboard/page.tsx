@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getPendingProperties } from '@/services/adminService';
 import { PropertyWithLister } from '@/lib/definitions';
 import { PendingPropertiesList } from '@/components/admin/PendingPropertiesList';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { AdminLayout } from '@/components/admin/DashboardLayout';
 import { StatCard } from '@/components/admin/dashboard/StatCard';
 
 

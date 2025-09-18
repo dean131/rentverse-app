@@ -1,10 +1,17 @@
-export default function Home() {
+// File Path: apps/frontend/src/app/(main)/page.tsx
+import { Hero } from '@/components/home/Hero';
+import { Stats } from '@/components/home/Stats';
+import { FeaturedProperties } from '@/components/home/FeaturedProperties';
+import { Footer } from '@/components/home/Footer';
+
+export default function HomePage() {
   return (
-    <div className="text-center">
-      <h1 className="text-4xl font-bold">Welcome to Rentverse</h1>
-      <p className="mt-4 text-lg text-gray-700">
-        The future of property rentals. Find your perfect space today.
-      </p>
+    <div className="bg-white">
+      <Hero />
+      <Stats />
+      <FeaturedProperties />
+      <Footer />
     </div>
   );
 }
+

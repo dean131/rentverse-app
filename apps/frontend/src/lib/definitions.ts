@@ -19,7 +19,7 @@ export const registerSchema = z
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
-    path: ["confirmPassword"], // path of error
+    path: ["confirmPassword"],
   });
 export type RegisterCredentials = z.infer<typeof registerSchema>;
 
@@ -48,6 +48,7 @@ export const propertySubmissionSchema = z.object({
   ]),
   projectId: z.coerce.number().int().optional(),
   viewIds: z.array(z.number()).optional(),
+  ownershipDocumentUrl: z.string().url("A valid document URL is required."),
 });
 
 export type PropertySubmission = z.infer<typeof propertySubmissionSchema>;
@@ -75,10 +76,20 @@ export type PropertyWithLister = {
   title: string;
   propertyType: string;
   rentalPrice: number | null;
-  listedBy: {
+  bedrooms: number;
+  bathrooms: number;
+  sizeSqft: number;
+  images: { imageUrl: string }[];
+  listedBy?: {
     fullName: string;
     email: string;
   };
+};
+
+export type PropertyDetailed = PropertyWithLister & {
+  description: string;
+  listingType: string;
+  status: string;
 };
 
 export type StatusUpdatePayload = {

@@ -3,31 +3,25 @@ import { prisma } from "../../lib/prisma.js";
 import { Property, PropertyStatus } from "@prisma/client";
 
 export class AdminRepository {
-  /**
-   * Finds all properties with a 'PENDING' status.
-   */
-  async findPendingProperties(): Promise<Property[]> {
+  async findPendingProperties(): Promise<any[]> {
     return prisma.property.findMany({
       where: {
-        status: "PENDING",
+        status: PropertyStatus.PENDING,
       },
       include: {
         listedBy: {
-          // Include basic user info
           select: {
             fullName: true,
             email: true,
           },
         },
       },
+      orderBy: {
+        id: "asc", // Consistently order by ID
+      },
     });
   }
 
-  /**
-   * Updates the status of a specific property.
-   * @param id - The ID of the property to update.
-   * @param status - The new status ('APPROVED' or 'REJECTED').
-   */
   async updatePropertyStatus(
     id: number,
     status: PropertyStatus
@@ -36,5 +30,42 @@ export class AdminRepository {
       where: { id },
       data: { status },
     });
+  }
+
+  /**
+   * NEW METHOD: Fetches aggregate statistics for the admin dashboard.
+   */
+  async getAdminDashboardStats() {
+    // Use Prisma's transaction feature to run multiple queries concurrently for efficiency
+    const [
+      totalDocuments,
+      registeredUsers,
+      pendingProperties,
+      documentsThisMonth,
+    ] = await prisma.$transaction([
+      prisma.propertyDocument.count(),
+      prisma.user.count(),
+      prisma.property.count({ where: { status: "PENDING" } }),
+      prisma.propertyDocument.count({
+        where: {
+          uploadedAt: {
+            // Filter for documents uploaded in the current month
+            gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+            lt: new Date(
+              new Date().getFullYear(),
+              new Date().getMonth() + 1,
+              1
+            ),
+          },
+        },
+      }),
+    ]);
+
+    return {
+      totalDocuments,
+      registeredUsers,
+      pendingProperties,
+      documentsThisMonth,
+    };
   }
 }

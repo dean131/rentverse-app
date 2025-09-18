@@ -1,3 +1,4 @@
+// File Path: apps/core-service/src/api/properties/properties.routes.ts
 import { Router } from "express";
 import { PropertyController } from "./properties.controller.js";
 import { protect } from "../../middleware/auth.middleware.js";
@@ -9,7 +10,10 @@ export const createPropertyRouter = (
 ): Router => {
   const router = Router();
 
-  // Protect this route and validate the input
+  // New Public Route to get approved properties
+  router.get("/", controller.getPublicProperties);
+
+  // Protected route to create a new property
   router.post(
     "/",
     protect,

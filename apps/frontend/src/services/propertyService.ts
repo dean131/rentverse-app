@@ -6,7 +6,8 @@ import {
   View,
   PropertyPublic,
   PropertyDetailed,
-  RawPropertyFromAPI, // Import the new type
+  RawPropertyFromAPI,
+  PropertyFilters,
 } from "@/lib/definitions";
 
 // --- Fetch Functions (for dropdowns, etc.) ---
@@ -32,11 +33,22 @@ export const submitProperty = async (
 
 // --- Public Fetch Functions ---
 
-export const getPublicProperties = async (): Promise<PropertyPublic[]> => {
-  const response = await apiClient.get("/properties");
-  // CORRECTED: Replaced 'any' with the specific 'RawPropertyFromAPI' type.
+// CORRECTED: Added a default empty object {} to the filters parameter to make it optional.
+export const getPublicProperties = async (
+  filters: PropertyFilters = {}
+): Promise<PropertyPublic[]> => {
+  const params = new URLSearchParams();
+  if (filters.search) {
+    params.append("search", filters.search);
+  }
+  if (filters.type && filters.type !== "ALL") {
+    params.append("propertyType", filters.type);
+  }
+
+  const response = await apiClient.get(`/properties?${params.toString()}`);
+
   return response.data.data.map((p: RawPropertyFromAPI) => ({
     ...p,
-    address: p.project?.address || null, // Safely access nested address
+    address: p.project?.address || null,
   }));
 };

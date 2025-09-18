@@ -70,7 +70,6 @@ export type View = {
   name: string;
 };
 
-// For the admin list of pending properties
 export type PropertyWithLister = {
   id: number;
   title: string;
@@ -83,19 +82,15 @@ export type PropertyWithLister = {
   images?: { imageUrl: string }[];
 };
 
-// For a detailed property view after creation or when fetching a single property
 export type PropertyDetailed = {
   id: number;
   title: string;
-  // Add other fields as needed from the backend response
 };
 
-// NEW: This type represents the raw data structure from the public properties API
 export type RawPropertyFromAPI = Omit<PropertyPublic, "address"> & {
   project: { address: string } | null;
 };
 
-// For the public property cards on the homepage
 export type PropertyPublic = {
   id: number;
   title: string;
@@ -111,4 +106,11 @@ export type PropertyPublic = {
 
 export type StatusUpdatePayload = {
   status: "APPROVED" | "REJECTED";
+};
+
+// UPDATED: Expanded the filters type to include all possible filter fields.
+export type PropertyFilters = {
+  search?: string;
+  type?: string;
+  beds?: string;
 };

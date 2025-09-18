@@ -4,7 +4,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
 
 :root {
-  --background: #ffffff;
+  --background: #f2f4f6;
   --foreground: #171717;
 }
 
@@ -17,13 +17,24 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    --background: #f2f4f6; /* Forcing light mode */
+    --foreground: #171717;
+  }
+}
+/* DEFAULT */
+/* @media (prefers-color-scheme: dark) {
+  :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Inter", sans-serif;
+}
+
+main {
+  background-color: #f2f4f6; /* or use a light gray like #f9fafb if you prefer */
 }

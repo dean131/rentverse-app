@@ -33,7 +33,6 @@ export const submitProperty = async (
 
 // --- Public Fetch Functions ---
 
-// CORRECTED: Added a default empty object {} to the filters parameter to make it optional.
 export const getPublicProperties = async (
   filters: PropertyFilters = {}
 ): Promise<PropertyPublic[]> => {
@@ -51,4 +50,12 @@ export const getPublicProperties = async (
     ...p,
     address: p.project?.address || null,
   }));
+};
+
+// NEW: Service function to get the details of a single property
+export const getPropertyById = async (
+  id: number
+): Promise<PropertyDetailed> => {
+  const response = await apiClient.get(`/properties/${id}`);
+  return response.data.data;
 };

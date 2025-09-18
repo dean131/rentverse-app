@@ -82,9 +82,16 @@ export type PropertyWithLister = {
   images?: { imageUrl: string }[];
 };
 
-export type PropertyDetailed = {
-  id: number;
-  title: string;
+// UPDATED: Expanded the detailed property type to include all the new fields
+export type PropertyDetailed = PropertyPublic & {
+  description: string;
+  furnishingStatus: string;
+  amenities: { id: number; name: string }[];
+  views: { id: number; name: string }[];
+  listedBy: {
+    fullName: string;
+    profilePictureUrl: string | null;
+  };
 };
 
 export type RawPropertyFromAPI = Omit<PropertyPublic, "address"> & {
@@ -108,7 +115,6 @@ export type StatusUpdatePayload = {
   status: "APPROVED" | "REJECTED";
 };
 
-// UPDATED: Expanded the filters type to include all possible filter fields.
 export type PropertyFilters = {
   search?: string;
   type?: string;

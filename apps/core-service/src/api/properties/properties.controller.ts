@@ -13,14 +13,12 @@ export class PropertyController {
     this.propertyService = propertyService;
   }
 
-  // Handles POST /api/properties
   createProperty = asyncHandler(
     async (req: AuthenticatedRequest, res: Response) => {
       const userId = req.user?.userId;
       if (!userId) {
         throw new ApiError(401, "User not authenticated");
       }
-
       const newProperty = await this.propertyService.createProperty(
         req.body,
         userId
@@ -29,13 +27,24 @@ export class PropertyController {
     }
   );
 
-  // Handles GET /api/properties
   getPublicProperties = asyncHandler(async (req: Request, res: Response) => {
-    // Extract the search query from the URL, if it exists
     const searchQuery = req.query.search as string | undefined;
+    const propertyType = req.query.propertyType as string | undefined;
 
-    const properties =
-      await this.propertyService.getPublicProperties(searchQuery);
+    const properties = await this.propertyService.getPublicProperties({
+      searchQuery,
+      propertyType,
+    });
     ApiResponse.success(res, properties);
+  });
+
+  // NEW: Controller method to handle fetching a single property by its ID.
+  getPropertyById = asyncHandler(async (req: Request, res: Response) => {
+    const propertyId = parseInt(req.params.id, 10);
+    if (isNaN(propertyId)) {
+      throw new ApiError(400, "Invalid property ID provided.");
+    }
+    const property = await this.propertyService.getPropertyById(propertyId);
+    ApiResponse.success(res, property);
   });
 }

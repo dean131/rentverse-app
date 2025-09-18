@@ -1,6 +1,7 @@
 // File Path: apps/core-service/src/api/properties/properties.service.ts
-import { Property } from "@prisma/client";
+import { Property, PropertyType } from "@prisma/client";
 import { PropertyRepository } from "./properties.repository.js";
+import { ApiError } from "../../utils/ApiError.js";
 
 export class PropertyService {
   private propertyRepository: PropertyRepository;
@@ -15,14 +16,8 @@ export class PropertyService {
 
     const dataToCreate = {
       ...restOfData,
-      listedBy: {
-        connect: { id: userId },
-      },
-      ...(projectId && {
-        project: {
-          connect: { id: projectId },
-        },
-      }),
+      listedBy: { connect: { id: userId } },
+      ...(projectId && { project: { connect: { id: projectId } } }),
       ...(viewIds &&
         viewIds.length > 0 && {
           views: {
@@ -38,11 +33,33 @@ export class PropertyService {
         },
       },
     };
-
     return this.propertyRepository.createProperty(dataToCreate);
   }
 
-  async getPublicProperties(searchQuery?: string): Promise<any[]> {
-    return this.propertyRepository.findAllPublic(searchQuery);
+  async getPublicProperties(filters: {
+    searchQuery?: string;
+    propertyType?: string;
+  }): Promise<any[]> {
+    return this.propertyRepository.findAllPublic(filters);
+  }
+
+  // NEW: Service method to find a property by ID and handle "not found" cases.
+  async getPropertyById(id: number): Promise<any> {
+    const property = await this.propertyRepository.findPropertyById(id);
+    if (!property) {
+      throw new ApiError(
+        404,
+        "Property not found or is not approved for public viewing."
+      );
+    }
+
+    // Reshape the data to be more frontend-friendly
+    const formattedProperty = {
+      ...property,
+      amenities: property.amenities.map((pa) => pa.amenity),
+      views: property.views.map((pv) => pv.view),
+    };
+
+    return formattedProperty;
   }
 }

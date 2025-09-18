@@ -10,7 +10,7 @@ export const ListingTypeTag = ({ listingType }: Props) => {
   
   return (
     // UPDATED: Reverted from bg-brandOrange to bg-orange-500
-    <div className="absolute top-4 left-4 bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+    <div className="absolute top-4 left-4 bg-orange-400 text-white text-xs font-semibold px-3 py-1 rounded-full">
       {label}
     </div>
   );

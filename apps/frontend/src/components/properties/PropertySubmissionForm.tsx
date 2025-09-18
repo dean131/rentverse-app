@@ -165,7 +165,7 @@ export const PropertySubmissionForm = () => {
                             <input
                               id={`view-${view.id}`}
                               type="checkbox"
-                              className="h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                              className="h-4 w-4 text-orange-400 border-gray-300 rounded focus:ring-orange-500"
                               checked={field.value?.includes(view.id)}
                               onChange={(e) => {
                                 const newValues = e.target.checked

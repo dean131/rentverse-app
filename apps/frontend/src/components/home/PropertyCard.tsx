@@ -32,7 +32,7 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
             </div>
             <div className="p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{property.title}</h3>
-                <p className="text-lg font-semibold text-orange-600 mb-4">{formatPrice(property.rentalPrice)} /mo</p>
+                <p className="text-lg font-semibold text-orange-400 mb-4">{formatPrice(property.rentalPrice)} /mo</p>
                 <div className="flex justify-between text-sm text-gray-600 border-t pt-4">
                     <div className="flex items-center">
                         {/* Bedrooms Icon */}

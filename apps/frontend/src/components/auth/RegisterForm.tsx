@@ -102,7 +102,7 @@ export const RegisterForm = () => {
       </form>
       <p className="mt-8 text-center text-sm text-gray-600">
         Already have an account?{' '}
-        <Link href="/login" className="font-medium text-orange-600 hover:text-orange-500">
+        <Link href="/login" className="font-medium text-orange-400 hover:text-orange-500">
           Login Now
         </Link>
       </p>

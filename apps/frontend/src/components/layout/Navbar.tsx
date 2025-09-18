@@ -46,8 +46,8 @@ export const Navbar = () => {
                 href={link.href}
                 className={`font-medium transition-colors duration-200 ${
                   pathname === link.href
-                    ? 'text-orange-600'
-                    : 'text-gray-600 hover:text-orange-600'
+                    ? 'text-orange-400'
+                    : 'text-gray-600 hover:text-orange-400'
                 }`}
               >
                 {link.label}

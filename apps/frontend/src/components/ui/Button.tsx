@@ -14,8 +14,8 @@ export const Button = ({ children, className, variant = 'default', ...props }: B
 
   // Define styles specific to each variant
   const variantStyles = {
-    default: 'bg-orange-600 text-white hover:bg-orange-700',
-    outline: 'border border-orange-600 bg-transparent text-orange-600 hover:bg-orange-50',
+    default: 'bg-orange-400 text-white hover:bg-orange-700',
+    outline: 'border border-orange-400 bg-transparent text-orange-400 hover:bg-orange-50',
   };
 
   const combinedClassName = `${baseStyles} ${variantStyles[variant]} ${className} py-2 px-4`;

@@ -19,11 +19,17 @@ export const registerSchema = z
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
-    path: ["confirmPassword"], // path of error
+    path: ["confirmPassword"],
   });
 export type RegisterCredentials = z.infer<typeof registerSchema>;
 
-// --- Property Schemas ---
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
 
 export const propertySubmissionSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -51,9 +57,27 @@ export const propertySubmissionSchema = z.object({
   ]),
   projectId: z.coerce.number().int().optional().nullable(),
   viewIds: z.array(z.coerce.number()).optional(),
-  // ADDED: amenityIds to the schema
+  // ADDED: amenityIds to the validation schema
   amenityIds: z.array(z.coerce.number()).optional(),
   ownershipDocumentUrl: z.string().url("A valid document URL is required."),
+  images: z
+    .any()
+    .refine(
+      (files) => (files as FileList)?.length >= 1,
+      "At least one image is required."
+    )
+    .refine((files) => {
+      if (!files || files.length === 0) return true;
+      return Array.from(files as FileList).every(
+        (file) => file.size <= MAX_FILE_SIZE
+      );
+    }, `Max file size is 5MB.`)
+    .refine((files) => {
+      if (!files || files.length === 0) return true;
+      return Array.from(files as FileList).every((file) =>
+        ACCEPTED_IMAGE_TYPES.includes(file.type)
+      );
+    }, "Only .jpg, .jpeg, .png and .webp formats are supported."),
 });
 
 export type PropertySubmission = z.infer<typeof propertySubmissionSchema>;
@@ -81,6 +105,7 @@ export type View = {
   name: string;
 };
 
+// For the admin list of pending properties
 export type PropertyWithLister = {
   id: number;
   title: string;
@@ -93,6 +118,7 @@ export type PropertyWithLister = {
   images?: { imageUrl: string }[];
 };
 
+// For the public property cards on the homepage and search results
 export type PropertyPublic = {
   id: number;
   title: string;
@@ -106,10 +132,12 @@ export type PropertyPublic = {
   images: { imageUrl: string }[];
 };
 
+// This type represents the raw data structure from the public properties API
 export type RawPropertyFromAPI = Omit<PropertyPublic, "address"> & {
   project: { address: string } | null;
 };
 
+// For the detailed property view page
 export type PropertyDetailed = {
   id: number;
   title: string;
@@ -124,6 +152,11 @@ export type PropertyDetailed = {
   images: { imageUrl: string }[];
   amenities: Amenity[];
   views: View[];
+  listedBy: {
+    fullName: string;
+    email: string;
+    profilePictureUrl: string | null;
+  };
 };
 
 export type StatusUpdatePayload = {

@@ -4,6 +4,7 @@ import {
   PropertySubmission,
   Project,
   View,
+  Amenity,
   PropertyPublic,
   PropertyDetailed,
   RawPropertyFromAPI,
@@ -52,10 +53,14 @@ export const getPublicProperties = async (
   }));
 };
 
-// NEW: Service function to get the details of a single property
 export const getPropertyById = async (
   id: number
 ): Promise<PropertyDetailed> => {
   const response = await apiClient.get(`/properties/${id}`);
+  return response.data.data;
+};
+
+export const getAmenities = async (): Promise<Amenity[]> => {
+  const response = await apiClient.get("/amenities");
   return response.data.data;
 };

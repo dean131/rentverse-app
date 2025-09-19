@@ -1,3 +1,5 @@
+// File Path: apps/core-service/prisma/schema.prisma
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -10,40 +12,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ===================================
-// ENUMERATIONS
-// ===================================
+// --- ENUMS ---
+// Enums provide a set of predefined values for a field.
 
 enum Role {
+  ADMIN
   PROPERTY_OWNER
   TENANT
-  ADMIN
-}
-
-enum ListingType {
-  SALE
-  RENT
-  BOTH
 }
 
 enum PropertyStatus {
   PENDING
   APPROVED
   REJECTED
-  RENTED
   SOLD
+  RENTED
 }
 
-enum DocumentType {
-  OWNERSHIP_CERTIFICATE
-  TAX_RECORD
-  UTILITY_BILL
-}
-
-enum VerificationStatus {
-  PENDING
-  VERIFIED
-  REJECTED
+enum ListingType {
+  SALE
+  RENT
+  BOTH
 }
 
 enum PropertyType {
@@ -54,10 +43,10 @@ enum PropertyType {
   COMMERCIAL
 }
 
-enum Furnishing {
-  UNFURNISHED
-  PARTIALLY_FURNISHED
+enum FurnishingStatus {
   FULLY_FURNISHED
+  PARTIALLY_FURNISHED
+  UNFURNISHED
 }
 
 enum PaymentPeriod {
@@ -67,17 +56,13 @@ enum PaymentPeriod {
   YEARLY
 }
 
-enum AgreementStatus {
-  ACTIVE
-  EXPIRED
-  TERMINATED
+enum DocumentType {
+  OWNERSHIP_CERTIFICATE
+  FLOOR_PLAN
+  OTHER
 }
 
-// ===================================
-// MODELS
-// ===================================
-
-// --- Core User and Property Models ---
+// --- MODELS ---
 
 model User {
   id                Int      @id @default(autoincrement())
@@ -91,184 +76,104 @@ model User {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  properties       Property[]
-  reviews          Review[]
-  favorites        Favorite[]
-  refreshTokens    RefreshToken[] // Relation to refresh tokens
-  ownedAgreements  RentalAgreement[] @relation("OwnerAgreements")
-  rentedAgreements RentalAgreement[] @relation("TenantAgreements")
+  properties   Property[]
+  refreshToken RefreshToken?
 }
 
-// NEW TABLE for Refresh Token Mechanism
 model RefreshToken {
   id        Int      @id @default(autoincrement())
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-}
-
-model Project {
-  id             Int       @id @default(autoincrement())
-  projectName    String
-  developer      String?
-  address        String
-  completionDate DateTime?
-
-  properties Property[]
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int  @unique
 }
 
 model Property {
-  id               Int            @id @default(autoincrement())
+  id               Int              @id @default(autoincrement())
   title            String
-  description      String         @db.Text
+  description      String
+  status           PropertyStatus   @default(PENDING)
   listingType      ListingType
   propertyType     PropertyType
   rentalPrice      Float?
   paymentPeriod    PaymentPeriod?
-  salePrice        Float?
-  maintenanceFee   Float?
   sizeSqft         Int
   bedrooms         Int
   bathrooms        Int
-  furnishingStatus Furnishing
-  latitude         Float
-  longitude        Float
-  status           PropertyStatus @default(PENDING)
+  furnishingStatus FurnishingStatus
 
-  listedById Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   listedBy   User @relation(fields: [listedById], references: [id])
+  listedById Int
 
-  projectId Int?
   project   Project? @relation(fields: [projectId], references: [id])
+  projectId Int?
 
-  documents        PropertyDocument[]
-  images           PropertyImage[]
-  amenities        PropertyAmenity[]
-  views            PropertyView[]
-  nearbyFacilities NearbyFacility[]
-  reviews          Review[]
-  favoritedBy      Favorite[]
-  agreements       RentalAgreement[]
+  images    PropertyImage[]
+  documents PropertyDocument[]
+  amenities PropertyAmenity[]
+  views     PropertyView[]
 }
 
-// --- Property-related Detail Models ---
-
-model PropertyDocument {
-  id                 Int                @id @default(autoincrement())
-  fileUrl            String
-  documentType       DocumentType
-  verificationStatus VerificationStatus @default(PENDING)
-  uploadedAt         DateTime           @default(now())
-
-  propertyId Int
-  property   Property @relation(fields: [propertyId], references: [id])
+model Project {
+  id          Int        @id @default(autoincrement())
+  projectName String
+  address     String
+  latitude    Float?
+  longitude   Float?
+  properties  Property[]
 }
 
 model PropertyImage {
-  id           Int    @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   imageUrl     String
-  displayOrder Int    @default(0)
+  displayOrder Int      @default(0)
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId   Int
+}
 
-  propertyId Int
-  property   Property @relation(fields: [propertyId], references: [id])
+model PropertyDocument {
+  id           Int          @id @default(autoincrement())
+  fileUrl      String
+  documentType DocumentType
+  uploadedAt   DateTime     @default(now())
+  property     Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId   Int
 }
 
 model Amenity {
-  id   Int     @id @default(autoincrement())
-  name String  @unique
-  icon String?
-
+  id         Int               @id @default(autoincrement())
+  name       String            @unique
   properties PropertyAmenity[]
 }
 
+model View {
+  id         Int            @id @default(autoincrement())
+  name       String         @unique
+  properties PropertyView[]
+}
+
+// --- JOIN TABLES for Many-to-Many Relationships ---
+
 model PropertyAmenity {
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   propertyId Int
-  property   Property @relation(fields: [propertyId], references: [id])
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
   amenityId  Int
-  amenity    Amenity  @relation(fields: [amenityId], references: [id])
 
   @@id([propertyId, amenityId])
 }
 
-model View {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-
-  properties PropertyView[]
-}
-
 model PropertyView {
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   propertyId Int
-  property   Property @relation(fields: [propertyId], references: [id])
+  view       View     @relation(fields: [viewId], references: [id], onDelete: Cascade)
   viewId     Int
-  view       View     @relation(fields: [viewId], references: [id])
 
   @@id([propertyId, viewId])
-}
-
-// --- Location-based Models ---
-
-model FacilityCategory {
-  id   Int     @id @default(autoincrement())
-  name String  @unique
-  icon String?
-
-  facilities NearbyFacility[]
-}
-
-model NearbyFacility {
-  id               Int    @id @default(autoincrement())
-  name             String
-  distanceInMeters Int
-
-  propertyId Int
-  property   Property         @relation(fields: [propertyId], references: [id])
-  categoryId Int
-  category   FacilityCategory @relation(fields: [categoryId], references: [id])
-}
-
-// --- User Engagement Models ---
-
-model Review {
-  id        Int      @id @default(autoincrement())
-  rating    Int
-  comment   String?  @db.Text
-  createdAt DateTime @default(now())
-
-  propertyId Int
-  property   Property @relation(fields: [propertyId], references: [id])
-  userId     Int
-  user       User     @relation(fields: [userId], references: [id])
-}
-
-model Favorite {
-  userId     Int
-  user       User     @relation(fields: [userId], references: [id])
-  propertyId Int
-  property   Property @relation(fields: [propertyId], references: [id])
-
-  @@id([userId, propertyId])
-}
-
-// --- Challenge 3: Agreement Model ---
-
-model RentalAgreement {
-  id              Int             @id @default(autoincrement())
-  startDate       DateTime
-  endDate         DateTime
-  rentalAmount    Float
-  status          AgreementStatus @default(ACTIVE)
-  generatedPdfUrl String?
-
-  propertyId Int
-  property   Property @relation(fields: [propertyId], references: [id])
-
-  tenantId Int
-  tenant   User @relation("TenantAgreements", fields: [tenantId], references: [id])
-
-  ownerId Int
-  owner   User @relation("OwnerAgreements", fields: [ownerId], references: [id])
 }

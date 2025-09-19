@@ -1,18 +1,11 @@
+// File Path: apps/core-service/src/api/auth/auth.repository.ts
 import { prisma } from "../../lib/prisma.js";
-import { Prisma, User, RefreshToken } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 
 export class AuthRepository {
-  // --- User Methods ---
   async findUserByEmail(email: string): Promise<User | null> {
     return prisma.user.findUnique({
       where: { email },
-    });
-  }
-
-  // NEW method to find a user by their ID
-  async findUserById(id: number): Promise<User | null> {
-    return prisma.user.findUnique({
-      where: { id },
     });
   }
 
@@ -22,26 +15,29 @@ export class AuthRepository {
     });
   }
 
-  // --- Refresh Token Methods ---
-  async createRefreshToken(data: {
-    userId: number;
-    token: string;
-    expiresAt: Date;
-  }): Promise<RefreshToken> {
-    return prisma.refreshToken.create({
-      data,
+  async saveRefreshToken(userId: number, token: string): Promise<void> {
+    // Refresh tokens should have an expiry date. Let's set it for 7 days.
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    // Upsert ensures we create a new token or update the existing one for the user
+    await prisma.refreshToken.upsert({
+      where: { userId },
+      update: { token, expiresAt },
+      create: { userId, token, expiresAt },
     });
   }
 
-  async findRefreshToken(token: string): Promise<RefreshToken | null> {
+  async findRefreshToken(token: string) {
     return prisma.refreshToken.findUnique({
       where: { token },
+      include: { user: true },
     });
   }
 
-  async deleteRefreshToken(token: string): Promise<void> {
-    await prisma.refreshToken.delete({
-      where: { token },
+  async deleteRefreshToken(userId: number): Promise<void> {
+    await prisma.refreshToken.deleteMany({
+      where: { userId },
     });
   }
 }

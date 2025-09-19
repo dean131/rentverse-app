@@ -4,43 +4,29 @@ import { PropertyStatus } from "@prisma/client";
 
 export class UserRepository {
   /**
-   * Counts the number of properties listed by a specific user, grouped by status.
-   * @param userId - The ID of the user.
-   * @returns An object with counts for each property status.
+   * Calculates property statistics for a specific property owner.
+   * @param userId The ID of the property owner.
+   * @returns An object with counts of pending, approved, and rejected properties.
    */
-  async countPropertiesByStatusForUser(userId: number) {
-    // Use Prisma's `groupBy` to efficiently count properties
-    const propertyCounts = await prisma.property.groupBy({
-      by: ["status"],
-      where: {
-        listedById: userId,
-      },
-      _count: {
-        id: true,
-      },
-    });
+  async getUserPropertyStats(userId: number) {
+    // We use Prisma's transaction feature to run multiple count queries efficiently.
+    const [pendingCount, approvedCount, rejectedCount] =
+      await prisma.$transaction([
+        prisma.property.count({
+          where: { listedById: userId, status: PropertyStatus.PENDING },
+        }),
+        prisma.property.count({
+          where: { listedById: userId, status: PropertyStatus.APPROVED },
+        }),
+        prisma.property.count({
+          where: { listedById: userId, status: PropertyStatus.REJECTED },
+        }),
+      ]);
 
-    // Initialize a result object with all statuses set to 0
-    const dashboardStats = {
-      PENDING: 0,
-      APPROVED: 0,
-      REJECTED: 0,
-      TOTAL: 0,
+    return {
+      pendingProperties: pendingCount,
+      approvedProperties: approvedCount,
+      rejectedProperties: rejectedCount,
     };
-
-    let totalProperties = 0;
-
-    // Map the query results to our result object
-    for (const group of propertyCounts) {
-      const count = group._count.id;
-      if (group.status in dashboardStats) {
-        dashboardStats[group.status as keyof typeof dashboardStats] = count;
-      }
-      totalProperties += count;
-    }
-
-    dashboardStats.TOTAL = totalProperties;
-
-    return dashboardStats;
   }
 }

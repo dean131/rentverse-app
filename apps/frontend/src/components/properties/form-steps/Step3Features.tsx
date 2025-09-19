@@ -4,23 +4,19 @@
 import { useEffect, useState, InputHTMLAttributes } from 'react';
 import { UseFormRegister, FieldErrors, Path } from 'react-hook-form';
 import { PropertySubmission, View, Amenity } from '@/lib/definitions';
-import { getViews } from '@/services/propertyService';
-// We will need to create a getAmenities function in our service
-// For now, we'll assume it exists and use mock data.
+import { getViews, getAmenities } from '@/services/propertyService';
 
 interface Step3Props {
     register: UseFormRegister<PropertySubmission>;
     errors: FieldErrors<PropertySubmission>;
 }
 
-// Define strong types for the reusable FormCheckbox component's props
 interface FormCheckboxProps extends InputHTMLAttributes<HTMLInputElement> {
     name: Path<PropertySubmission>;
     label: string;
     register: UseFormRegister<PropertySubmission>;
 }
 
-// Reusable checkbox component, now fully type-safe
 const FormCheckbox = ({ name, value, label, register }: FormCheckboxProps) => (
     <label className="flex items-center space-x-3">
         <input
@@ -33,30 +29,33 @@ const FormCheckbox = ({ name, value, label, register }: FormCheckboxProps) => (
     </label>
 );
 
-
 export const Step3Features = ({ register, errors }: Step3Props) => {
     const [views, setViews] = useState<View[]>([]);
-    // Mocking amenities for now, this would come from an API call
-    const mockAmenities: Amenity[] = [
-        { id: 1, name: 'Swimming Pool' },
-        { id: 2, name: 'Gymnasium' },
-        { id: 3, name: '24/7 Security' },
-        { id: 4, name: 'Playground' },
-        { id: 5, name: 'Balcony' },
-        { id: 6, name: 'Covered Parking' },
-    ];
+    const [amenities, setAmenities] = useState<Amenity[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchViews = async () => {
+        const fetchData = async () => {
             try {
-                const viewsData = await getViews();
+                // Fetch both views and amenities concurrently
+                const [viewsData, amenitiesData] = await Promise.all([
+                    getViews(),
+                    getAmenities()
+                ]);
                 setViews(viewsData);
+                setAmenities(amenitiesData);
             } catch (error) {
-                console.error("Failed to fetch views", error);
+                console.error("Failed to fetch features data", error);
+            } finally {
+                setIsLoading(false);
             }
         };
-        fetchViews();
+        fetchData();
     }, []);
+
+    if (isLoading) {
+        return <div>Loading features...</div>;
+    }
 
     return (
         <div className="space-y-8">
@@ -81,7 +80,7 @@ export const Step3Features = ({ register, errors }: Step3Props) => {
                 <h3 className="text-lg font-semibold">Amenities</h3>
                  <p className="text-sm text-gray-500 mb-4">Select the amenities included with the property.</p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {mockAmenities.map(amenity => (
+                    {amenities.map(amenity => (
                          <FormCheckbox 
                             key={amenity.id}
                             name="amenityIds"

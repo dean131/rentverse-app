@@ -15,7 +15,8 @@ export class PropertyController {
 
   createProperty = asyncHandler(
     async (req: AuthenticatedRequest, res: Response) => {
-      const userId = req.user?.userId;
+      // CORRECTED: The user object from the middleware has an 'id' property, not 'userId'.
+      const userId = req.user?.id;
       if (!userId) {
         throw new ApiError(401, "User not authenticated");
       }
@@ -30,15 +31,16 @@ export class PropertyController {
   getPublicProperties = asyncHandler(async (req: Request, res: Response) => {
     const searchQuery = req.query.search as string | undefined;
     const propertyType = req.query.propertyType as string | undefined;
+    const beds = req.query.beds as string | undefined;
 
     const properties = await this.propertyService.getPublicProperties({
       searchQuery,
       propertyType,
+      beds,
     });
     ApiResponse.success(res, properties);
   });
 
-  // NEW: Controller method to handle fetching a single property by its ID.
   getPropertyById = asyncHandler(async (req: Request, res: Response) => {
     const propertyId = parseInt(req.params.id, 10);
     if (isNaN(propertyId)) {

@@ -1,49 +1,46 @@
 // File Path: apps/core-service/src/api/users/users.service.ts
-import { Role } from "@prisma/client";
+import { AdminRepository } from "../admin/admin.repository.js";
 import { UserRepository } from "./users.repository.js";
-import { AdminRepository } from "../admin/admin.repository.js"; // Import AdminRepository
+import { PropertyRepository } from "../properties/properties.repository.js"; // Import PropertyRepository
 import { ApiError } from "../../utils/ApiError.js";
+import { AuthenticatedUser } from "../../middleware/auth.middleware.js";
 
 export class UserService {
   private userRepository: UserRepository;
-  private adminRepository: AdminRepository; // Add AdminRepository
+  private propertyRepository: PropertyRepository; // Add property repository
+  private adminRepository: AdminRepository;
 
-  // Inject both repositories
   constructor(
     userRepository: UserRepository,
+    propertyRepository: PropertyRepository, // Add property repository to constructor
     adminRepository: AdminRepository
   ) {
     this.userRepository = userRepository;
+    this.propertyRepository = propertyRepository; // Assign it
     this.adminRepository = adminRepository;
   }
 
-  /**
-   * Fetches dashboard data tailored to the user's role.
-   * @param userId - The ID of the authenticated user.
-   * @param role - The role of the authenticated user.
-   * @returns Dashboard summary data.
-   */
-  async getDashboardData(userId: number, role: Role) {
-    switch (role) {
-      case Role.PROPERTY_OWNER:
-        // For a property owner, get counts of their own properties.
-        return this.userRepository.countPropertiesByStatusForUser(userId);
+  async getUserDashboard(user: AuthenticatedUser) {
+    if (!user) {
+      throw new ApiError(401, "User not authenticated");
+    }
 
-      case Role.ADMIN:
-        // For an admin, get system-wide counts.
+    switch (user.role) {
+      case "ADMIN":
         return this.adminRepository.getAdminDashboardStats();
 
-      case Role.TENANT:
-        // For a tenant, we can return other relevant data in the future.
-        // For now, we'll return a simple object.
+      case "PROPERTY_OWNER":
+        // CORRECTED: Use the propertyRepository to get property stats
+        return this.propertyRepository.getUserPropertyStats(user.id);
+
+      case "TENANT":
         return {
-          favoritesCount: 0, // Placeholder
-          reviewsCount: 0, // Placeholder
+          welcomeMessage: "Welcome to your dashboard!",
+          savedProperties: 0,
         };
 
       default:
-        // Handle unexpected roles gracefully.
-        throw new ApiError(403, "Dashboard data not available for this role.");
+        throw new ApiError(400, "Invalid user role");
     }
   }
 }

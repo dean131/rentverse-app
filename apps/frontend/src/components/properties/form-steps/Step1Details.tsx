@@ -8,6 +8,7 @@ interface Step1Props {
     errors: FieldErrors<PropertySubmission>;
 }
 
+// Reusable form component types
 interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
     label: string;
     name: Path<PropertySubmission>;
@@ -23,7 +24,7 @@ interface FormSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
     children: ReactNode;
 }
 
-
+// Reusable form components
 const FormInput = ({ label, name, register, error, type = "text", ...props }: FormInputProps) => (
     <div>
         <label htmlFor={name} className="block text-sm font-medium text-gray-700">{label}</label>
@@ -51,7 +52,7 @@ const FormSelect = ({ label, name, register, error, children, ...props }: FormSe
         </select>
         {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
     </div>
-)
+);
 
 export const Step1Details = ({ register, errors }: Step1Props) => {
     return (
@@ -77,6 +78,7 @@ export const Step1Details = ({ register, errors }: Step1Props) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* ADDED: Missing select fields */}
                 <FormSelect label="Listing Type" name="listingType" register={register} error={errors.listingType}>
                     <option value="">Select Listing Type</option>
                     <option value="RENT">For Rent</option>
@@ -91,6 +93,12 @@ export const Step1Details = ({ register, errors }: Step1Props) => {
                     <option value="STUDIO">Studio</option>
                     <option value="COMMERCIAL">Commercial</option>
                 </FormSelect>
+                 <FormSelect label="Furnishing Status" name="furnishingStatus" register={register} error={errors.furnishingStatus}>
+                    <option value="">Select Status</option>
+                    <option value="UNFURNISHED">Unfurnished</option>
+                    <option value="PARTIALLY_FURNISHED">Partially Furnished</option>
+                    <option value="FULLY_FURNISHED">Fully Furnished</option>
+                </FormSelect>
                 <FormInput 
                     label="Rental Price (MYR)"
                     name="rentalPrice"
@@ -103,12 +111,6 @@ export const Step1Details = ({ register, errors }: Step1Props) => {
                     <option value="">Select Period</option>
                     <option value="MONTHLY">Monthly</option>
                     <option value="YEARLY">Yearly</option>
-                </FormSelect>
-                 <FormSelect label="Furnishing Status" name="furnishingStatus" register={register} error={errors.furnishingStatus}>
-                    <option value="">Select Status</option>
-                    <option value="UNFURNISHED">Unfurnished</option>
-                    <option value="PARTIALLY_FURNISHED">Partially Furnished</option>
-                    <option value="FULLY_FURNISHED">Fully Furnished</option>
                 </FormSelect>
                 <FormInput 
                     label="Bedrooms"
@@ -135,6 +137,7 @@ export const Step1Details = ({ register, errors }: Step1Props) => {
                     placeholder="e.g., 1200"
                 />
             </div>
+            {/* ADDED: Missing URL input field */}
              <FormInput 
                 label="Ownership Document URL"
                 name="ownershipDocumentUrl"

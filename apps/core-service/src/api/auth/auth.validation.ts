@@ -1,27 +1,31 @@
+// File Path: apps/core-service/src/api/auth/auth.validation.ts
 import { z } from "zod";
+import { Role } from "@prisma/client";
 
-// Schema for user registration
-export const registerUserSchema = z.object({
+export const registerSchema = z.object({
   body: z.object({
     fullName: z
-      .string()
-      .min(3, { message: "Full name must be at least 3 characters long" }),
-    email: z.string().email({ message: "A valid email address is required" }),
+      .string({ required_error: "Full name is required" })
+      .min(3, "Full name must be at least 3 characters long"),
+    email: z
+      .string({ required_error: "Email is required" })
+      .email("Invalid email address"),
     password: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters long" }),
-    role: z.enum(["PROPERTY_OWNER", "TENANT"], {
-      errorMap: () => ({
-        message: "Role must be either PROPERTY_OWNER or TENANT",
-      }),
+      .string({ required_error: "Password is required" })
+      .min(8, "Password must be at least 8 characters long"),
+    role: z.nativeEnum(Role, {
+      errorMap: () => ({ message: "Invalid role specified" }),
     }),
   }),
 });
 
-// Schema for user login
-export const loginUserSchema = z.object({
+export const loginSchema = z.object({
   body: z.object({
-    email: z.string().email({ message: "A valid email address is required" }),
-    password: z.string().min(1, { message: "Password is required" }),
+    email: z
+      .string({ required_error: "Email is required" })
+      .email("Invalid email address"),
+    password: z
+      .string({ required_error: "Password is required" })
+      .min(1, "Password cannot be empty"),
   }),
 });

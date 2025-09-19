@@ -12,6 +12,7 @@ export class PropertyRepository {
   async findAllPublic(filters: {
     searchQuery?: string;
     propertyType?: string;
+    beds?: string;
   }): Promise<any[]> {
     const whereClause: Prisma.PropertyWhereInput = {
       status: PropertyStatus.APPROVED,
@@ -31,6 +32,15 @@ export class PropertyRepository {
 
     if (filters.propertyType && filters.propertyType !== "ALL") {
       whereClause.propertyType = filters.propertyType as PropertyType;
+    }
+
+    if (filters.beds) {
+      const minBeds = parseInt(filters.beds, 10);
+      if (!isNaN(minBeds)) {
+        whereClause.bedrooms = {
+          gte: minBeds,
+        };
+      }
     }
 
     return prisma.property.findMany({
@@ -53,46 +63,76 @@ export class PropertyRepository {
     });
   }
 
-  // NEW: Repository method to fetch a single, approved property with all its relations.
   async findPropertyById(id: number) {
     return prisma.property.findUnique({
       where: {
         id: id,
-        status: PropertyStatus.APPROVED, // Ensure only approved properties can be fetched
+        status: PropertyStatus.APPROVED,
       },
       include: {
         listedBy: {
-          // Include information about the owner
           select: {
             fullName: true,
-            email: true, // For a contact form
+            email: true,
             profilePictureUrl: true,
           },
         },
         project: {
-          // Include project details
           select: {
             projectName: true,
             address: true,
           },
         },
         images: {
-          // Get all images
           orderBy: { displayOrder: "asc" },
         },
         amenities: {
-          // Get all linked amenities
-          include: {
-            amenity: true,
-          },
+          include: { amenity: true },
         },
         views: {
-          // Get all linked views
-          include: {
-            view: true,
-          },
+          include: { view: true },
         },
       },
     });
+  }
+
+  /**
+   * NEW METHOD: Fetches statistics for a specific property owner's listings.
+   * Counts properties by their status (PENDING, APPROVED, REJECTED).
+   */
+  async getUserPropertyStats(userId: number) {
+    const stats = await prisma.property.groupBy({
+      by: ["status"],
+      where: {
+        listedById: userId,
+      },
+      _count: {
+        id: true, // Count the number of properties in each group
+      },
+    });
+
+    const statsMap = {
+      totalListings: 0,
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+    };
+
+    for (const stat of stats) {
+      const count = stat._count.id;
+      statsMap.totalListings += count;
+      switch (stat.status) {
+        case PropertyStatus.PENDING:
+          statsMap.pending = count;
+          break;
+        case PropertyStatus.APPROVED:
+          statsMap.approved = count;
+          break;
+        case PropertyStatus.REJECTED:
+          statsMap.rejected = count;
+          break;
+      }
+    }
+    return statsMap;
   }
 }

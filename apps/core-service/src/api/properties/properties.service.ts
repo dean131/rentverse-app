@@ -1,5 +1,5 @@
 // File Path: apps/core-service/src/api/properties/properties.service.ts
-import { Property, PropertyType } from "@prisma/client";
+import { Property } from "@prisma/client";
 import { PropertyRepository } from "./properties.repository.js";
 import { ApiError } from "../../utils/ApiError.js";
 
@@ -11,7 +11,6 @@ export class PropertyService {
   }
 
   async createProperty(propertyData: any, userId: number): Promise<Property> {
-    // UPDATED: Destructure amenityIds from the incoming data
     const {
       viewIds,
       amenityIds,
@@ -32,7 +31,6 @@ export class PropertyService {
             })),
           },
         }),
-      // ADDED: Logic to connect the selected amenities to the new property
       ...(amenityIds &&
         amenityIds.length > 0 && {
           amenities: {
@@ -51,14 +49,15 @@ export class PropertyService {
     return this.propertyRepository.createProperty(dataToCreate);
   }
 
+  // CORRECTED: The type definition for the filters object now includes the optional 'beds' property.
   async getPublicProperties(filters: {
     searchQuery?: string;
     propertyType?: string;
+    beds?: string;
   }): Promise<any[]> {
     return this.propertyRepository.findAllPublic(filters);
   }
 
-  // NEW: Service method to find a property by ID and handle "not found" cases.
   async getPropertyById(id: number): Promise<any> {
     const property = await this.propertyRepository.findPropertyById(id);
     if (!property) {
@@ -68,7 +67,6 @@ export class PropertyService {
       );
     }
 
-    // Reshape the data to be more frontend-friendly
     const formattedProperty = {
       ...property,
       amenities: property.amenities.map((pa) => pa.amenity),

@@ -33,7 +33,11 @@ import { createUserRouter } from "./api/users/users.routes.js";
 const app = express();
 
 // --- Core Middlewares ---
-const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "http://rentverse_frontend:3000",
+];
 
 const corsOptions = {
   origin: (

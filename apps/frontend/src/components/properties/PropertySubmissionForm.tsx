@@ -8,6 +8,7 @@ import { propertySubmissionSchema, PropertySubmission } from '@/lib/definitions'
 import { Step1Details } from './form-steps/Step1Details';
 import { Step2Location } from './form-steps/Step2Location';
 import { Step3Features } from './form-steps/Step3Features';
+import { Step4UploadPhotos } from './form-steps/Step4UploadPhotos';
 import { FormStepper } from './form-steps/FormStepper';
 import { Button } from '@/components/ui/Button';
 
@@ -20,6 +21,7 @@ export const PropertySubmissionForm = () => {
         handleSubmit,
         formState: { errors, isSubmitting },
         trigger,
+        setValue,
     } = useForm<PropertySubmission>({
         resolver: zodResolver(propertySubmissionSchema),
         mode: 'onChange',
@@ -28,20 +30,16 @@ export const PropertySubmissionForm = () => {
     const fieldsByStep: Record<number, Path<PropertySubmission>[]> = {
         1: ["title", "description", "rentalPrice", "paymentPeriod", "bedrooms", "bathrooms", "sizeSqft", "listingType", "propertyType", "furnishingStatus", "ownershipDocumentUrl"],
         2: ["projectId"],
-        // UPDATED: Added amenityIds for step 3 validation
         3: ["viewIds", "amenityIds"],
-        4: [],
+        4: ["images"],
     };
 
     const onSubmit = (data: PropertySubmission) => {
-        // Convert checkbox values to numbers before submitting
-        const formattedData = {
-            ...data,
-            viewIds: data.viewIds?.map(id => Number(id)),
-            amenityIds: data.amenityIds?.map(id => Number(id)),
-        };
-        console.log("Final Form Data:", formattedData);
-        alert("Property submitted! Check the console for the data.");
+        // In a real application, you would first upload the files to a cloud storage service (like AWS S3),
+        // get back the URLs, and then submit those URLs along with the rest of the form data to your backend.
+        
+        console.log("Final Form Data (including FileList object):", data);
+        alert("Property submitted successfully! Check the browser console for the data.");
     };
     
     const handleNextStep = async () => {
@@ -68,6 +66,7 @@ export const PropertySubmissionForm = () => {
                     {currentStep === 1 && <Step1Details register={register} errors={errors} />}
                     {currentStep === 2 && <Step2Location register={register} errors={errors} />}
                     {currentStep === 3 && <Step3Features register={register} errors={errors} />}
+                    {currentStep === 4 && <Step4UploadPhotos setValue={setValue} errors={errors} />}
 
                     <div className="mt-8 pt-6 border-t flex justify-between">
                         {currentStep > 1 ? (

@@ -11,8 +11,14 @@ export class PropertyService {
   }
 
   async createProperty(propertyData: any, userId: number): Promise<Property> {
-    const { viewIds, ownershipDocumentUrl, projectId, ...restOfData } =
-      propertyData;
+    // UPDATED: Destructure amenityIds from the incoming data
+    const {
+      viewIds,
+      amenityIds,
+      ownershipDocumentUrl,
+      projectId,
+      ...restOfData
+    } = propertyData;
 
     const dataToCreate = {
       ...restOfData,
@@ -23,6 +29,15 @@ export class PropertyService {
           views: {
             create: viewIds.map((id: number) => ({
               view: { connect: { id } },
+            })),
+          },
+        }),
+      // ADDED: Logic to connect the selected amenities to the new property
+      ...(amenityIds &&
+        amenityIds.length > 0 && {
+          amenities: {
+            create: amenityIds.map((id: number) => ({
+              amenity: { connect: { id } },
             })),
           },
         }),

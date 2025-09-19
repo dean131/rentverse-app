@@ -9,8 +9,7 @@ interface FilterButtonProps {
 }
 
 export const FilterButton = ({ label, options, selectedValue, onValueChange }: FilterButtonProps) => {
-  const displayLabel = options.find(o => o.value === selectedValue)?.label || label;
-
+  // REMOVED: Unused 'displayLabel' variable
   return (
     <div className="relative">
       <select

@@ -36,8 +36,11 @@ export const propertySubmissionSchema = z.object({
     "STUDIO",
     "COMMERCIAL",
   ]),
-  rentalPrice: z.coerce.number().positive().optional(),
-  paymentPeriod: z.enum(["MONTHLY", "QUARTERLY", "BI_ANNUALLY", "YEARLY"]),
+  rentalPrice: z.coerce.number().positive().optional().nullable(),
+  paymentPeriod: z
+    .enum(["MONTHLY", "QUARTERLY", "BI_ANNUALLY", "YEARLY"])
+    .optional()
+    .nullable(),
   sizeSqft: z.coerce.number().int().positive("Size must be a positive number"),
   bedrooms: z.coerce.number().int().min(0, "Cannot be negative"),
   bathrooms: z.coerce.number().int().min(0, "Cannot be negative"),
@@ -46,8 +49,11 @@ export const propertySubmissionSchema = z.object({
     "PARTIALLY_FURNISHED",
     "FULLY_FURNISHED",
   ]),
-  projectId: z.coerce.number().int().optional(),
-  viewIds: z.array(z.number()).optional(),
+  projectId: z.coerce.number().int().optional().nullable(),
+  viewIds: z.array(z.coerce.number()).optional(),
+  // ADDED: amenityIds to the schema
+  amenityIds: z.array(z.coerce.number()).optional(),
+  ownershipDocumentUrl: z.string().url("A valid document URL is required."),
 });
 
 export type PropertySubmission = z.infer<typeof propertySubmissionSchema>;
@@ -63,6 +69,11 @@ export type User = {
 export type Project = {
   id: number;
   projectName: string;
+};
+
+export type Amenity = {
+  id: number;
+  name: string;
 };
 
 export type View = {
@@ -82,22 +93,6 @@ export type PropertyWithLister = {
   images?: { imageUrl: string }[];
 };
 
-// UPDATED: Expanded the detailed property type to include all the new fields
-export type PropertyDetailed = PropertyPublic & {
-  description: string;
-  furnishingStatus: string;
-  amenities: { id: number; name: string }[];
-  views: { id: number; name: string }[];
-  listedBy: {
-    fullName: string;
-    profilePictureUrl: string | null;
-  };
-};
-
-export type RawPropertyFromAPI = Omit<PropertyPublic, "address"> & {
-  project: { address: string } | null;
-};
-
 export type PropertyPublic = {
   id: number;
   title: string;
@@ -109,6 +104,26 @@ export type PropertyPublic = {
   sizeSqft: number;
   address: string | null;
   images: { imageUrl: string }[];
+};
+
+export type RawPropertyFromAPI = Omit<PropertyPublic, "address"> & {
+  project: { address: string } | null;
+};
+
+export type PropertyDetailed = {
+  id: number;
+  title: string;
+  description: string;
+  address: string;
+  rentalPrice: number | null;
+  paymentPeriod: string | null;
+  bedrooms: number;
+  bathrooms: number;
+  sizeSqft: number;
+  furnishingStatus: string;
+  images: { imageUrl: string }[];
+  amenities: Amenity[];
+  views: View[];
 };
 
 export type StatusUpdatePayload = {

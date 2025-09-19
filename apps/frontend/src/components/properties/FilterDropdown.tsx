@@ -1,7 +1,7 @@
 // File Path: apps/frontend/src/components/properties/FilterDropdown.tsx
 'use client';
 
-import { useState } from 'react';
+// REMOVED: Unused 'useState' import
 
 interface FilterDropdownProps {
   label: string;
@@ -11,7 +11,6 @@ interface FilterDropdownProps {
 }
 
 export const FilterDropdown = ({ label, options, selectedValue, onValueChange }: FilterDropdownProps) => {
-    // This is a basic implementation. A real-world version might use a library like Headless UI for accessibility.
     return (
         <div>
             <label htmlFor={`filter-${label}`} className="sr-only">{label}</label>
@@ -29,3 +28,4 @@ export const FilterDropdown = ({ label, options, selectedValue, onValueChange }:
         </div>
     );
 };
+

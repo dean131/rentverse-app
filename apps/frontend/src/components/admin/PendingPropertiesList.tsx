@@ -12,7 +12,6 @@ interface PendingPropertiesListProps {
 }
 
 export const PendingPropertiesList = ({ initialProperties, onUpdate }: PendingPropertiesListProps) => {
-  const [properties, setProperties] = useState(initialProperties);
   const [error, setError] = useState<string | null>(null);
   const [loadingStates, setLoadingStates] = useState<Record<number, boolean>>({});
 
@@ -21,9 +20,8 @@ export const PendingPropertiesList = ({ initialProperties, onUpdate }: PendingPr
     setError(null);
 
     try {
-      // CORRECTED: Pass the status as a direct string argument, not an object.
       await updatePropertyStatus(propertyId, status);
-      onUpdate(propertyId); // Notify parent to update its state
+      onUpdate(propertyId);
     } catch (err) {
       console.error(`Failed to update property ${propertyId} to ${status}`, err);
       setError(`Could not ${status.toLowerCase()} property. Please try again.`);
@@ -32,7 +30,7 @@ export const PendingPropertiesList = ({ initialProperties, onUpdate }: PendingPr
     }
   };
   
-  if (properties.length === 0) {
+  if (initialProperties.length === 0) {
       return <p className="text-gray-500 text-center py-8">No pending properties found.</p>
   }
 
@@ -50,7 +48,7 @@ export const PendingPropertiesList = ({ initialProperties, onUpdate }: PendingPr
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {properties.map((property) => (
+          {initialProperties.map((property) => (
             <tr key={property.id}>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm font-medium text-gray-900">{property.title}</div>

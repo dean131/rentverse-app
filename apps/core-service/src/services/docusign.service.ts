@@ -1,15 +1,8 @@
 // File Path: apps/core-service/src/services/docusign.service.ts
 import docusign from "docusign-esign";
 import { config } from "../config/index.js";
-import { User, Property, TenancyAgreement, Project } from "@prisma/client";
-
-// Define a more specific type for the property object that includes its relations
-type PropertyWithProject = Property & { project: Project | null };
-type FullAgreementDetails = TenancyAgreement & {
-  owner: User;
-  tenant: User;
-  property: PropertyWithProject;
-};
+import { User, TenancyAgreement } from "@prisma/client";
+import { PropertyWithProject } from "../api/agreements/agreements.service.js";
 
 // This service encapsulates all logic for interacting with the DocuSign API.
 export class DocusignService {
@@ -24,15 +17,19 @@ export class DocusignService {
 
   private async initializeApiClient() {
     try {
-      const privateKey = Buffer.from(config.docusign.privateKey, "base64");
+      // Decode the base64 private key from the environment variable
+      const privateKey = Buffer.from(
+        config.docusign.privateKey,
+        "base64"
+      ).toString("utf8");
       const consentScopes = ["signature", "impersonation"];
 
       const response = await this.apiClient.requestJWTUserToken(
         config.docusign.clientId,
         config.docusign.impersonatedUserId,
         consentScopes,
-        privateKey,
-        3600
+        Buffer.from(privateKey),
+        3600 // Token expires in 1 hour
       );
 
       const accessToken = response.body.access_token;
@@ -56,7 +53,7 @@ export class DocusignService {
     tenant: User,
     property: PropertyWithProject
   ): string {
-    // CORRECTED: The 'property' parameter is now strongly typed, so 'property.project' is accessible.
+    // In a real app, you'd use a more robust templating engine.
     let docHtml = `
             <!DOCTYPE html><html><body style="font-family: sans-serif; line-height: 1.6;">
                 <h1 style="text-align: center;">Tenancy Agreement</h1>
@@ -81,7 +78,7 @@ export class DocusignService {
     return Buffer.from(docHtml).toString("base64");
   }
 
-  async createAndSendEnvelope(agreement: FullAgreementDetails) {
+  async createAndSendEnvelope(agreement: any) {
     await this.initializeApiClient();
 
     const { owner, tenant, property } = agreement;
@@ -92,8 +89,6 @@ export class DocusignService {
       property
     );
 
-    // CORRECTED: Define DocuSign objects as plain JavaScript objects that match the SDK's types.
-    // This avoids using non-existent constructors and satisfies TypeScript.
     const ownerSigner: docusign.Signer = {
       email: owner.email,
       name: owner.fullName,
@@ -130,15 +125,13 @@ export class DocusignService {
       emailSubject: `Please Sign: Tenancy Agreement for ${property.title}`,
       documents: [
         {
-          documentBase64: documentBase64,
+          documentBase64,
           name: "Tenancy Agreement",
           fileExtension: "html",
           documentId: "1",
         },
       ],
-      recipients: {
-        signers: [ownerSigner, tenantSigner],
-      },
+      recipients: { signers: [ownerSigner, tenantSigner] },
       status: "sent",
     };
 

@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { createAgreement } from '@/services/agreementService';
-import axios from 'axios'; // Import axios to use its type guard
+import axios from 'axios';
 
 interface BookingModalProps {
   propertyId: number;
@@ -41,14 +41,13 @@ export const BookingModal = ({ propertyId, onClose, onSuccess }: BookingModalPro
         endDate: new Date(endDate).toISOString(),
       });
       onSuccess();
-    } catch (err) { // CORRECTED: Removed ': any' and added type checking below
+    } catch (err) {
       console.error("Booking failed:", err);
-      // Use a type guard to safely access properties from the error object
       if (axios.isAxiosError(err) && err.response) {
-        const message = err.response.data?.message || "An error occurred on the server.";
-        setError(message);
+          const message = err.response.data?.message || "An unexpected error occurred.";
+          setError(message);
       } else {
-        setError("An unexpected error occurred. Please try again.");
+          setError("An unexpected error occurred. Please try again.");
       }
     } finally {
       setIsSubmitting(false);
@@ -56,8 +55,11 @@ export const BookingModal = ({ propertyId, onClose, onSuccess }: BookingModalPro
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg p-8 max-w-md w-full">
+    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg p-8 max-w-md w-full relative">
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
         <h2 className="text-2xl font-bold mb-4">Request to Book</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -81,7 +83,7 @@ export const BookingModal = ({ propertyId, onClose, onSuccess }: BookingModalPro
             />
           </div>
           
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-600 text-center">{error}</p>}
 
           <div className="pt-4 flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>

@@ -225,3 +225,18 @@ export type TenancyAgreement = {
   ownerId: number;
   tenantId: number;
 };
+
+export type AgreementDetails = {
+  id: number;
+  status: string;
+  startDate: string;
+  endDate: string;
+  rentAmount: number;
+  property: {
+    id: number;
+    title: string;
+    images: { imageUrl: string }[];
+  };
+  tenant: { id: number; fullName: string };
+  owner: { id: number; fullName: string };
+};

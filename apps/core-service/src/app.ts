@@ -30,7 +30,6 @@ import { UserService } from "./api/users/users.service.js";
 import { UserController } from "./api/users/users.controller.js";
 import { createUserRouter } from "./api/users/users.routes.js";
 
-// NEW: Import the new views and amenities modules
 import { ViewRepository } from "./api/views/views.repository.js";
 import { ViewService } from "./api/views/views.service.js";
 import { ViewController } from "./api/views/views.controller.js";
@@ -45,6 +44,10 @@ import { AgreementRepository } from "./api/agreements/agreements.repository.js";
 import { AgreementService } from "./api/agreements/agreements.service.js";
 import { AgreementController } from "./api/agreements/agreements.controller.js";
 import { createAgreementRouter } from "./api/agreements/agreements.routes.js";
+
+import { WebhookService } from "./api/webhooks/webhooks.service.js";
+import { WebhookController } from "./api/webhooks/webhooks.controller.js";
+import { createWebhookRouter } from "./api/webhooks/webhooks.routes.js";
 
 import { DocusignService } from "./services/docusign.service.js";
 
@@ -64,10 +67,15 @@ const corsOptions: cors.CorsOptions = {
   credentials: true,
 };
 
-// Use the configured CORS options.
-app.use(cors(corsOptions));
-
 // --- Middleware ---
+app.use(
+  express.json({
+    verify: (req: any, res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -108,13 +116,15 @@ const amenityController = new AmenityController(amenityService);
 const docusignService = new DocusignService();
 
 const agreementRepository = new AgreementRepository();
-// UPDATED: Inject DocusignService into AgreementService
 const agreementService = new AgreementService(
   agreementRepository,
   propertyRepository,
   docusignService
 );
 const agreementController = new AgreementController(agreementService);
+
+const webhookService = new WebhookService(agreementRepository);
+const webhookController = new WebhookController(webhookService);
 
 // --- API Routes ---
 app.use("/api/auth", createAuthRouter(authController));
@@ -125,6 +135,7 @@ app.use("/api/users", createUserRouter(userController));
 app.use("/api/views", createViewRouter(viewController));
 app.use("/api/amenities", createAmenityRouter(amenityController));
 app.use("/api/agreements", createAgreementRouter(agreementController));
+app.use("/api/webhooks", createWebhookRouter(webhookController));
 
 // --- Error Handler ---
 app.use(errorHandler);

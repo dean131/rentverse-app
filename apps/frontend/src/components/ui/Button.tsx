@@ -1,22 +1,36 @@
 // File Path: apps/frontend/src/components/ui/Button.tsx
 import { type ComponentProps } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 
-interface ButtonProps extends ComponentProps<'button'> {
-  variant?: 'solid' | 'outline';
-}
+// Using class-variance-authority (cva) is a modern best practice for creating
+// flexible components with multiple variants and sizes.
+const buttonVariants = cva(
+  "inline-flex items-center justify-center rounded-md font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none",
+  {
+    variants: {
+      variant: {
+        solid: "bg-orange-600 text-white hover:bg-orange-700 focus:ring-orange-600",
+        outline: "bg-transparent border border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white focus:ring-orange-600",
+      },
+      size: {
+        default: "px-6 py-2 text-sm",
+        sm: "px-3 py-1 text-xs",
+      },
+    },
+    defaultVariants: {
+      variant: "solid",
+      size: "default",
+    },
+  }
+);
 
-export const Button = ({ children, className, variant = 'solid', ...props }: ButtonProps) => {
-  const baseClasses = "px-6 py-2 rounded-md font-semibold text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
+// The component props now extend the variants defined above
+export interface ButtonProps extends ComponentProps<'button'>, VariantProps<typeof buttonVariants> {}
 
-  // UPDATED: Reverted from brandOrange to standard orange-400 classes for better contrast
-  const variantClasses = {
-    solid: 'bg-orange-400 text-white hover:bg-orange-700 focus:ring-orange-400',
-    outline: 'bg-transparent border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white focus:ring-orange-400',
-  };
-
+export const Button = ({ children, className, variant, size, ...props }: ButtonProps) => {
   return (
     <button
-      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+      className={buttonVariants({ variant, size, className })}
       {...props}
     >
       {children}

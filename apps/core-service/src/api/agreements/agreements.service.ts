@@ -3,6 +3,10 @@ import { AgreementRepository } from "./agreements.repository.js";
 import { PropertyRepository } from "../properties/properties.repository.js";
 import { DocusignService } from "../../services/docusign.service.js";
 import { ApiError } from "../../utils/ApiError.js";
+import { Property, Project } from "@prisma/client";
+
+// Define and export a more specific type that includes the nested project data
+export type PropertyWithProject = Property & { project: Project | null };
 
 export class AgreementService {
   private agreementRepository: AgreementRepository;
@@ -23,7 +27,6 @@ export class AgreementService {
     data: { propertyId: number; startDate: Date; endDate: Date },
     tenantId: number
   ) {
-    // 1. Verify the property exists and is approved
     const property = await this.propertyRepository.findPropertyById(
       data.propertyId
     );
@@ -34,22 +37,19 @@ export class AgreementService {
       );
     }
 
-    // 2. Prevent the owner from booking their own property
     if (property.listedById === tenantId) {
       throw new ApiError(400, "You cannot book your own property.");
     }
 
-    // 3. Prepare the data for the new agreement
     const agreementData = {
       propertyId: data.propertyId,
       tenantId: tenantId,
       ownerId: property.listedById,
       startDate: new Date(data.startDate),
       endDate: new Date(data.endDate),
-      rentAmount: property.rentalPrice || 0, // Use the listed rental price
+      rentAmount: property.rentalPrice || 0,
     };
 
-    // 4. Create the agreement in the database
     return this.agreementRepository.create(agreementData);
   }
 
@@ -69,14 +69,12 @@ export class AgreementService {
     if (agreement.status !== "PENDING_OWNER_APPROVAL")
       throw new ApiError(400, "This agreement is not pending approval.");
 
-    // This is the trigger for the DocuSign integration
     const envelopeId =
       await this.docusignService.createAndSendEnvelope(agreement);
 
     if (!envelopeId)
       throw new ApiError(500, "Failed to create DocuSign envelope.");
 
-    // Update the agreement in our database with the new status and envelope ID
     return this.agreementRepository.updateStatusAndEnvelope(
       agreementId,
       "PENDING_SIGNATURES",

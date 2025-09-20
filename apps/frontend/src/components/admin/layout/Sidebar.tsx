@@ -8,20 +8,34 @@ import { Icon } from './Icon';
 
 export const Sidebar = () => {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
-  const navItems = [
+  // Define links for each role
+  const adminLinks = [
     { href: '/dashboard', label: 'Dashboard', iconD: 'M4 6h16M4 12h16M4 18h16' },
-    { href: '/pending', label: 'Pending', iconD: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { href: '/approved', label: 'Approved', iconD: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { href: '/rejected', label: 'Reject', iconD: 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636' },
+    { href: '/admin/pending', label: 'Pending Properties', iconD: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
   ];
+  
+  const ownerLinks = [
+      { href: '/dashboard', label: 'Dashboard', iconD: 'M4 6h16M4 12h16M4 18h16' },
+      { href: '/agreements', label: 'My Agreements', iconD: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+  ];
+  
+  const tenantLinks = [
+       { href: '/dashboard', label: 'Dashboard', iconD: 'M4 6h16M4 12h16M4 18h16' },
+       { href: '/agreements', label: 'My Agreements', iconD: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+  ];
+
+  // Determine which set of links to show
+  const navItems = user?.role === 'ADMIN' ? adminLinks : user?.role === 'PROPERTY_OWNER' ? ownerLinks : tenantLinks;
 
   return (
     <aside className="w-64 flex-shrink-0 bg-white border-r hidden md:block">
       <div className="flex flex-col h-full">
         <div className="h-20 flex items-center justify-center border-b">
-          <span className="text-2xl font-bold text-gray-800">RENTVERSE</span>
+          <Link href="/">
+            <span className="text-2xl font-bold text-gray-800">RENTVERSE</span>
+          </Link>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
           {navItems.map((item) => (
@@ -29,9 +43,9 @@ export const Sidebar = () => {
               key={item.label}
               href={item.href}
               className={`flex items-center px-4 py-2 rounded-md transition-colors duration-200 
-                ${pathname === item.href
-                  ? 'bg-orange-500 text-white'
-                  : 'text-gray-700 hover:bg-gray-200'
+                ${pathname.startsWith(item.href) && item.href !== '/' || pathname === item.href
+                  ? 'bg-orange-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
                 }`}
             >
               <Icon d={item.iconD} />
@@ -40,7 +54,6 @@ export const Sidebar = () => {
           ))}
         </nav>
         <div className="px-4 py-6 border-t">
-          {/* UPDATED: Added text-red-600 and hover states for the logout button */}
           <button
             onClick={logout}
             className="w-full flex items-center px-4 py-2 text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
@@ -48,9 +61,6 @@ export const Sidebar = () => {
             <Icon d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             <span className="ml-3 font-medium">Logout</span>
           </button>
-        </div>
-        <div className="px-4 py-2 text-center text-xs text-gray-400">
-          © 2025 Rentverse
         </div>
       </div>
     </aside>

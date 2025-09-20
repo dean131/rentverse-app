@@ -39,6 +39,7 @@ export class AgreementController {
     }
   );
 
+  // NEW: Handler for the owner approval endpoint
   approveAgreement = asyncHandler(
     async (req: AuthenticatedRequest, res: Response) => {
       const ownerId = req.user?.id;

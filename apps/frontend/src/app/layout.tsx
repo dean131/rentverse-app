@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Navbar } from "@/components/layout/Navbar";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
@@ -17,10 +18,14 @@ export default function RootLayout({
       {/* Using a standard Tailwind background color */}
       <body className="bg-gray-50">
         <AuthProvider>
-          {children}
+            <div>
+              <Navbar />
+              <main>
+                {children}
+              </main>
+            </div>
         </AuthProvider>
       </body>
     </html>
   );
 }
-

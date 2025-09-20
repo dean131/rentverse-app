@@ -192,3 +192,17 @@ export type PropertyFilters = {
   type?: string;
   beds?: string;
 };
+
+export type OwnerDashboardStats = {
+  totalListings: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+};
+
+export type PredictionFeatures = {
+  bedrooms: number;
+  bathrooms: number;
+  area_sqft: number;
+  location: string; // The location string to be one-hot encoded by the backend
+};

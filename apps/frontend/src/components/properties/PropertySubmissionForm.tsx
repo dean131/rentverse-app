@@ -11,8 +11,9 @@ import { Step3Features } from './form-steps/Step3Features';
 import { Step4UploadPhotos } from './form-steps/Step4UploadPhotos';
 import { FormStepper } from './form-steps/FormStepper';
 import { Button } from '@/components/ui/Button';
-import { submitProperty } from '@/services/propertyService'; // Import the service
+import { submitProperty } from '@/services/propertyService';
 import { useRouter } from 'next/navigation';
+import axios from 'axios'; // Import axios to check for AxiosError
 
 export const PropertySubmissionForm = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -26,13 +27,14 @@ export const PropertySubmissionForm = () => {
         formState: { errors, isSubmitting },
         trigger,
         setValue,
+        watch,
     } = useForm<PropertySubmission>({
         resolver: zodResolver(propertySubmissionSchema),
         mode: 'onChange',
     });
     
     const fieldsByStep: Record<number, Path<PropertySubmission>[]> = {
-        1: ["title", "description", "rentalPrice", "paymentPeriod", "bedrooms", "bathrooms", "sizeSqft", "listingType", "propertyType", "furnishingStatus", "ownershipDocumentUrl"],
+        1: ["title", "description", "listingType", "propertyType", "rentalPrice", "paymentPeriod", "sizeSqft", "bedrooms", "bathrooms", "furnishingStatus", "ownershipDocumentUrl"],
         2: ["projectId"],
         3: ["viewIds", "amenityIds"],
         4: ["images"],
@@ -43,10 +45,16 @@ export const PropertySubmissionForm = () => {
         try {
             await submitProperty(data);
             alert("Property submitted successfully! It is now pending admin approval.");
-            router.push('/dashboard'); // Redirect to dashboard on success
-        } catch (error) {
+            router.push('/dashboard');
+        } catch (error) { // CORRECTED: Removed ': any' and added type checking below
             console.error("Failed to submit property:", error);
-            setServerError("Failed to submit property. Please try again later.");
+            // Type-safe error handling
+            if (axios.isAxiosError(error) && error.response) {
+                const message = error.response.data?.message || "An error occurred on the server.";
+                setServerError(`Failed to submit property: ${message}`);
+            } else {
+                setServerError(`Failed to submit property: An unexpected error occurred.`);
+            }
         }
     };
     
@@ -71,7 +79,7 @@ export const PropertySubmissionForm = () => {
             
             <div className="p-8 flex-grow">
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    {currentStep === 1 && <Step1Details register={register} errors={errors} />}
+                    {currentStep === 1 && <Step1Details register={register} errors={errors} watch={watch} />}
                     {currentStep === 2 && <Step2Location register={register} errors={errors} />}
                     {currentStep === 3 && <Step3Features register={register} errors={errors} />}
                     {currentStep === 4 && <Step4UploadPhotos setValue={setValue} errors={errors} />}

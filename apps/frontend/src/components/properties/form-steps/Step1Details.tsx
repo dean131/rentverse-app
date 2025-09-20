@@ -1,14 +1,13 @@
 // File Path: apps/frontend/src/components/properties/form-steps/Step1Details.tsx
-import { UseFormRegister, FieldErrors, Path, FieldError } from 'react-hook-form';
+'use client';
+
+import { useState, useEffect, InputHTMLAttributes, SelectHTMLAttributes, ReactNode } from 'react';
+import { UseFormRegister, FieldErrors, Path, FieldError, UseFormWatch } from 'react-hook-form';
 import { PropertySubmission } from '@/lib/definitions';
-import { InputHTMLAttributes, SelectHTMLAttributes, ReactNode } from 'react';
+import { getPricePrediction } from '@/services/predictionService';
+import { debounce } from 'lodash';
 
-interface Step1Props {
-    register: UseFormRegister<PropertySubmission>;
-    errors: FieldErrors<PropertySubmission>;
-}
-
-// Reusable form component types
+// --- Reusable form components ---
 interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
     label: string;
     name: Path<PropertySubmission>;
@@ -24,7 +23,6 @@ interface FormSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
     children: ReactNode;
 }
 
-// Reusable form components
 const FormInput = ({ label, name, register, error, type = "text", ...props }: FormInputProps) => (
     <div>
         <label htmlFor={name} className="block text-sm font-medium text-gray-700">{label}</label>
@@ -54,10 +52,55 @@ const FormSelect = ({ label, name, register, error, children, ...props }: FormSe
     </div>
 );
 
-export const Step1Details = ({ register, errors }: Step1Props) => {
+// --- Main Step 1 Component ---
+interface Step1Props {
+    register: UseFormRegister<PropertySubmission>;
+    errors: FieldErrors<PropertySubmission>;
+    watch: UseFormWatch<PropertySubmission>; 
+}
+
+export const Step1Details = ({ register, errors, watch }: Step1Props) => {
+    const [suggestedPrice, setSuggestedPrice] = useState<number | null>(null);
+    const [isPredictionLoading, setIsPredictionLoading] = useState(false);
+
+    const watchedFields = watch(['bedrooms', 'bathrooms', 'sizeSqft']);
+
+    useEffect(() => {
+        const [bedrooms, bathrooms, area_sqft] = watchedFields;
+
+        const debouncedFetchPrediction = debounce(async () => {
+            if (bedrooms > 0 && bathrooms > 0 && area_sqft > 0) {
+                setIsPredictionLoading(true);
+                try {
+                    const prediction = await getPricePrediction({
+                        bedrooms,
+                        bathrooms,
+                        area_sqft,
+                        location: 'Kuala Lumpur', // Using a default location for the prediction model for now
+                    });
+                    setSuggestedPrice(prediction);
+                } catch (error) {
+                    console.error("Prediction failed:", error);
+                    setSuggestedPrice(null);
+                } finally {
+                    setIsPredictionLoading(false);
+                }
+            }
+        }, 1000); 
+
+        debouncedFetchPrediction();
+
+        return () => {
+            debouncedFetchPrediction.cancel();
+        };
+
+    }, [watchedFields]);
+
+
     return (
         <div className="space-y-6">
             <h3 className="text-lg font-semibold">Property Details</h3>
+            
             <FormInput 
                 label="Property Title"
                 name="title"
@@ -76,9 +119,8 @@ export const Step1Details = ({ register, errors }: Step1Props) => {
                  />
                  {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
             </div>
-
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* ADDED: Missing select fields */}
                 <FormSelect label="Listing Type" name="listingType" register={register} error={errors.listingType}>
                     <option value="">Select Listing Type</option>
                     <option value="RENT">For Rent</option>
@@ -137,7 +179,15 @@ export const Step1Details = ({ register, errors }: Step1Props) => {
                     placeholder="e.g., 1200"
                 />
             </div>
-            {/* ADDED: Missing URL input field */}
+
+            {/* AI Price Suggestion Box */}
+            {isPredictionLoading && <div className="text-sm text-gray-500 p-3 bg-gray-50 rounded-md">Generating price suggestion...</div>}
+            {suggestedPrice !== null && !isPredictionLoading && (
+                <div className="text-sm text-green-800 p-3 bg-green-50 rounded-md">
+                    <strong>AI Suggestion:</strong> Based on the details provided, a competitive monthly rental price would be around <strong>RM {Math.round(suggestedPrice).toLocaleString()}</strong>.
+                </div>
+            )}
+            
              <FormInput 
                 label="Ownership Document URL"
                 name="ownershipDocumentUrl"

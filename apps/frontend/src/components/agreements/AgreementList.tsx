@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { approveAgreement } from '@/services/agreementService';
 import { Button } from '@/components/ui/Button';
 import Image from 'next/image';
-import axios from 'axios'; // Import axios to use its type guard
+import axios from 'axios';
 
 interface AgreementListProps {
   agreements: AgreementDetails[];
@@ -19,7 +19,6 @@ const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; o
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // The user is the owner if their ID matches the agreement's ownerId
     const isOwner = user?.userId === agreement.owner.id;
 
     const handleApprove = async () => {
@@ -29,9 +28,8 @@ const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; o
             await approveAgreement(agreement.id);
             alert("Agreement approved! A signing request has been sent via DocuSign.");
             onUpdate(); // Refresh the list
-        } catch (err) { // CORRECTED: Removed ': any' and added type checking below
+        } catch (err) {
             console.error("Failed to approve agreement:", err);
-            // Use a type guard to safely access properties from the error object
             if (axios.isAxiosError(err) && err.response) {
                 setError(err.response.data?.message || "Failed to approve.");
             } else {

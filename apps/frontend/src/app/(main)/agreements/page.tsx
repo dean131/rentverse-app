@@ -31,7 +31,7 @@ export default function MyAgreementsPage() {
 
   return (
     <DashboardLayout>
-      <div className="bg-white p-8 rounded-lg shadow">
+      <div className="bg-white p-8 rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">My Agreements</h1>
         {isLoading ? (
           <p>Loading your agreements...</p>
@@ -44,3 +44,4 @@ export default function MyAgreementsPage() {
     </DashboardLayout>
   );
 }
+

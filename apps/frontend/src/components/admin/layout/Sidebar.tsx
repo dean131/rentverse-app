@@ -13,7 +13,7 @@ export const Sidebar = () => {
   // Define links for each role
   const adminLinks = [
     { href: '/dashboard', label: 'Dashboard', iconD: 'M4 6h16M4 12h16M4 18h16' },
-    { href: '/admin/pending', label: 'Pending Properties', iconD: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+    // Add other admin-specific links here
   ];
   
   const ownerLinks = [

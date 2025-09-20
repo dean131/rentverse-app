@@ -46,6 +46,8 @@ import { AgreementService } from "./api/agreements/agreements.service.js";
 import { AgreementController } from "./api/agreements/agreements.controller.js";
 import { createAgreementRouter } from "./api/agreements/agreements.routes.js";
 
+import { DocusignService } from "./services/docusign.service.js";
+
 const app = express();
 
 // --- CORS Configuration ---
@@ -103,10 +105,14 @@ const amenityRepository = new AmenityRepository();
 const amenityService = new AmenityService(amenityRepository);
 const amenityController = new AmenityController(amenityService);
 
+const docusignService = new DocusignService();
+
 const agreementRepository = new AgreementRepository();
+// UPDATED: Inject DocusignService into AgreementService
 const agreementService = new AgreementService(
   agreementRepository,
-  propertyRepository
+  propertyRepository,
+  docusignService
 );
 const agreementController = new AgreementController(agreementService);
 

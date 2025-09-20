@@ -19,5 +19,7 @@ export const createAgreementRouter = (
   // Route for any logged-in user to fetch their agreements
   router.get("/my-agreements", controller.getMyAgreements);
 
+  router.patch("/:id/approve", controller.approveAgreement);
+
   return router;
 };

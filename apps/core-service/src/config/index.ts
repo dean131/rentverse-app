@@ -15,7 +15,7 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 const validateEnv = (varName: string, defaultValue?: string): string => {
   const value = process.env[varName] || defaultValue;
   if (!value) {
-    console.error(`Error: Environment variable ${varName} is not set.`);
+    console.error(`FATAL ERROR: Environment variable ${varName} is not set.`);
     process.exit(1); // Exit the process with an error code
   }
   return value;
@@ -32,9 +32,17 @@ export const config = {
 
   // JSON Web Token (JWT) settings for authentication
   jwt: {
-    accessSecret: validateEnv("JWT_ACCESS_SECRET", "defaultsecret123#$%^"),
-    refreshSecret: validateEnv("JWT_REFRESH_SECRET", "defaultsecesh123#$%^"),
-    accessExpiration: validateEnv("ACCESS_TOKEN_EXPIRES_IN", "15m"),
-    refreshExpiration: validateEnv("REFRESH_TOKEN_EXPIRES_IN_DAYS", "7d"),
+    accessSecret: validateEnv("JWT_ACCESS_SECRET"),
+    refreshSecret: validateEnv("JWT_REFRESH_SECRET"),
+    accessExpiration: "15m", // Access tokens are short-lived
+    refreshExpiration: "7d", // Refresh tokens are long-lived
+  },
+
+  // DocuSign API settings for e-signature integration
+  docusign: {
+    clientId: validateEnv("DOCUSIGN_CLIENT_ID"),
+    impersonatedUserId: validateEnv("DOCUSIGN_IMPERSONATED_USER_ID"),
+    accountId: validateEnv("DOCUSIGN_ACCOUNT_ID"),
+    privateKey: validateEnv("DOCUSIGN_PRIVATE_KEY"),
   },
 };

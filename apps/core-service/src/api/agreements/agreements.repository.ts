@@ -1,6 +1,6 @@
 // File Path: apps/core-service/src/api/agreements/agreements.repository.ts
 import { prisma } from "../../lib/prisma.js";
-import { Prisma } from "@prisma/client";
+import { Prisma, TenancyStatus } from "@prisma/client";
 
 export class AgreementRepository {
   /**
@@ -10,6 +10,33 @@ export class AgreementRepository {
    */
   async create(data: Prisma.TenancyAgreementUncheckedCreateInput) {
     return prisma.tenancyAgreement.create({ data });
+  }
+
+  async findById(id: number) {
+    return prisma.tenancyAgreement.findUnique({
+      where: { id },
+      include: {
+        tenant: true,
+        owner: true,
+        property: {
+          include: {
+            project: true,
+          },
+        },
+      },
+    });
+  }
+
+  // NEW: Update the status and DocuSign envelope ID of an agreement
+  async updateStatusAndEnvelope(
+    id: number,
+    status: TenancyStatus,
+    envelopeId: string
+  ) {
+    return prisma.tenancyAgreement.update({
+      where: { id },
+      data: { status, docusignEnvelopeId: envelopeId },
+    });
   }
 
   /**

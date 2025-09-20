@@ -38,4 +38,20 @@ export class AgreementController {
       ApiResponse.success(res, agreements);
     }
   );
+
+  approveAgreement = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response) => {
+      const ownerId = req.user?.id;
+      if (!ownerId) throw new ApiError(401, "User not authenticated");
+
+      const agreementId = parseInt(req.params.id, 10);
+      if (isNaN(agreementId)) throw new ApiError(400, "Invalid agreement ID.");
+
+      const updatedAgreement = await this.agreementService.approveAgreement(
+        agreementId,
+        ownerId
+      );
+      ApiResponse.success(res, updatedAgreement);
+    }
+  );
 }

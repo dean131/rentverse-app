@@ -41,6 +41,11 @@ import { AmenityService } from "./api/amenities/amenities.service.js";
 import { AmenityController } from "./api/amenities/amenities.controller.js";
 import { createAmenityRouter } from "./api/amenities/amenities.routes.js";
 
+import { AgreementRepository } from "./api/agreements/agreements.repository.js";
+import { AgreementService } from "./api/agreements/agreements.service.js";
+import { AgreementController } from "./api/agreements/agreements.controller.js";
+import { createAgreementRouter } from "./api/agreements/agreements.routes.js";
+
 const app = express();
 
 // --- CORS Configuration ---
@@ -90,7 +95,6 @@ const userService = new UserService(
 );
 const userController = new UserController(userService);
 
-// NEW: Instantiate the new views and amenities modules
 const viewRepository = new ViewRepository();
 const viewService = new ViewService(viewRepository);
 const viewController = new ViewController(viewService);
@@ -99,15 +103,22 @@ const amenityRepository = new AmenityRepository();
 const amenityService = new AmenityService(amenityRepository);
 const amenityController = new AmenityController(amenityService);
 
+const agreementRepository = new AgreementRepository();
+const agreementService = new AgreementService(
+  agreementRepository,
+  propertyRepository
+);
+const agreementController = new AgreementController(agreementService);
+
 // --- API Routes ---
 app.use("/api/auth", createAuthRouter(authController));
 app.use("/api/properties", createPropertyRouter(propertyController));
 app.use("/api/projects", createProjectRouter(projectController));
 app.use("/api/admin", createAdminRouter(adminController));
 app.use("/api/users", createUserRouter(userController));
-// NEW: Register the new routes
 app.use("/api/views", createViewRouter(viewController));
 app.use("/api/amenities", createAmenityRouter(amenityController));
+app.use("/api/agreements", createAgreementRouter(agreementController));
 
 // --- Error Handler ---
 app.use(errorHandler);

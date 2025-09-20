@@ -62,6 +62,17 @@ enum DocumentType {
   OTHER
 }
 
+// NEW: Enum to track the status of a booking/tenancy agreement
+enum TenancyStatus {
+  PENDING_OWNER_APPROVAL
+  OWNER_REJECTED
+  PENDING_TENANT_PAYMENT
+  PENDING_SIGNATURES
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
 // --- MODELS ---
 
 model User {
@@ -76,8 +87,10 @@ model User {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  properties   Property[]
-  refreshToken RefreshToken?
+  properties        Property[]
+  refreshToken      RefreshToken?
+  createdAgreements TenancyAgreement[] @relation("OwnerAgreements")
+  tenantAgreements  TenancyAgreement[] @relation("TenantAgreements")
 }
 
 model RefreshToken {
@@ -104,20 +117,20 @@ model Property {
   bedrooms         Int
   bathrooms        Int
   furnishingStatus FurnishingStatus
+  latitude         Float?
+  longitude        Float?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  listedBy   User @relation(fields: [listedById], references: [id])
-  listedById Int
-
-  project   Project? @relation(fields: [projectId], references: [id])
-  projectId Int?
-
-  images    PropertyImage[]
-  documents PropertyDocument[]
-  amenities PropertyAmenity[]
-  views     PropertyView[]
+  listedBy          User               @relation(fields: [listedById], references: [id])
+  listedById        Int
+  project           Project?           @relation(fields: [projectId], references: [id])
+  projectId         Int?
+  images            PropertyImage[]
+  documents         PropertyDocument[]
+  amenities         PropertyAmenity[]
+  views             PropertyView[]
+  tenancyAgreements TenancyAgreement[]
 }
 
 model Project {
@@ -156,6 +169,25 @@ model View {
   id         Int            @id @default(autoincrement())
   name       String         @unique
   properties PropertyView[]
+}
+
+// NEW: Model to manage the entire booking and tenancy lifecycle
+model TenancyAgreement {
+  id                 Int           @id @default(autoincrement())
+  status             TenancyStatus @default(PENDING_OWNER_APPROVAL)
+  startDate          DateTime
+  endDate            DateTime
+  rentAmount         Float
+  docusignEnvelopeId String?       @unique
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId Int
+  owner      User     @relation("OwnerAgreements", fields: [ownerId], references: [id])
+  ownerId    Int
+  tenant     User     @relation("TenantAgreements", fields: [tenantId], references: [id])
+  tenantId   Int
 }
 
 // --- JOIN TABLES for Many-to-Many Relationships ---

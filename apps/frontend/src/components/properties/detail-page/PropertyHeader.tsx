@@ -6,16 +6,17 @@ interface HeaderProps {
     address: string;
     price: number | null;
     period: string | null;
+    onRequestBooking: () => void; // Add prop for the click handler
 }
 
-export const PropertyHeader = ({ title, address, price, period }: HeaderProps) => {
-    const formatPrice = (price: number | null) => {
-        if (!price) return 'Price on request';
+export const PropertyHeader = ({ title, address, price, period, onRequestBooking }: HeaderProps) => {
+    const formatPrice = (priceVal: number | null) => {
+        if (!priceVal) return 'Price on request';
         return new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',
             minimumFractionDigits: 0,
-        }).format(price);
+        }).format(priceVal);
     };
 
     return (
@@ -29,7 +30,8 @@ export const PropertyHeader = ({ title, address, price, period }: HeaderProps) =
                 </p>
                 <div className="flex space-x-2">
                     <Button variant="outline">Save</Button>
-                    <Button>Request a tour</Button>
+                    {/* UPDATED: Button text changed and onClick handler added */}
+                    <Button onClick={onRequestBooking}>Request to Book</Button>
                 </div>
             </div>
         </div>

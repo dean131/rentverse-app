@@ -7,6 +7,7 @@ import {
   PropertyType,
   FurnishingStatus,
   PaymentPeriod,
+  TenancyStatus,
 } from "@prisma/client";
 import bcrypt from "bcrypt";
 
@@ -16,8 +17,9 @@ async function main() {
   console.log("Start seeding...");
 
   // --- 1. CLEANUP ---
-  // Delete data in a specific order to avoid foreign key constraint errors
+  // Delete data in reverse order of creation to avoid foreign key constraint errors
   console.log("Cleaning up existing data...");
+  await prisma.tenancyAgreement.deleteMany({});
   await prisma.propertyAmenity.deleteMany({});
   await prisma.propertyView.deleteMany({});
   await prisma.propertyDocument.deleteMany({});
@@ -40,6 +42,8 @@ async function main() {
       email: "admin@rentverse.com",
       password: hashedPassword,
       role: Role.ADMIN,
+      profilePictureUrl:
+        "https://placehold.co/100x100/CCCCCC/FFFFFF/png?text=Admin",
     },
   });
 
@@ -49,6 +53,8 @@ async function main() {
       email: "owner@rentverse.com",
       password: hashedPassword,
       role: Role.PROPERTY_OWNER,
+      profilePictureUrl:
+        "https://placehold.co/100x100/CCCCCC/FFFFFF/png?text=Owner",
     },
   });
 
@@ -96,16 +102,14 @@ async function main() {
   const project1 = await prisma.project.create({
     data: {
       projectName: "Taman Anggrek Residences",
-      address:
-        "Jl. Letjend S. Parman Kav. 21, Tanjung Duren Selatan, Grogol Petamburan, Jakarta Barat",
+      address: "Jl. Letjend S. Parman Kav. 21, Jakarta Barat",
     },
   });
   console.log(`Created project: ${project1.projectName}`);
 
   // --- 5. CREATE PROPERTIES ---
   console.log("Creating properties...");
-  // Property 1: Approved, linked to project
-  await prisma.property.create({
+  const approvedProperty = await prisma.property.create({
     data: {
       title: "Luxurious 2BR Apartment at Taman Anggrek",
       description:
@@ -143,18 +147,15 @@ async function main() {
       },
       amenities: {
         create: [
-          { amenityId: amenities.find((a) => a.name === "Swimming Pool")!.id },
-          { amenityId: amenities.find((a) => a.name === "Gymnasium")!.id },
+          { amenityId: amenities[0].id },
+          { amenityId: amenities[1].id },
         ],
       },
-      views: {
-        create: [{ viewId: views.find((v) => v.name === "City View")!.id }],
-      },
+      views: { create: [{ viewId: views[0].id }] },
     },
   });
 
-  // Property 2: Pending, standalone
-  await prisma.property.create({
+  const pendingProperty = await prisma.property.create({
     data: {
       title: "Cozy Studio in Kemang",
       description:
@@ -181,23 +182,32 @@ async function main() {
           documentType: "OWNERSHIP_CERTIFICATE",
         },
       },
-      amenities: {
-        create: [
-          {
-            amenityId: amenities.find((a) => a.name === "Air Conditioning")!.id,
-          },
-        ],
-      },
+      amenities: { create: [{ amenityId: amenities[6].id }] },
     },
   });
-
   console.log("Created 2 sample properties.");
-  console.log("Seeding finished.");
+
+  // --- 6. CREATE TENANCY AGREEMENT ---
+  console.log("Creating a sample tenancy agreement...");
+  await prisma.tenancyAgreement.create({
+    data: {
+      propertyId: approvedProperty.id,
+      ownerId: owner.id,
+      tenantId: tenant.id,
+      status: TenancyStatus.PENDING_OWNER_APPROVAL,
+      startDate: new Date("2025-10-01"),
+      endDate: new Date("2026-09-30"),
+      rentAmount: 15000000,
+    },
+  });
+  console.log("Created 1 sample tenancy agreement.");
+
+  console.log("\nSeeding finished successfully.");
 }
 
 main()
   .catch(async (e) => {
-    console.error(e);
+    console.error("An error occurred during seeding:", e);
     await prisma.$disconnect();
     process.exit(1);
   })

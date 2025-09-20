@@ -208,3 +208,20 @@ export type PredictionFeatures = {
   listing_type: string;
   property_type: string;
 };
+
+export type BookingRequest = {
+  propertyId: number;
+  startDate: string;
+  endDate: string;
+};
+
+export type TenancyAgreement = {
+  id: number;
+  status: string;
+  startDate: string;
+  endDate: string;
+  rentAmount: number;
+  propertyId: number;
+  ownerId: number;
+  tenantId: number;
+};

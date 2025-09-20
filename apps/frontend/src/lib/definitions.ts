@@ -34,32 +34,56 @@ const ACCEPTED_IMAGE_TYPES = [
 export const propertySubmissionSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  listingType: z.enum(["RENT", "SALE", "BOTH"]),
-  propertyType: z.enum([
-    "APARTMENT",
-    "HOUSE",
-    "PENTHOUSE",
-    "STUDIO",
-    "COMMERCIAL",
-  ]),
-  rentalPrice: z.coerce.number().positive().optional().nullable(),
+
+  // CORRECTED: Added specific required_error messages for enum fields.
+  // This will show a user-friendly message if a dropdown is not selected.
+  listingType: z.enum(["RENT", "SALE", "BOTH"], {
+    required_error: "Please select a listing type.",
+  }),
+  propertyType: z.enum(
+    ["APARTMENT", "HOUSE", "PENTHOUSE", "STUDIO", "COMMERCIAL"],
+    {
+      required_error: "Please select a property type.",
+    }
+  ),
+
+  rentalPrice: z.coerce
+    .number({ invalid_type_error: "Price must be a number" })
+    .positive()
+    .optional()
+    .nullable(),
   paymentPeriod: z
     .enum(["MONTHLY", "QUARTERLY", "BI_ANNUALLY", "YEARLY"])
     .optional()
     .nullable(),
-  sizeSqft: z.coerce.number().int().positive("Size must be a positive number"),
-  bedrooms: z.coerce.number().int().min(0, "Cannot be negative"),
-  bathrooms: z.coerce.number().int().min(0, "Cannot be negative"),
-  furnishingStatus: z.enum([
-    "UNFURNISHED",
-    "PARTIALLY_FURNISHED",
-    "FULLY_FURNISHED",
-  ]),
+  sizeSqft: z.coerce
+    .number({ required_error: "Area is required" })
+    .int()
+    .positive("Size must be a positive number"),
+  bedrooms: z.coerce
+    .number({ required_error: "Bedrooms count is required" })
+    .int()
+    .min(0, "Cannot be negative"),
+  bathrooms: z.coerce
+    .number({ required_error: "Bathrooms count is required" })
+    .int()
+    .min(0, "Cannot be negative"),
+
+  furnishingStatus: z.enum(
+    ["UNFURNISHED", "PARTIALLY_FURNISHED", "FULLY_FURNISHED"],
+    {
+      required_error: "Please select the furnishing status.",
+    }
+  ),
+
   projectId: z.coerce.number().int().optional().nullable(),
   viewIds: z.array(z.coerce.number()).optional(),
-  // ADDED: amenityIds to the validation schema
   amenityIds: z.array(z.coerce.number()).optional(),
-  ownershipDocumentUrl: z.string().url("A valid document URL is required."),
+  ownershipDocumentUrl: z
+    .string()
+    .url("A valid document URL is required.")
+    .min(1, "Document URL is required."),
+
   images: z
     .any()
     .refine(

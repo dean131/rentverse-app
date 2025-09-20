@@ -11,9 +11,13 @@ import { Step3Features } from './form-steps/Step3Features';
 import { Step4UploadPhotos } from './form-steps/Step4UploadPhotos';
 import { FormStepper } from './form-steps/FormStepper';
 import { Button } from '@/components/ui/Button';
+import { submitProperty } from '@/services/propertyService'; // Import the service
+import { useRouter } from 'next/navigation';
 
 export const PropertySubmissionForm = () => {
     const [currentStep, setCurrentStep] = useState(1);
+    const [serverError, setServerError] = useState<string | null>(null);
+    const router = useRouter();
     const totalSteps = 4;
 
     const {
@@ -34,12 +38,16 @@ export const PropertySubmissionForm = () => {
         4: ["images"],
     };
 
-    const onSubmit = (data: PropertySubmission) => {
-        // In a real application, you would first upload the files to a cloud storage service (like AWS S3),
-        // get back the URLs, and then submit those URLs along with the rest of the form data to your backend.
-        
-        console.log("Final Form Data (including FileList object):", data);
-        alert("Property submitted successfully! Check the browser console for the data.");
+    const onSubmit = async (data: PropertySubmission) => {
+        setServerError(null);
+        try {
+            await submitProperty(data);
+            alert("Property submitted successfully! It is now pending admin approval.");
+            router.push('/dashboard'); // Redirect to dashboard on success
+        } catch (error) {
+            console.error("Failed to submit property:", error);
+            setServerError("Failed to submit property. Please try again later.");
+        }
     };
     
     const handleNextStep = async () => {
@@ -67,6 +75,8 @@ export const PropertySubmissionForm = () => {
                     {currentStep === 2 && <Step2Location register={register} errors={errors} />}
                     {currentStep === 3 && <Step3Features register={register} errors={errors} />}
                     {currentStep === 4 && <Step4UploadPhotos setValue={setValue} errors={errors} />}
+
+                    {serverError && <p className="text-sm text-red-600 mt-4 text-center">{serverError}</p>}
 
                     <div className="mt-8 pt-6 border-t flex justify-between">
                         {currentStep > 1 ? (

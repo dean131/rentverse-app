@@ -28,7 +28,42 @@ export const getViews = async (): Promise<View[]> => {
 export const submitProperty = async (
   data: PropertySubmission
 ): Promise<PropertyDetailed> => {
-  const response = await apiClient.post("/properties", data);
+  // In a real-world scenario, you would first upload the files from `data.images`
+  // to a service like AWS S3 and get back an array of URLs.
+  // For this MVP, we will simulate this by sending placeholder image URLs.
+  const imageUrls = [
+    {
+      imageUrl:
+        "https://placehold.co/600x400/F99933/FFFFFF/jpg?text=Main+Photo",
+      displayOrder: 0,
+    },
+    {
+      imageUrl: "https://placehold.co/600x400/F99933/FFFFFF/jpg?text=Kitchen",
+      displayOrder: 1,
+    },
+  ];
+
+  // We construct the payload that our backend API expects.
+  // We exclude the client-side `images` FileList.
+  const payload = {
+    title: data.title,
+    description: data.description,
+    listingType: data.listingType,
+    propertyType: data.propertyType,
+    rentalPrice: data.rentalPrice,
+    paymentPeriod: data.paymentPeriod,
+    sizeSqft: data.sizeSqft,
+    bedrooms: data.bedrooms,
+    bathrooms: data.bathrooms,
+    furnishingStatus: data.furnishingStatus,
+    projectId: data.projectId,
+    viewIds: data.viewIds?.map((id) => Number(id)),
+    amenityIds: data.amenityIds?.map((id) => Number(id)),
+    ownershipDocumentUrl: data.ownershipDocumentUrl,
+    images: imageUrls, // We send the (simulated) URLs
+  };
+
+  const response = await apiClient.post("/properties", payload);
   return response.data.data;
 };
 

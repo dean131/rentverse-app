@@ -45,16 +45,19 @@ const app = express();
 
 // --- CORS Configuration ---
 const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      callback(new Error("This origin is not allowed by CORS"));
     }
   },
   credentials: true,
 };
+
+// Use the configured CORS options.
 app.use(cors(corsOptions));
 
 // --- Middleware ---

@@ -16,7 +16,10 @@ export class AuthController {
     res.cookie("refreshToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
+      // CRUCIAL FIX: Explicitly set the domain to 'localhost'.
+      // This tells the browser the cookie is valid for both localhost:3000 and localhost:8080.
+      domain: "localhost",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
   }
@@ -45,7 +48,10 @@ export class AuthController {
     if (userId) {
       await this.authService.logout(userId);
     }
-    res.clearCookie("refreshToken");
+    res.clearCookie("refreshToken", {
+      // Also specify domain on clear to ensure it's removed correctly
+      domain: "localhost",
+    });
     ApiResponse.success(res, { message: "Successfully logged out" });
   });
 }

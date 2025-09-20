@@ -11,10 +11,10 @@ export const Sidebar = () => {
   const { logout } = useAuth();
 
   const navItems = [
-    { href: '/admin/dashboard', label: 'Dashboard', iconD: 'M4 6h16M4 12h16M4 18h16' },
-    { href: '/admin/pending', label: 'Pending', iconD: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { href: '/admin/approved', label: 'Approved', iconD: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { href: '/admin/rejected', label: 'Reject', iconD: 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636' },
+    { href: '/dashboard', label: 'Dashboard', iconD: 'M4 6h16M4 12h16M4 18h16' },
+    { href: '/pending', label: 'Pending', iconD: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { href: '/approved', label: 'Approved', iconD: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { href: '/rejected', label: 'Reject', iconD: 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636' },
   ];
 
   return (

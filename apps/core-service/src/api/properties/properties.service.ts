@@ -11,18 +11,22 @@ export class PropertyService {
   }
 
   async createProperty(propertyData: any, userId: number): Promise<Property> {
+    // UPDATED: Now expects an `images` array of objects with URLs
     const {
       viewIds,
       amenityIds,
       ownershipDocumentUrl,
       projectId,
+      images,
       ...restOfData
     } = propertyData;
 
     const dataToCreate = {
       ...restOfData,
       listedBy: { connect: { id: userId } },
-      ...(projectId && { project: { connect: { id: projectId } } }),
+      ...(projectId && {
+        project: { connect: { id: parseInt(projectId, 10) } },
+      }),
       ...(viewIds &&
         viewIds.length > 0 && {
           views: {
@@ -45,6 +49,18 @@ export class PropertyService {
           documentType: "OWNERSHIP_CERTIFICATE",
         },
       },
+      // ADDED: Logic to create the property images from the provided URLs
+      ...(images &&
+        images.length > 0 && {
+          images: {
+            create: images.map(
+              (img: { imageUrl: string; displayOrder: number }) => ({
+                imageUrl: img.imageUrl,
+                displayOrder: img.displayOrder,
+              })
+            ),
+          },
+        }),
     };
     return this.propertyRepository.createProperty(dataToCreate);
   }

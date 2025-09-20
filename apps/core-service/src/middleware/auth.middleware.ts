@@ -42,7 +42,7 @@ export const protect = asyncHandler(
       const decoded = jwt.verify(token, config.jwt.accessSecret) as JwtPayload;
 
       // 3. Attach a user object with the correct shape (id and role) to the request.
-      // This is the crucial part that fixes the type mismatch.
+      // This is the crucial part that fixes the type mismatch errors in other services.
       req.user = { id: decoded.userId, role: decoded.role };
 
       // 4. Proceed to the next middleware or route handler.

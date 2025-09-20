@@ -22,8 +22,10 @@ export class AuthRepository {
 
     // Upsert ensures we create a new token or update the existing one for the user
     await prisma.refreshToken.upsert({
+      // The 'where' clause must use a field that is unique in your schema.
       where: { userId },
       update: { token, expiresAt },
+      // The 'create' clause must include all required fields from your schema.
       create: { userId, token, expiresAt },
     });
   }

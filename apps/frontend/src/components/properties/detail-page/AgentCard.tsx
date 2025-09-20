@@ -14,7 +14,7 @@ export const AgentCard = ({ agent }: AgentCardProps) => {
       <div className="flex items-center space-x-4">
         <div className="relative h-16 w-16 rounded-full overflow-hidden bg-gray-200">
           <Image 
-            src={agent.profilePictureUrl || '/default-avatar.png'} // Fallback to a default avatar
+            src={agent.profilePictureUrl || 'https://placehold.co/100x100/CCCCCC/FFFFFF/png?text=User'}
             alt={`Profile picture of ${agent.fullName}`}
             layout="fill"
             objectFit="cover"

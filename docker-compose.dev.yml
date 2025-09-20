@@ -1,36 +1,21 @@
 services:
   core-service:
-    # Build the image as usual, but we will override the command and add volumes.
-    build:
-      context: ./apps/core-service
-      dockerfile: Dockerfile
-
-    # Override the command to run the development server, which watches for changes.
     command: npm run dev
-
-    # Mount the local source code into the container.
     volumes:
       - ./apps/core-service:/app
-      # Add a "named volume" for node_modules to prevent local modules from overwriting container modules.
-      - /app/node_modules
-
-    environment:
-      # Ensure NODE_ENV is set to development for tools like nodemon
-      - NODE_ENV=development
+      - /app/node_modules # Anonymous volume to prevent local node_modules from overwriting the container's
 
   frontend:
-    build:
-      context: ./apps/frontend
-      dockerfile: Dockerfile
-
-    # Override the command to run the development server.
     command: npm run dev
-
-    # Mount the local source code into the container.
     volumes:
       - ./apps/frontend:/app
       - /app/node_modules
       - /app/.next
 
-    environment:
-      - NODE_ENV=development
+  # NEW: Added development settings for the prediction-service
+  prediction-service:
+    # The command uses --reload to automatically restart the server when code changes
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      # Mount the local directory into the container for live code changes
+      - ./apps/prediction-service:/app

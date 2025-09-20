@@ -201,8 +201,10 @@ export type OwnerDashboardStats = {
 };
 
 export type PredictionFeatures = {
+  area_sqft: number;
   bedrooms: number;
   bathrooms: number;
-  area_sqft: number;
-  location: string; // The location string to be one-hot encoded by the backend
+  location: string;
+  listing_type: string;
+  property_type: string;
 };

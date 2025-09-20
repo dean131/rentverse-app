@@ -3,16 +3,38 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import joblib
 import pandas as pd
-import numpy as np # Import numpy
+import numpy as np
 import os
+
+# NEW: Import the CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Rentverse Price Prediction API")
 
+# --- NEW: CORS Configuration ---
+# This is the crucial part that will fix the "Method Not Allowed" error.
+
+# Define the list of origins that are allowed to make requests to this API.
+# For development, this is our frontend's address.
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Allow the origins listed above
+    allow_credentials=True,  # Allow cookies to be sent
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
+
 # --- Model Loading ---
-MODEL_PATH = 'property_price_model.joblib'
-COLUMNS_PATH = 'model_columns.joblib'
+MODEL_PATH = "property_price_model.joblib"
+COLUMNS_PATH = "model_columns.joblib"
 model = None
 model_columns = []
+
 
 @app.on_event("startup")
 def load_model_and_columns():
@@ -25,15 +47,20 @@ def load_model_and_columns():
     else:
         print(f"Warning: Model or columns file not found.")
 
+
 # --- API Request and Response Models ---
 class PropertyFeatures(BaseModel):
+    area_sqft: float
     bedrooms: int
     bathrooms: int
-    area_sqft: float
     location: str
+    listing_type: str
+    property_type: str
+
 
 class PredictionResponse(BaseModel):
     predicted_price_myr: float
+
 
 # --- API Endpoint ---
 @app.post("/predict", response_model=PredictionResponse)
@@ -43,22 +70,17 @@ async def predict_price(features: PropertyFeatures):
 
     try:
         input_df = pd.DataFrame([features.dict()])
-        input_dummies = pd.get_dummies(input_df['location'], prefix='loc', dtype=int)
-        input_processed = pd.concat([input_df.drop(['location'], axis=1), input_dummies], axis=1)
-        final_df = input_processed.reindex(columns=model_columns, fill_value=0)
-        
-        # --- NEW: Handle Log Transformation ---
-        # 1. Predict the log-transformed price
+        input_encoded = pd.get_dummies(input_df)
+        final_df = input_encoded.reindex(columns=model_columns, fill_value=0)
+
         log_prediction = model.predict(final_df)[0]
-        
-        # 2. Convert the prediction back to the original price scale
         prediction = np.expm1(log_prediction)
-        
+
         return {"predicted_price_myr": round(prediction, 2)}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing input: {e}")
 
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Rentverse Prediction Service API"}
-

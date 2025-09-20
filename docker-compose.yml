@@ -1,5 +1,4 @@
 services:
-  # PostgreSQL Database Service
   postgres:
     image: postgres:15-alpine
     container_name: rentverse_db
@@ -14,38 +13,47 @@ services:
     networks:
       - rentverse_network
 
-  # Core Service (Express.js Backend)
   core-service:
+    container_name: rentverse_core_service
     build:
       context: ./apps/core-service
       dockerfile: Dockerfile
-    container_name: rentverse_core_service
     ports:
       - "8080:8080"
-    env_file: ./apps/core-service/.env
     depends_on:
       - postgres
+    env_file: ./apps/core-service/.env
     networks:
       - rentverse_network
 
-  # Frontend Service (Next.js UI)
   frontend:
+    container_name: rentverse_frontend
     build:
       context: ./apps/frontend
       dockerfile: Dockerfile
-    container_name: rentverse_frontend
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: "http://127.0.0.1:8080/api" # This will be the API Gateway URL later
+      NEXT_PUBLIC_API_URL: "http://127.0.0.1:8080/api"
     depends_on:
       - core-service
     networks:
       - rentverse_network
 
-volumes:
-  postgres_data:
+  # NEW: Added the prediction-service to our composition
+  prediction-service:
+    container_name: rentverse_prediction_service
+    build:
+      context: ./apps/prediction-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - rentverse_network
 
 networks:
   rentverse_network:
     driver: bridge
+
+volumes:
+  postgres_data:

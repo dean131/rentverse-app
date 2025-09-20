@@ -13,7 +13,7 @@ import { FormStepper } from './form-steps/FormStepper';
 import { Button } from '@/components/ui/Button';
 import { submitProperty } from '@/services/propertyService';
 import { useRouter } from 'next/navigation';
-import axios from 'axios'; // Import axios to check for AxiosError
+import axios from 'axios';
 
 export const PropertySubmissionForm = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -30,11 +30,11 @@ export const PropertySubmissionForm = () => {
         watch,
     } = useForm<PropertySubmission>({
         resolver: zodResolver(propertySubmissionSchema),
-        mode: 'onChange',
+        mode: 'onBlur',
     });
     
     const fieldsByStep: Record<number, Path<PropertySubmission>[]> = {
-        1: ["title", "description", "listingType", "propertyType", "rentalPrice", "paymentPeriod", "sizeSqft", "bedrooms", "bathrooms", "furnishingStatus", "ownershipDocumentUrl"],
+        1: ["title", "description", "listingType", "propertyType", "bedrooms", "bathrooms", "sizeSqft", "furnishingStatus", "ownershipDocumentUrl", "rentalPrice", "paymentPeriod"],
         2: ["projectId"],
         3: ["viewIds", "amenityIds"],
         4: ["images"],
@@ -46,9 +46,8 @@ export const PropertySubmissionForm = () => {
             await submitProperty(data);
             alert("Property submitted successfully! It is now pending admin approval.");
             router.push('/dashboard');
-        } catch (error) { // CORRECTED: Removed ': any' and added type checking below
+        } catch (error) {
             console.error("Failed to submit property:", error);
-            // Type-safe error handling
             if (axios.isAxiosError(error) && error.response) {
                 const message = error.response.data?.message || "An error occurred on the server.";
                 setServerError(`Failed to submit property: ${message}`);
@@ -79,7 +78,7 @@ export const PropertySubmissionForm = () => {
             
             <div className="p-8 flex-grow">
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    {currentStep === 1 && <Step1Details register={register} errors={errors} watch={watch} />}
+                    {currentStep === 1 && <Step1Details register={register} errors={errors} watch={watch} setValue={setValue} />}
                     {currentStep === 2 && <Step2Location register={register} errors={errors} />}
                     {currentStep === 3 && <Step3Features register={register} errors={errors} />}
                     {currentStep === 4 && <Step4UploadPhotos setValue={setValue} errors={errors} />}

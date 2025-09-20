@@ -1,5 +1,5 @@
 // File Path: apps/frontend/src/components/properties/detail-page/PropertyHighlights.tsx
-import type { ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 const HighlightItem = ({ icon, value, label }: { icon: ReactNode; value: string | number; label: string }) => (
     <div className="flex items-center space-x-3 bg-gray-100 p-3 rounded-lg">

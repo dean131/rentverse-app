@@ -15,7 +15,6 @@ export const PropertyInfoTabs = ({ description, amenities }: TabsProps) => {
   const tabs = [
     { id: 'description', label: 'Description' },
     { id: 'amenities', label: 'Features & Amenities' },
-    // Add more tabs here for "Location", "Reviews", etc.
   ];
 
   return (
@@ -59,3 +58,4 @@ export const PropertyInfoTabs = ({ description, amenities }: TabsProps) => {
     </div>
   );
 };
+

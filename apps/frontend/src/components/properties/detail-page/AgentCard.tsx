@@ -12,7 +12,7 @@ export const AgentCard = ({ agent }: AgentCardProps) => {
     <div className="bg-gray-50 p-6 rounded-lg sticky top-24">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">Listed By</h3>
       <div className="flex items-center space-x-4">
-        <div className="relative h-16 w-16 rounded-full overflow-hidden">
+        <div className="relative h-16 w-16 rounded-full overflow-hidden bg-gray-200">
           <Image 
             src={agent.profilePictureUrl || '/default-avatar.png'} // Fallback to a default avatar
             alt={`Profile picture of ${agent.fullName}`}
@@ -29,3 +29,4 @@ export const AgentCard = ({ agent }: AgentCardProps) => {
     </div>
   );
 };
+

@@ -13,7 +13,8 @@ export const PropertyImageGallery = ({ images, title }: ImageGalleryProps) => {
   const [selectedImage, setSelectedImage] = useState(images[0]?.imageUrl || '/placeholder.jpg');
 
   if (!images || images.length === 0) {
-    return null; // Or a placeholder component
+    // In a real app, you'd show a proper placeholder here
+    return <div className="h-[500px] bg-gray-200 rounded-lg flex items-center justify-center">No Images Available</div>;
   }
 
   return (
@@ -37,3 +38,4 @@ export const PropertyImageGallery = ({ images, title }: ImageGalleryProps) => {
     </div>
   );
 };
+

@@ -35,3 +35,4 @@ export const PropertyHeader = ({ title, address, price, period }: HeaderProps) =
         </div>
     );
 };
+

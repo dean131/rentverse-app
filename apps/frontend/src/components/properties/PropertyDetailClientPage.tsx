@@ -3,10 +3,10 @@
 
 import { PropertyDetailed } from '@/lib/definitions';
 import { PropertyImageGallery } from './detail-page/PropertyImageGallery';
-import { PropertyHeader } from '@/components/properties/detail-page/PropertyHeader';
-import { PropertyHighlights } from '@/components/properties/detail-page/PropertyHighlights';
-import { AgentCard } from '@/components/properties/detail-page/AgentCard';
-import { PropertyInfoTabs } from '@/components/properties/detail-page/PropertyInfoTabs';
+import { PropertyHeader } from './detail-page/PropertyHeader';
+import { PropertyHighlights } from './detail-page/PropertyHighlights';
+import { AgentCard } from './detail-page/AgentCard';
+import { PropertyInfoTabs } from './detail-page/PropertyInfoTabs';
 import { Footer } from '@/components/home/Footer';
 
 export const PropertyDetailClientPage = ({ property }: { property: PropertyDetailed }) => {

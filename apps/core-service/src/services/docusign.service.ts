@@ -1,8 +1,15 @@
 // File Path: apps/core-service/src/services/docusign.service.ts
 import docusign from "docusign-esign";
 import { config } from "../config/index.js";
-import { User, TenancyAgreement } from "@prisma/client";
-import { PropertyWithProject } from "../api/agreements/agreements.service.js";
+import { User, Property, TenancyAgreement, Project } from "@prisma/client";
+
+// Define a more specific type for the property object that includes its relations
+type PropertyWithProject = Property & { project: Project | null };
+type FullAgreementDetails = TenancyAgreement & {
+  owner: User;
+  tenant: User;
+  property: PropertyWithProject;
+};
 
 // This service encapsulates all logic for interacting with the DocuSign API.
 export class DocusignService {
@@ -17,7 +24,6 @@ export class DocusignService {
 
   private async initializeApiClient() {
     try {
-      // Decode the base64 private key from the environment variable
       const privateKey = Buffer.from(
         config.docusign.privateKey,
         "base64"
@@ -29,7 +35,7 @@ export class DocusignService {
         config.docusign.impersonatedUserId,
         consentScopes,
         Buffer.from(privateKey),
-        3600 // Token expires in 1 hour
+        3600
       );
 
       const accessToken = response.body.access_token;
@@ -53,7 +59,7 @@ export class DocusignService {
     tenant: User,
     property: PropertyWithProject
   ): string {
-    // In a real app, you'd use a more robust templating engine.
+    // CORRECTED: The 'property' parameter is now strongly typed, so 'property.project' is accessible.
     let docHtml = `
             <!DOCTYPE html><html><body style="font-family: sans-serif; line-height: 1.6;">
                 <h1 style="text-align: center;">Tenancy Agreement</h1>
@@ -78,7 +84,7 @@ export class DocusignService {
     return Buffer.from(docHtml).toString("base64");
   }
 
-  async createAndSendEnvelope(agreement: any) {
+  async createAndSendEnvelope(agreement: FullAgreementDetails) {
     await this.initializeApiClient();
 
     const { owner, tenant, property } = agreement;
@@ -89,11 +95,14 @@ export class DocusignService {
       property
     );
 
+    // CORRECTED: Added `clientUserId` to both signers.
+    // This ID must be a string and unique for each recipient. We'll use our database user ID.
     const ownerSigner: docusign.Signer = {
       email: owner.email,
       name: owner.fullName,
-      recipientId: "1",
+      recipientId: "1", // The owner is always recipient 1
       routingOrder: "1",
+      clientUserId: owner.id.toString(), // CRUCIAL: Link this signer to our internal user ID
       tabs: {
         signHereTabs: [
           {
@@ -108,8 +117,9 @@ export class DocusignService {
     const tenantSigner: docusign.Signer = {
       email: tenant.email,
       name: tenant.fullName,
-      recipientId: "2",
+      recipientId: "2", // The tenant is always recipient 2
       routingOrder: "2",
+      clientUserId: tenant.id.toString(), // CRUCIAL: Link this signer to our internal user ID
       tabs: {
         signHereTabs: [
           {
@@ -125,13 +135,15 @@ export class DocusignService {
       emailSubject: `Please Sign: Tenancy Agreement for ${property.title}`,
       documents: [
         {
-          documentBase64,
+          documentBase64: documentBase64,
           name: "Tenancy Agreement",
           fileExtension: "html",
           documentId: "1",
         },
       ],
-      recipients: { signers: [ownerSigner, tenantSigner] },
+      recipients: {
+        signers: [ownerSigner, tenantSigner],
+      },
       status: "sent",
     };
 
@@ -148,12 +160,14 @@ export class DocusignService {
     signer: User,
     recipientId: "1" | "2",
     returnUrl: string
-  ): Promise<string | undefined> {
+  ) {
     await this.initializeApiClient();
 
+    // The request body for generating the signing URL
     const viewRequest: docusign.RecipientViewRequest = {
-      authenticationMethod: "none", // For simplicity. Production apps might use 'email' or 'sms'.
-      clientUserId: signer.id.toString(), // This ID MUST match the one used when creating the envelope.
+      authenticationMethod: "none",
+      // This clientUserId MUST EXACTLY MATCH the one we set when creating the envelope
+      clientUserId: signer.id.toString(),
       recipientId: recipientId,
       returnUrl: returnUrl,
       userName: signer.fullName,

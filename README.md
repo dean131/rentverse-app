@@ -1,135 +1,132 @@
-# Turborepo starter
+Of course. Creating a comprehensive `README.md` is a critical step for your project submission. It's the first thing reviewers will see and it needs to clearly explain what your project is, what makes it special, and how to run it.
 
-This Turborepo starter is maintained by the Turborepo core team.
+Based on the submission requirements, here is the complete `README.md` file for the Rentverse project.
 
-## Using this example
+### **Rentverse: Full-Stack Property Rental & Management Platform**
 
-Run the following command:
+**Submission for the Rentverse Challenge**
+**Team**: [Your Team Name Here]
+**Submission Date**: September 21, 2025
 
-```sh
-npx create-turbo@latest
+---
+
+### **1. Introduction**
+
+Rentverse is a modern, full-stack property rental platform designed to streamline the entire lifecycle of a property listing—from creation and pricing to booking and legal contract signing. Built on a robust microservices architecture, the application provides a seamless and intuitive experience for three key user roles: Tenants, Property Owners, and Administrators.
+
+Our platform stands out by integrating advanced features like an **AI-powered price simulator** to help owners set competitive rates and a secure, automated **e-signature workflow** powered by the DocuSign API, making property rental simpler, smarter, and more secure for everyone involved.
+
+### **Key Features**
+
+- **Role-Based Access Control**: Tailored dashboards and functionalities for Tenants, Property Owners, and Admins.
+- **AI-Powered Price Simulator**: Real-time price suggestions for property owners based on a machine learning model trained on real-world data.
+- **End-to-End Booking Flow**: A complete workflow from a tenant's booking request to the owner's approval.
+- **DocuSign E-Signature Integration**: Automated generation and sending of tenancy agreements for legally binding electronic signatures.
+- **Admin Approval System**: A secure dashboard for administrators to review and approve new property listings.
+- **Advanced Search & Filtering**: A powerful public-facing marketplace for tenants to find properties.
+
+### **Tech Stack & Architecture**
+
+Rentverse is built as a monorepo with a microservices architecture, orchestrated with Docker Compose.
+
+| Service                  | Technology Stack                                 | Description                                                             |
+| :----------------------- | :----------------------------------------------- | :---------------------------------------------------------------------- |
+| **`frontend`**           | Next.js, React, TypeScript, Tailwind CSS         | The main user-facing web application.                                   |
+| **`core-service`**       | Node.js, Express, TypeScript, Prisma, PostgreSQL | The primary backend API for handling users, properties, and agreements. |
+| **`prediction-service`** | Python, FastAPI, Scikit-learn, Pandas            | An AI service that provides property price predictions.                 |
+| **`scraper-service`**    | Python, Selenium, Beautiful Soup                 | A utility service for collecting training data for the ML model.        |
+
+---
+
+### **2. How-to-Use Instructions (Local Setup)**
+
+Follow these steps to get the entire Rentverse application running on your local machine.
+
+### **Prerequisites**
+
+- [Docker](https://www.docker.com/products/docker-desktop/) and Docker Compose
+- [Node.js](https://nodejs.org/) (v18 or later)
+- [pnpm](https://pnpm.io/installation) package manager
+
+### **Step 1: Clone the Repository**
+
+```bash
+git clone [Your GitHub Repository Link]
+cd rentverse-app
 ```
 
-## What's inside?
+### **Step 2: Configure Environment Variables**
 
-This Turborepo includes the following packages/apps:
+You will need to create a `.env` file for the `core-service`.
 
-### Apps and Packages
+1.  Navigate to the `apps/core-service` directory.
+2.  Copy the example environment file:
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+<!-- end list -->
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```bash
+cp .env.example .env
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+3.  Open the new `.env` file and fill in your secret keys for the database, JWT, and the DocuSign API credentials you obtained.
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+### **Step 3: Run the Application**
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+From the **root directory** of the project (`rentverse-app`), run the following command:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-### Develop
+This command will:
 
-To develop all apps and packages, run the following command:
+1.  Build the Docker images for the `frontend`, `core-service`, and `prediction-service`.
+2.  Start all the necessary containers, including the PostgreSQL database.
+3.  Set up live reloading, so any changes you make to the code will automatically restart the relevant service.
 
-```
-cd my-turborepo
+### **Step 4: Access the Services**
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+Once all containers are running, you can access the different parts of the application:
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+- **Frontend / Main Website**: [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000)
+- **Backend Core API**: [http://localhost:8080/api](https://www.google.com/search?q=http://localhost:8080/api)
+- **Prediction API**: [http://localhost:8000](https://www.google.com/search?q=http://localhost:8000)
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+### **3. Special Features Explanation**
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+### **AI-Powered Price Simulator**
 
-### Remote Caching
+This feature provides property owners with real-time, data-driven price suggestions as they fill out the property submission form, helping them set competitive market rates.
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+**How it works:**
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+1.  **Data Collection**: We built a sophisticated web scraper using Python and Selenium to collect thousands of real-world property listings from public websites like `fazwaz.my`.
+2.  **Data Cleaning**: A dedicated Python script cleans this raw data, parsing prices, sizes, and locations, and saves it into a structured CSV file.
+3.  **Model Training**: We then use this clean data to train several machine learning models. Our script compares their performance and automatically selects the best one (a `RandomForestRegressor` in our case, with an R² score of 0.83). The trained model is saved to a file.
+4.  **Prediction API**: A FastAPI server loads the saved model and exposes a `/predict` endpoint.
+5.  **Frontend Integration**: The property submission form watches for changes in key fields. Using a debounced request, it calls the prediction API and displays the suggested price to the user in real time.
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+### **DocuSign E-Signature Integration**
 
-```
-cd my-turborepo
+This feature automates the entire contract signing process, providing a secure and legally binding workflow.
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+**How it works:**
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
+1.  **Tenant Request**: A tenant requests to book a property, creating a `TenancyAgreement` in our database with a `PENDING_OWNER_APPROVAL` status.
+2.  **Owner Approval**: The property owner reviews the request in their dashboard and clicks "Approve."
+3.  **Envelope Creation**: This triggers a call to our `DocusignService` on the backend. The service:
+    - Generates an HTML tenancy agreement with all the relevant details.
+    - Uses the DocuSign eSignature API to create an "envelope" with this document and defines the two signers (owner and tenant).
+    - Sends the envelope, which causes DocuSign to email both parties.
+    - Saves the unique `envelopeId` to our database.
+4.  **Signing Ceremony**: Users can click a "Sign Document" button in their dashboard. This calls another backend endpoint that generates a secure, one-time URL for the DocuSign signing interface, which is then loaded for the user.
+5.  **Webhook Confirmation**: Once both parties have signed, DocuSign sends a notification to our public webhook (`/api/webhooks/docusign`). Our backend verifies the request using an HMAC signature and then automatically updates the agreement's status to `ACTIVE`.
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+---
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+### **4. Submission Links**
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+- **GitHub Repository**: `[Link to Your GitHub Repository]`
+- **Demo System / Video**: `[Link to Live Deployment or Recorded Demo]`

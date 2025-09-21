@@ -33,3 +33,10 @@ export const approveAgreement = async (
   const response = await apiClient.patch(`/agreements/${agreementId}/approve`);
   return response.data.data;
 };
+
+export const getSigningUrl = async (agreementId: number): Promise<string> => {
+  const response = await apiClient.get(
+    `/agreements/${agreementId}/signing-url`
+  );
+  return response.data.data.url;
+};

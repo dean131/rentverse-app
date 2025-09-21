@@ -142,4 +142,31 @@ export class DocusignService {
 
     return results.envelopeId;
   }
+
+  async getRecipientViewUrl(
+    envelopeId: string,
+    signer: User,
+    recipientId: "1" | "2",
+    returnUrl: string
+  ): Promise<string | undefined> {
+    await this.initializeApiClient();
+
+    const viewRequest: docusign.RecipientViewRequest = {
+      authenticationMethod: "none", // For simplicity. Production apps might use 'email' or 'sms'.
+      clientUserId: signer.id.toString(), // This ID MUST match the one used when creating the envelope.
+      recipientId: recipientId,
+      returnUrl: returnUrl,
+      userName: signer.fullName,
+      email: signer.email,
+    };
+
+    const envelopesApi = new docusign.EnvelopesApi(this.apiClient);
+    const results = await envelopesApi.createRecipientView(
+      this.accountId,
+      envelopeId,
+      { recipientViewRequest: viewRequest }
+    );
+
+    return results.url;
+  }
 }

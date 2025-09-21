@@ -55,4 +55,20 @@ export class AgreementController {
       ApiResponse.success(res, updatedAgreement);
     }
   );
+
+  getSigningUrl = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response) => {
+      const userId = req.user?.id;
+      if (!userId) throw new ApiError(401, "User not authenticated");
+
+      const agreementId = parseInt(req.params.id, 10);
+      if (isNaN(agreementId)) throw new ApiError(400, "Invalid agreement ID.");
+
+      const signingUrl = await this.agreementService.getSigningUrl(
+        agreementId,
+        userId
+      );
+      ApiResponse.success(res, { url: signingUrl });
+    }
+  );
 }

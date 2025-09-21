@@ -9,14 +9,14 @@ export const createAgreementRouter = (
   controller: AgreementController
 ): Router => {
   const router = Router();
-
   router.use(protect);
 
   router.post("/", validate(createAgreementSchema), controller.createAgreement);
   router.get("/my-agreements", controller.getMyAgreements);
-
-  // NEW: Route for an owner to approve a pending agreement
   router.patch("/:id/approve", controller.approveAgreement);
+
+  // NEW: Route to get a unique URL for the embedded signing ceremony
+  router.get("/:id/signing-url", controller.getSigningUrl);
 
   return router;
 };

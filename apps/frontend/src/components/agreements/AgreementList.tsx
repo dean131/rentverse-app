@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { AgreementDetails } from '@/lib/definitions';
 import { useAuth } from '@/hooks/useAuth';
-import { approveAgreement } from '@/services/agreementService';
+import { approveAgreement, getSigningUrl } from '@/services/agreementService';
 import { Button } from '@/components/ui/Button';
 import Image from 'next/image';
 import axios from 'axios';
@@ -35,6 +35,21 @@ const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; o
             } else {
                 setError("An unexpected error occurred.");
             }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSign = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const signingUrl = await getSigningUrl(agreement.id);
+            // Redirect the user to the DocuSign signing ceremony
+            window.location.href = signingUrl;
+        } catch (err) {
+            console.error("Failed to get signing URL:", err);
+            setError("Could not retrieve signing link. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -72,6 +87,11 @@ const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; o
                 {isOwner && agreement.status === 'PENDING_OWNER_APPROVAL' && (
                     <Button onClick={handleApprove} disabled={isLoading} size="sm" className="w-full sm:w-auto">
                         {isLoading ? 'Approving...' : 'Approve'}
+                    </Button>
+                )}
+                {agreement.status === 'PENDING_SIGNATURES' && (
+                    <Button onClick={handleSign} disabled={isLoading} size="sm">
+                        {isLoading ? 'Loading...' : 'Sign Document'}
                     </Button>
                 )}
                  {error && <p className="text-xs text-red-500">{error}</p>}

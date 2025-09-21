@@ -1,65 +1,107 @@
 // File Path: apps/core-service/src/api/agreements/agreements.repository.ts
+
 import { prisma } from "../../lib/prisma.js";
 import { Prisma, TenancyStatus } from "@prisma/client";
 
 export class AgreementRepository {
-  async create(data: Prisma.TenancyAgreementUncheckedCreateInput) {
+  /**
+   * Creates a new tenancy agreement record in the database.
+   * @param data The data for the new agreement.
+   * @returns The newly created tenancy agreement.
+   */
+  async createAgreement(data: Prisma.TenancyAgreementCreateInput) {
     return prisma.tenancyAgreement.create({ data });
   }
 
-  // NEW: Find a single agreement by its ID, including related user and property data
-  async findById(id: number) {
+  /**
+   * Finds a tenancy agreement by its ID.
+   * @param agreementId The ID of the agreement.
+   * @returns The found agreement or null if not found.
+   */
+  async findAgreementById(agreementId: number) {
     return prisma.tenancyAgreement.findUnique({
-      where: { id },
+      where: { id: agreementId },
       include: {
-        tenant: true,
-        owner: true,
         property: {
-          include: {
-            project: true,
+          select: {
+            title: true,
+            listedBy: {
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+              },
+            },
+          },
+        },
+        tenant: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
           },
         },
       },
     });
   }
 
-  async findByUserId(userId: number) {
+  /**
+   * Finds all agreements for a given user, either as an owner or a tenant.
+   * @param userId The ID of the user.
+   * @returns A list of agreements.
+   */
+  async findAgreementsForUser(userId: number) {
     return prisma.tenancyAgreement.findMany({
       where: {
-        OR: [{ tenantId: userId }, { ownerId: userId }],
+        OR: [{ ownerId: userId }, { tenantId: userId }],
       },
       include: {
         property: {
           select: {
             id: true,
             title: true,
-            images: { take: 1, select: { imageUrl: true } },
+            // Corrected query to get the primary image from the PropertyImage model
+            images: {
+              take: 1,
+              orderBy: {
+                displayOrder: "asc",
+              },
+              select: {
+                imageUrl: true,
+              },
+            },
+            listedBy: { select: { fullName: true } },
           },
         },
-        // CORRECTED: Added 'id' to the select statement for both tenant and owner
-        tenant: { select: { id: true, fullName: true } },
-        owner: { select: { id: true, fullName: true } },
-      },
-      orderBy: {
-        createdAt: "desc",
+        tenant: {
+          select: {
+            fullName: true,
+          },
+        },
       },
     });
   }
 
-  async updateStatusAndEnvelope(
-    id: number,
-    status: TenancyStatus,
-    envelopeId: string
-  ) {
-    return prisma.tenancyAgreement.update({
-      where: { id },
-      data: { status, docusignEnvelopeId: envelopeId },
+  /**
+   * Finds a tenancy agreement by its DocuSign envelope ID.
+   * @param docusignEnvelopeId The DocuSign envelope ID.
+   * @returns The found agreement or null if not found.
+   */
+  async findAgreementByDocusignId(docusignEnvelopeId: string) {
+    return prisma.tenancyAgreement.findUnique({
+      where: { docusignEnvelopeId },
     });
   }
 
-  async updateStatusByEnvelopeId(envelopeId: string, status: TenancyStatus) {
+  /**
+   * Updates the status of a tenancy agreement.
+   * @param agreementId The ID of the agreement to update.
+   * @param status The new status to set.
+   * @returns The updated agreement.
+   */
+  async updateAgreementStatus(agreementId: number, status: TenancyStatus) {
     return prisma.tenancyAgreement.update({
-      where: { docusignEnvelopeId: envelopeId },
+      where: { id: agreementId },
       data: { status },
     });
   }

@@ -1,4 +1,7 @@
 // File Path: apps/core-service/src/app.ts
+
+// This file has been updated to include the new agreements and webhooks modules.
+
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -68,6 +71,9 @@ const corsOptions: cors.CorsOptions = {
 };
 
 // --- Middleware ---
+app.use(cors(corsOptions));
+app.use(cookieParser());
+// NEW: Add a middleware to handle webhook raw body
 app.use(
   express.json({
     verify: (req: any, res, buf) => {
@@ -75,17 +81,18 @@ app.use(
     },
   })
 );
-app.use(cors(corsOptions));
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 // --- Dependency Injection ---
+const propertyRepository = new PropertyRepository();
+const userRepository = new UserRepository();
+const adminRepository = new AdminRepository();
+const agreementRepository = new AgreementRepository();
+
 const authRepository = new AuthRepository();
 const authService = new AuthService(authRepository);
 const authController = new AuthController(authService);
 
-const propertyRepository = new PropertyRepository();
 const propertyService = new PropertyService(propertyRepository);
 const propertyController = new PropertyController(propertyService);
 
@@ -93,11 +100,9 @@ const projectRepository = new ProjectRepository();
 const projectService = new ProjectService(projectRepository);
 const projectController = new ProjectController(projectService);
 
-const adminRepository = new AdminRepository();
 const adminService = new AdminService(adminRepository);
 const adminController = new AdminController(adminService);
 
-const userRepository = new UserRepository();
 const userService = new UserService(
   userRepository,
   propertyRepository,
@@ -113,9 +118,8 @@ const amenityRepository = new AmenityRepository();
 const amenityService = new AmenityService(amenityRepository);
 const amenityController = new AmenityController(amenityService);
 
+// NEW: Instantiate new services and controllers for agreements and webhooks
 const docusignService = new DocusignService();
-
-const agreementRepository = new AgreementRepository();
 const agreementService = new AgreementService(
   agreementRepository,
   propertyRepository,
@@ -134,6 +138,7 @@ app.use("/api/admin", createAdminRouter(adminController));
 app.use("/api/users", createUserRouter(userController));
 app.use("/api/views", createViewRouter(viewController));
 app.use("/api/amenities", createAmenityRouter(amenityController));
+// NEW: Add new routes
 app.use("/api/agreements", createAgreementRouter(agreementController));
 app.use("/api/webhooks", createWebhookRouter(webhookController));
 

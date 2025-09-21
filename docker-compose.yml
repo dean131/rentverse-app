@@ -12,6 +12,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - rentverse_network
+      - tunnel
 
   core-service:
     container_name: rentverse_core_service
@@ -25,6 +26,7 @@ services:
     env_file: ./apps/core-service/.env
     networks:
       - rentverse_network
+      - tunnel
 
   frontend:
     container_name: rentverse_frontend
@@ -39,6 +41,7 @@ services:
       - core-service
     networks:
       - rentverse_network
+      - tunnel
 
   # NEW: Added the prediction-service to our composition
   prediction-service:
@@ -50,10 +53,13 @@ services:
       - "8000:8000"
     networks:
       - rentverse_network
+      - tunnel
 
 networks:
   rentverse_network:
     driver: bridge
+  tunnel:
+    external: true
 
 volumes:
   postgres_data:

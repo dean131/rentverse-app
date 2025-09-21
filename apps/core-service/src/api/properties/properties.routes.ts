@@ -1,7 +1,7 @@
 // File Path: apps/core-service/src/api/properties/properties.routes.ts
 import { Router } from "express";
 import { PropertyController } from "./properties.controller.js";
-import { protect } from "../../middleware/auth.middleware.js";
+import { authenticate } from "../../middleware/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import { createPropertySchema } from "./properties.validation.js";
 
@@ -20,7 +20,7 @@ export const createPropertyRouter = (
   // Protected route for property owners to create a new listing
   router.post(
     "/",
-    protect,
+    authenticate,
     validate(createPropertySchema),
     controller.createProperty
   );

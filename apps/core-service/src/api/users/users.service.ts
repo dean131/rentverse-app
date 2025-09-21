@@ -1,46 +1,36 @@
 // File Path: apps/core-service/src/api/users/users.service.ts
-import { AdminRepository } from "../admin/admin.repository.js";
+
 import { UserRepository } from "./users.repository.js";
-import { PropertyRepository } from "../properties/properties.repository.js"; // Import PropertyRepository
+import { PropertyRepository } from "../properties/properties.repository.js";
+import { AdminRepository } from "../admin/admin.repository.js";
+import { Prisma, Role } from "@prisma/client";
 import { ApiError } from "../../utils/ApiError.js";
-import { AuthenticatedUser } from "../../middleware/auth.middleware.js";
+import { AuthenticatedRequest } from "../../middleware/auth.middleware.js";
 
 export class UserService {
   private userRepository: UserRepository;
-  private propertyRepository: PropertyRepository; // Add property repository
+  private propertyRepository: PropertyRepository;
   private adminRepository: AdminRepository;
 
   constructor(
     userRepository: UserRepository,
-    propertyRepository: PropertyRepository, // Add property repository to constructor
+    propertyRepository: PropertyRepository,
     adminRepository: AdminRepository
   ) {
     this.userRepository = userRepository;
-    this.propertyRepository = propertyRepository; // Assign it
+    this.propertyRepository = propertyRepository;
     this.adminRepository = adminRepository;
   }
 
-  async getUserDashboard(user: AuthenticatedUser) {
+  async getCurrentUser(id: number) {
+    const user = await this.userRepository.findUserById(id);
     if (!user) {
-      throw new ApiError(401, "User not authenticated");
+      throw new ApiError(404, "User not found");
     }
+    return user;
+  }
 
-    switch (user.role) {
-      case "ADMIN":
-        return this.adminRepository.getAdminDashboardStats();
-
-      case "PROPERTY_OWNER":
-        // CORRECTED: Use the propertyRepository to get property stats
-        return this.propertyRepository.getUserPropertyStats(user.id);
-
-      case "TENANT":
-        return {
-          welcomeMessage: "Welcome to your dashboard!",
-          savedProperties: 0,
-        };
-
-      default:
-        throw new ApiError(400, "Invalid user role");
-    }
+  async updateProfile(id: number, data: Prisma.UserUpdateInput) {
+    return this.userRepository.updateUser(id, data);
   }
 }

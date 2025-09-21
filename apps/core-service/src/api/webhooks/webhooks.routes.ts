@@ -1,13 +1,18 @@
 // File Path: apps/core-service/src/api/webhooks/webhooks.routes.ts
+
 import { Router } from "express";
 import { WebhookController } from "./webhooks.controller.js";
 
-export const createWebhookRouter = (controller: WebhookController): Router => {
+/**
+ * Creates and returns the Express router for the webhooks module.
+ * @param controller The WebhookController instance.
+ * @returns The configured Express router.
+ */
+export function createWebhookRouter(controller: WebhookController): Router {
   const router = Router();
 
-  // This is a public endpoint that DocuSign's servers will call.
-  // It does not use our standard JWT protection; it's secured by the HMAC signature.
+  // DocuSign webhook endpoint. This endpoint does not require authentication.
   router.post("/docusign", controller.handleDocusignWebhook);
 
   return router;
-};
+}

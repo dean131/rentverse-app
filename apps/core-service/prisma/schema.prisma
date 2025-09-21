@@ -1,4 +1,7 @@
 // File Path: apps/core-service/prisma/schema.prisma
+//
+// This file has been updated to include the new TenancyAgreement and TenancyStatus.
+// A new migration will need to be run to apply these changes to the database.
 
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
@@ -73,6 +76,13 @@ enum TenancyStatus {
   CANCELLED
 }
 
+// NEW: Enum to track the verification status of a document
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
 // --- MODELS ---
 
 model User {
@@ -91,6 +101,8 @@ model User {
   refreshToken      RefreshToken?
   createdAgreements TenancyAgreement[] @relation("OwnerAgreements")
   tenantAgreements  TenancyAgreement[] @relation("TenantAgreements")
+  favorites         Favorite[]
+  reviews           Review[]
 }
 
 model RefreshToken {
@@ -113,6 +125,8 @@ model Property {
   propertyType     PropertyType
   rentalPrice      Float?
   paymentPeriod    PaymentPeriod?
+  salePrice        Float?
+  maintenanceFee   Float?
   sizeSqft         Int
   bedrooms         Int
   bathrooms        Int
@@ -131,15 +145,17 @@ model Property {
   amenities         PropertyAmenity[]
   views             PropertyView[]
   tenancyAgreements TenancyAgreement[]
+  favorites         Favorite[]
+  reviews           Review[]
 }
 
 model Project {
-  id          Int        @id @default(autoincrement())
-  projectName String
-  address     String
-  latitude    Float?
-  longitude   Float?
-  properties  Property[]
+  id             Int        @id @default(autoincrement())
+  projectName    String
+  developer      String?
+  address        String
+  completionDate DateTime?
+  properties     Property[]
 }
 
 model PropertyImage {
@@ -151,12 +167,13 @@ model PropertyImage {
 }
 
 model PropertyDocument {
-  id           Int          @id @default(autoincrement())
-  fileUrl      String
-  documentType DocumentType
-  uploadedAt   DateTime     @default(now())
-  property     Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  propertyId   Int
+  id                 Int                @id @default(autoincrement())
+  fileUrl            String
+  documentType       DocumentType
+  verificationStatus VerificationStatus @default(PENDING)
+  uploadedAt         DateTime           @default(now())
+  property           Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId         Int
 }
 
 model Amenity {
@@ -208,4 +225,28 @@ model PropertyView {
   viewId     Int
 
   @@id([propertyId, viewId])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId Int
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+}
+
+model Favorite {
+  createdAt DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId Int
+
+  @@id([userId, propertyId])
 }

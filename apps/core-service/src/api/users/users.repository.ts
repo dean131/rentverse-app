@@ -1,32 +1,46 @@
 // File Path: apps/core-service/src/api/users/users.repository.ts
+
 import { prisma } from "../../lib/prisma.js";
-import { PropertyStatus } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 export class UserRepository {
   /**
-   * Calculates property statistics for a specific property owner.
-   * @param userId The ID of the property owner.
-   * @returns An object with counts of pending, approved, and rejected properties.
+   * Creates a new user in the database.
+   * @param data The user data.
+   * @returns The newly created user.
    */
-  async getUserPropertyStats(userId: number) {
-    // We use Prisma's transaction feature to run multiple count queries efficiently.
-    const [pendingCount, approvedCount, rejectedCount] =
-      await prisma.$transaction([
-        prisma.property.count({
-          where: { listedById: userId, status: PropertyStatus.PENDING },
-        }),
-        prisma.property.count({
-          where: { listedById: userId, status: PropertyStatus.APPROVED },
-        }),
-        prisma.property.count({
-          where: { listedById: userId, status: PropertyStatus.REJECTED },
-        }),
-      ]);
+  async createUser(data: Prisma.UserCreateInput) {
+    return prisma.user.create({ data });
+  }
 
-    return {
-      pendingProperties: pendingCount,
-      approvedProperties: approvedCount,
-      rejectedProperties: rejectedCount,
-    };
+  /**
+   * Finds a user by their email address.
+   * @param email The user's email.
+   * @returns The found user or null if not found.
+   */
+  async findUserByEmail(email: string) {
+    return prisma.user.findUnique({ where: { email } });
+  }
+
+  /**
+   * Finds a user by their unique ID.
+   * @param id The user's ID.
+   * @returns The found user or null if not found.
+   */
+  async findUserById(id: number) {
+    return prisma.user.findUnique({ where: { id } });
+  }
+
+  /**
+   * Updates a user's profile information.
+   * @param id The ID of the user to update.
+   * @param data The fields to update.
+   * @returns The updated user.
+   */
+  async updateUser(id: number, data: Prisma.UserUpdateInput) {
+    return prisma.user.update({
+      where: { id },
+      data,
+    });
   }
 }

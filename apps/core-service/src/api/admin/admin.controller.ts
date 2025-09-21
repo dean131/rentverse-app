@@ -1,9 +1,11 @@
 // File Path: apps/core-service/src/api/admin/admin.controller.ts
-import { Response } from "express";
+
+import { Response, NextFunction } from "express";
 import { AdminService } from "./admin.service.js";
-import { ApiResponse } from "../../utils/response.helper.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { ApiResponse } from "../../utils/response.helper.js";
 import { AuthenticatedRequest } from "../../middleware/auth.middleware.js";
+import { updatePropertyStatusValidation } from "./admin.validation.js";
 
 export class AdminController {
   private adminService: AdminService;
@@ -13,17 +15,16 @@ export class AdminController {
   }
 
   getPendingProperties = asyncHandler(
-    async (req: AuthenticatedRequest, res: Response) => {
-      const properties = await this.adminService.getPendingProperties();
-      ApiResponse.success(res, properties);
+    async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+      const pendingProperties = await this.adminService.getPendingProperties();
+      ApiResponse.success(res, pendingProperties);
     }
   );
 
   updatePropertyStatus = asyncHandler(
-    async (req: AuthenticatedRequest, res: Response) => {
-      const propertyId = parseInt(req.params.id, 10);
-      const { status } = req.body;
-
+    async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+      const propertyId = parseInt(req.params.id);
+      const { status } = updatePropertyStatusValidation.parse(req.body);
       const updatedProperty = await this.adminService.updatePropertyStatus(
         propertyId,
         status

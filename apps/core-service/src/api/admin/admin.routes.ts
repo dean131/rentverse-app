@@ -1,24 +1,32 @@
 // File Path: apps/core-service/src/api/admin/admin.routes.ts
+
 import { Router } from "express";
 import { AdminController } from "./admin.controller.js";
-import { protect } from "../../middleware/auth.middleware.js";
+// Corrected middleware name from 'protect' to 'authenticate'
+import { authenticate } from "../../middleware/auth.middleware.js";
 import { authorize } from "../../middleware/authorize.middleware.js";
-import { validate } from "../../middleware/validate.middleware.js";
-import { updateStatusSchema } from "./admin.validation.js";
+import { Role } from "@prisma/client";
 
-export const createAdminRouter = (controller: AdminController): Router => {
+export function createAdminRouter(controller: AdminController): Router {
   const router = Router();
 
-  // Middleware pipeline: Check for login, then check for ADMIN role.
-  router.use(protect, authorize("ADMIN"));
+  // Get all pending properties (admin only)
+  // Corrected the argument for the authorize middleware to be an array of Role enums
+  router.get(
+    "/properties/pending",
+    authenticate,
+    authorize([Role.ADMIN]),
+    controller.getPendingProperties
+  );
 
-  router.get("/properties/pending", controller.getPendingProperties);
-
+  // Update a property's status (admin only)
+  // Corrected the argument for the authorize middleware to be an array of Role enums
   router.patch(
     "/properties/:id/status",
-    validate(updateStatusSchema),
+    authenticate,
+    authorize([Role.ADMIN]),
     controller.updatePropertyStatus
   );
 
   return router;
-};
+}

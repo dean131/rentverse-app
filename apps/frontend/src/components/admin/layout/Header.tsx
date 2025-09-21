@@ -8,7 +8,7 @@ export const Header = () => {
 
     return (
         // CORRECTED: Changed from justify-between to justify-end to align the profile to the right
-        <header className="h-20 bg-white border-b flex items-center justify-end px-8">
+        <header className="h-20 bg-white flex items-center justify-end px-8">
             {/* REMOVED: The search bar div has been removed from here */}
             
             {/* User Profile */}

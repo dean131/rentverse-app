@@ -30,9 +30,9 @@ export const Sidebar = () => {
   const navItems = user?.role === 'ADMIN' ? adminLinks : user?.role === 'PROPERTY_OWNER' ? ownerLinks : tenantLinks;
 
   return (
-    <aside className="w-64 flex-shrink-0 bg-white border-r hidden md:block">
+    <aside className="w-64 flex-shrink-0 bg-white hidden md:block">
       <div className="flex flex-col h-full">
-        <div className="h-20 flex items-center justify-center border-b">
+        <div className="h-20 flex items-center justify-center">
           <Link href="/">
             <span className="text-2xl font-bold text-gray-800">RENTVERSE</span>
           </Link>
@@ -53,7 +53,7 @@ export const Sidebar = () => {
             </Link>
           ))}
         </nav>
-        <div className="px-4 py-6 border-t">
+        <div className="px-4 py-6">
           <button
             onClick={logout}
             className="w-full flex items-center px-4 py-2 text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors duration-200"

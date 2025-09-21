@@ -23,20 +23,17 @@ export class AgreementController {
    * @param next - The Express next middleware function.
    */
   createAgreement = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-      // @ts-ignore
-      const tenantId = req.user.id;
-      const validatedData = createAgreementValidation.parse(req.body);
-
-      const newAgreement = await this.agreementService.createAgreement(
-        validatedData.propertyId,
-        tenantId,
-        validatedData.startDate,
-        validatedData.endDate
+    async (req: AuthenticatedRequest, res: Response) => {
+      // req.user.id from the middleware is a number
+      const tenantId = req.user?.id;
+      if (!tenantId) {
+        throw new ApiError(401, "User not authenticated");
+      }
+      const agreement = await this.agreementService.createAgreement(
+        req.body,
+        tenantId
       );
-
-      // Use the `created` method for a 201 response.
-      ApiResponse.created(res, newAgreement);
+      ApiResponse.created(res, agreement);
     }
   );
 
@@ -57,13 +54,6 @@ export class AgreementController {
     }
   );
 
-  /**
-   * Updates the status of a pending agreement to 'APPROVED'.
-   * This action triggers the DocuSign integration.
-   * @param req - The Express request object.
-   * @param res - The Express response object.
-   * @param next - The Express next middleware function.
-   */
   approveAgreement = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
       const agreementId = parseInt(req.params.id);
@@ -103,6 +93,22 @@ export class AgreementController {
 
       // Use the `success` method for a 200 response.
       ApiResponse.success(res, updatedAgreement);
+    }
+  );
+
+  getSigningUrl = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response) => {
+      const userId = req.user?.id;
+      if (!userId) throw new ApiError(401, "User not authenticated");
+
+      const agreementId = parseInt(req.params.id, 10);
+      if (isNaN(agreementId)) throw new ApiError(400, "Invalid agreement ID.");
+
+      const signingUrl = await this.agreementService.getSigningUrl(
+        agreementId,
+        userId
+      );
+      ApiResponse.success(res, { url: signingUrl });
     }
   );
 }

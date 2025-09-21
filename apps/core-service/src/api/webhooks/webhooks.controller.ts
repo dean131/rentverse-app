@@ -11,24 +11,26 @@ export class WebhookController {
     this.webhookService = webhookService;
   }
 
-  /**
-   * Handles incoming webhooks from DocuSign.
-   * @param req - The Express request object.
-   * @param res - The Express response object.
-   * @param next - The Express next middleware function.
-   */
-  handleDocusignWebhook = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-      // In a real application, you would first verify the webhook signature.
-      // The raw body is already attached to req.rawBody by middleware in app.ts.
-      // const isSignatureValid = verifyDocusignWebhookSignature(req.rawBody, req.headers["x-docusign-signature"]);
-      // if (!isSignatureValid) {
-      //   res.status(403).send("Invalid signature");
-      //   return;
-      // }
-
-      await this.webhookService.handleDocusignWebhook(req.body);
-      res.status(200).send("Webhook received");
+  handleDocusignWebhook = asyncHandler(async (req: Request, res: Response) => {
+    const signature = req.header("x-docusign-signature-1");
+    if (!signature) {
+      throw new ApiError(400, "Missing DocuSign signature header.");
     }
-  );
+
+    const rawPayload = (req as any).rawBody;
+    if (!rawPayload) {
+      throw new ApiError(
+        400,
+        "Raw request body is not available for signature verification."
+      );
+    }
+
+    await this.webhookService.processDocusignEvent(
+      req.body,
+      signature,
+      rawPayload
+    );
+
+    res.status(204).send();
+  });
 }

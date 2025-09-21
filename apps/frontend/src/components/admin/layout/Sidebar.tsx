@@ -13,7 +13,6 @@ export const Sidebar = () => {
   // Define links for each role
   const adminLinks = [
     { href: '/dashboard', label: 'Dashboard', iconD: 'M4 6h16M4 12h16M4 18h16' },
-    // Add other admin-specific links here
   ];
   
   const ownerLinks = [
@@ -26,8 +25,10 @@ export const Sidebar = () => {
        { href: '/agreements', label: 'My Agreements', iconD: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
   ];
 
-  // Determine which set of links to show
-  const navItems = user?.role === 'ADMIN' ? adminLinks : user?.role === 'PROPERTY_OWNER' ? ownerLinks : tenantLinks;
+  // Determine which set of links to show based on the user's role
+  const navItems = user?.role === 'ADMIN' ? adminLinks 
+                 : user?.role === 'PROPERTY_OWNER' ? ownerLinks 
+                 : tenantLinks;
 
   return (
     <aside className="w-64 flex-shrink-0 bg-white border-r hidden md:block">
@@ -43,7 +44,7 @@ export const Sidebar = () => {
               key={item.label}
               href={item.href}
               className={`flex items-center px-4 py-2 rounded-md transition-colors duration-200 
-                ${pathname.startsWith(item.href) && item.href !== '/' || pathname === item.href
+                ${(pathname.startsWith(item.href) && item.href !== '/') || pathname === item.href
                   ? 'bg-orange-600 text-white'
                   : 'text-gray-700 hover:bg-gray-100'
                 }`}

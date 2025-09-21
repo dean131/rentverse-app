@@ -12,37 +12,53 @@ export class WebhookService {
   }
 
   /**
-   * Handles a DocuSign webhook notification.
-   * In a real application, this would also verify the webhook signature.
-   * @param payload The raw webhook payload from DocuSign.
+   * Verifies the HMAC signature from DocuSign to ensure the request is authentic.
    */
-  async handleDocusignWebhook(payload: any) {
-    // Assuming the payload has an event type and an envelope ID
-    const { envelopeId, event } = payload;
+  private verifySignature(signature: string, payload: Buffer): boolean {
+    const hmac = crypto.createHmac("sha256", config.docusign.webhookSecret);
+    hmac.update(payload);
+    const computedSignature = hmac.digest("base64");
 
-    if (!envelopeId || !event) {
-      console.error("Invalid DocuSign webhook payload:", payload);
-      return;
+    // Use timingSafeEqual to prevent timing attacks
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(computedSignature)
+    );
+  }
+
+  /**
+   * Processes incoming events from the DocuSign webhook.
+   */
+  async processDocusignEvent(
+    payload: any,
+    signature: string,
+    rawPayload: Buffer
+  ) {
+    if (!this.verifySignature(signature, rawPayload)) {
+      console.warn("Invalid DocuSign webhook signature received.");
+      throw new ApiError(401, "Invalid webhook signature.");
     }
 
-    if (event === "envelope-completed") {
-      // Find the agreement by its Docusign envelope ID and update the status
-      const agreement =
-        await this.agreementRepository.findAgreementByDocusignId(envelopeId);
-      if (agreement) {
-        // Correctly reference the enum from the Prisma namespace
-        await this.agreementRepository.updateAgreementStatus(
-          agreement.id,
-          TenancyStatus.ACTIVE
-        );
-        console.log(
-          `Agreement ${agreement.id} status updated to ACTIVE from DocuSign webhook.`
-        );
-      } else {
-        console.warn(
-          `DocuSign webhook received for unknown envelope ID: ${envelopeId}`
-        );
-      }
+    const event = payload.event;
+    const envelopeId = payload.data.envelopeId;
+
+    console.log(
+      `DocuSign Webhook: Received event '${event}' for envelope ${envelopeId}.`
+    );
+
+    if (event === "envelope_completed") {
+      console.log(
+        `-> Envelope ${envelopeId} has been completed by all parties.`
+      );
+      await this.agreementRepository.updateStatusByEnvelopeId(
+        envelopeId,
+        TenancyStatus.ACTIVE
+      );
+      console.log(
+        `-> Database updated: Agreement for envelope ${envelopeId} is now ACTIVE.`
+      );
+    } else {
+      console.log(`-> Ignoring unhandled event type.`);
     }
   }
 }

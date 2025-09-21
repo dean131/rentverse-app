@@ -13,28 +13,12 @@ import { Role } from "@prisma/client";
  */
 export function createAgreementRouter(controller: AgreementController): Router {
   const router = Router();
+  router.use(protect);
 
-  // Create a new booking request (for tenants)
-  router.post("/", authenticate, controller.createAgreement);
-
-  // Get all agreements for the authenticated user
-  router.get("/my-agreements", authenticate, controller.getMyAgreements);
-
-  // Approve a pending agreement (for owners)
-  router.patch(
-    "/:id/approve",
-    authenticate,
-    authorize([Role.PROPERTY_OWNER]),
-    controller.approveAgreement
-  );
-
-  // Reject a pending agreement (for owners)
-  router.patch(
-    "/:id/reject",
-    authenticate,
-    authorize([Role.PROPERTY_OWNER]),
-    controller.rejectAgreement
-  );
+  router.post("/", validate(createAgreementSchema), controller.createAgreement);
+  router.get("/my-agreements", controller.getMyAgreements);
+  router.patch("/:id/approve", controller.approveAgreement);
+  router.get("/:id/signing-url", controller.getSigningUrl);
 
   return router;
 }

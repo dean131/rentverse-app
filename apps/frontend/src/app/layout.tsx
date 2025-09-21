@@ -1,7 +1,10 @@
+// File Path: apps/frontend/src/app/layout.tsx
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
 import { AuthProvider } from "@/contexts/AuthContext";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Rentverse App",
@@ -15,17 +18,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/* Using a standard Tailwind background color */}
-      <body className="bg-gray-50">
+      <body className={inter.className}>
+        {/* The AuthProvider wraps the entire application, making user data
+            and auth functions globally available to all components. */}
         <AuthProvider>
-            <div>
-              <Navbar />
-              <main>
-                {children}
-              </main>
-            </div>
+          {children}
         </AuthProvider>
       </body>
     </html>
   );
 }
+

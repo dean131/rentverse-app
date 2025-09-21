@@ -5,9 +5,10 @@ import { useEffect, useState } from 'react';
 import { getPendingProperties } from '@/services/adminService';
 import { PropertyWithLister } from '@/lib/definitions';
 import { PendingPropertiesList } from '@/components/admin/PendingPropertiesList';
-import { DashboardLayout } from '@/components/layout/DashboardLayout'; // CORRECTED IMPORT
 import { StatCard } from '@/components/admin/dashboard/StatCard';
+// REMOVED: DashboardLayout import is no longer needed.
 
+// This component now only renders its specific content.
 export const AdminDashboard = () => {
   const [properties, setProperties] = useState<PropertyWithLister[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,11 +33,11 @@ export const AdminDashboard = () => {
   }, []);
 
   if (error) {
-    return <DashboardLayout><div className="text-red-500 p-8">{error}</div></DashboardLayout>;
+    return <div className="text-red-500 p-8">{error}</div>;
   }
 
   return (
-    <DashboardLayout>
+    <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard title="Total Documents" value="N/A" />
             <StatCard title="Registered Users" value="N/A" />
@@ -47,7 +48,7 @@ export const AdminDashboard = () => {
              <h2 className="text-xl font-semibold mb-4 text-gray-800">Pending Approvals</h2>
              {isLoading ? <p>Loading properties...</p> : <PendingPropertiesList initialProperties={properties} onUpdate={handlePropertyUpdate} />}
         </div>
-    </DashboardLayout>
+    </>
   );
 };
 

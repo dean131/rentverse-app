@@ -4,8 +4,11 @@ import { AgreementRepository } from "./agreements.repository.js";
 import { PropertyRepository } from "../properties/properties.repository.js";
 import { DocusignService } from "../../services/docusign.service.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { TenancyStatus } from "@prisma/client";
-import { prisma } from "../../lib/prisma.js";
+import { Property, Project, User } from "@prisma/client";
+import { config } from "../../config/index.js";
+
+export type PropertyWithProject = Property & { project: Project | null };
+
 export class AgreementService {
   private agreementRepository: AgreementRepository;
   private propertyRepository: PropertyRepository;
@@ -42,45 +45,22 @@ export class AgreementService {
         "Property not found or not available for booking."
       );
     }
-
     if (property.listedById === tenantId) {
       throw new ApiError(400, "You cannot book your own property.");
     }
-
-    // Check for existing agreements that overlap with the new dates
-    const existingAgreements =
-      await this.agreementRepository.findAgreementsForUser(tenantId);
-    const hasOverlap = existingAgreements.some((agreement) => {
-      const existingStart = new Date(agreement.startDate);
-      const existingEnd = new Date(agreement.endDate);
-      const newStart = new Date(startDate);
-      const newEnd = new Date(endDate);
-      return newStart <= existingEnd && newEnd >= existingStart;
-    });
-
-    if (hasOverlap) {
-      throw new ApiError(400, "A booking already exists for these dates.");
-    }
-
-    const newAgreement = await this.agreementRepository.createAgreement({
-      startDate,
-      endDate,
-      rentAmount: property.rentalPrice as number, // Assumes rental price is always available
-      property: { connect: { id: propertyId } },
-      owner: { connect: { id: property.listedById } },
-      tenant: { connect: { id: tenantId } },
-    });
-
-    return newAgreement;
+    const agreementData = {
+      propertyId: data.propertyId,
+      tenantId: tenantId,
+      ownerId: property.listedById,
+      startDate: new Date(data.startDate),
+      endDate: new Date(data.endDate),
+      rentAmount: property.rentalPrice || 0,
+    };
+    return this.agreementRepository.create(agreementData);
   }
 
-  /**
-   * Fetches all agreements for the current user.
-   * @param userId The ID of the authenticated user.
-   * @returns A list of agreements.
-   */
-  async getMyAgreements(userId: number) {
-    return this.agreementRepository.findAgreementsForUser(userId);
+  async getAgreementsForUser(userId: number) {
+    return this.agreementRepository.findByUserId(userId);
   }
 
   /**
@@ -90,109 +70,54 @@ export class AgreementService {
    * @returns The updated agreement.
    */
   async approveAgreement(agreementId: number, ownerId: number) {
-    const agreement =
-      await this.agreementRepository.findAgreementById(agreementId);
-    if (!agreement) {
-      throw new ApiError(404, "Agreement not found.");
-    }
-
-    // Authorization check
-    if (agreement.ownerId !== ownerId) {
+    const agreement = await this.agreementRepository.findById(agreementId);
+    if (!agreement) throw new ApiError(404, "Agreement not found.");
+    if (agreement.ownerId !== ownerId)
       throw new ApiError(
         403,
         "You do not have permission to approve this agreement."
       );
-    }
+    if (agreement.status !== "PENDING_OWNER_APPROVAL")
+      throw new ApiError(400, "This agreement is not pending approval.");
 
-    if (agreement.status !== TenancyStatus.PENDING_OWNER_APPROVAL) {
-      throw new ApiError(
-        400,
-        "Only agreements pending owner approval can be approved."
-      );
-    }
+    const envelopeId =
+      await this.docusignService.createAndSendEnvelope(agreement);
+    if (!envelopeId)
+      throw new ApiError(500, "Failed to create DocuSign envelope.");
 
-    // Generate a simple tenancy agreement document (or load a template)
-    const documentBase64 = this.docusignService.generateAgreementDocument({
-      tenantName: agreement.tenant.fullName,
-      tenantEmail: agreement.tenant.email,
-      ownerName: agreement.property.listedBy.fullName,
-      ownerEmail: agreement.property.listedBy.email,
-      propertyTitle: agreement.property.title,
-      startDate: agreement.startDate,
-      endDate: agreement.endDate,
-      rentAmount: agreement.rentAmount,
-    });
-
-    // Create a DocuSign envelope with the document and signers
-    const { envelopeId, signingUrl } =
-      await this.docusignService.createAndSendEnvelope({
-        envelopeName: `Tenancy Agreement for ${agreement.property.title}`,
-        documentBase64,
-        signers: [
-          {
-            name: agreement.tenant.fullName,
-            email: agreement.tenant.email,
-            recipientId: "1",
-          },
-          {
-            name: agreement.property.listedBy.fullName,
-            email: agreement.property.listedBy.email,
-            recipientId: "2",
-          },
-        ],
-      });
-
-    // Update the agreement with the DocuSign envelope ID
-    const updatedAgreement =
-      await this.agreementRepository.updateAgreementStatus(
-        agreementId,
-        TenancyStatus.PENDING_SIGNATURES
-      );
-
-    // Save the envelopeId for webhook tracking
-    await prisma.tenancyAgreement.update({
-      where: { id: agreementId },
-      data: { docusignEnvelopeId: envelopeId },
-    });
-
-    // In a real application, you might also want to notify the tenant to sign
-    // this.docusignService.notifySigner(signingUrl);
-
-    return updatedAgreement;
+    return this.agreementRepository.updateStatusAndEnvelope(
+      agreementId,
+      "PENDING_SIGNATURES",
+      envelopeId
+    );
   }
 
-  /**
-   * Rejects a pending tenancy agreement.
-   * @param agreementId The ID of the agreement to reject.
-   * @param ownerId The ID of the owner rejecting the agreement.
-   * @returns The updated agreement.
-   */
-  async rejectAgreement(agreementId: number, ownerId: number) {
-    const agreement =
-      await this.agreementRepository.findAgreementById(agreementId);
+  async getSigningUrl(
+    agreementId: number,
+    userId: number
+  ): Promise<string | undefined> {
+    const agreement = await this.agreementRepository.findById(agreementId);
     if (!agreement) {
       throw new ApiError(404, "Agreement not found.");
     }
-
-    if (agreement.ownerId !== ownerId) {
-      throw new ApiError(
-        403,
-        "You do not have permission to reject this agreement."
-      );
+    if (agreement.ownerId !== userId && agreement.tenantId !== userId) {
+      throw new ApiError(403, "You are not a party to this agreement.");
+    }
+    if (!agreement.docusignEnvelopeId) {
+      throw new ApiError(400, "This agreement is not ready for signing.");
     }
 
-    if (agreement.status !== TenancyStatus.PENDING_OWNER_APPROVAL) {
-      throw new ApiError(
-        400,
-        "Only agreements pending owner approval can be rejected."
-      );
-    }
+    const isOwner = userId === agreement.ownerId;
+    const signer = isOwner ? agreement.owner : agreement.tenant;
+    const recipientId = isOwner ? "1" : "2";
 
-    const updatedAgreement =
-      await this.agreementRepository.updateAgreementStatus(
-        agreementId,
-        TenancyStatus.OWNER_REJECTED
-      );
-    return updatedAgreement;
+    const returnUrl = `${config.frontendUrl}/agreements?signing=complete`;
+
+    return this.docusignService.getRecipientViewUrl(
+      agreement.docusignEnvelopeId,
+      signer,
+      recipientId,
+      returnUrl
+    );
   }
 }

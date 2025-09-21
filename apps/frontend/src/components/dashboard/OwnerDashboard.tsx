@@ -3,11 +3,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { StatCard } from '@/components/admin/dashboard/StatCard';
 import { Button } from '@/components/ui/Button';
-import { getUserDashboardStats } from '@/services/userService'; // Import the new service
+import { getUserDashboardStats } from '@/services/userService';
 import { OwnerDashboardStats } from '@/lib/definitions';
+// REMOVED: DashboardLayout import is no longer needed.
 
 export const OwnerDashboard = () => {
   const [stats, setStats] = useState<OwnerDashboardStats | null>(null);
@@ -20,8 +20,7 @@ export const OwnerDashboard = () => {
         const data = await getUserDashboardStats();
         setStats(data);
       } catch (err) {
-        console.error("Failed to fetch dashboard stats:", err);
-        setError("Could not load your dashboard data. Please try again later.");
+        setError("Could not load your dashboard data.");
       } finally {
         setIsLoading(false);
       }
@@ -49,7 +48,7 @@ export const OwnerDashboard = () => {
   };
 
   return (
-    <DashboardLayout>
+    <>
         <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold text-gray-800">My Properties</h1>
             <Link href="/properties/submit">
@@ -61,10 +60,9 @@ export const OwnerDashboard = () => {
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
              <h2 className="text-xl font-semibold mb-4 text-gray-800">My Listings Overview</h2>
-             {/* A table of the owner's properties will be rendered here in a future step */}
-             <p className="text-gray-500">A detailed list of your properties and their statuses will appear here soon.</p>
+             <p className="text-gray-500">A detailed list of your properties will appear here soon.</p>
         </div>
-    </DashboardLayout>
+    </>
   );
 };
 

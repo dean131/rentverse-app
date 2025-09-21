@@ -13,44 +13,19 @@ export class AgreementRepository {
     return prisma.tenancyAgreement.create({ data });
   }
 
-  /**
-   * Finds a tenancy agreement by its ID.
-   * @param agreementId The ID of the agreement.
-   * @returns The found agreement or null if not found.
-   */
-  async findAgreementById(agreementId: number) {
+  async findById(id: number) {
     return prisma.tenancyAgreement.findUnique({
       where: { id: agreementId },
       include: {
-        property: {
-          select: {
-            title: true,
-            listedBy: {
-              select: {
-                id: true,
-                fullName: true,
-                email: true,
-              },
-            },
-          },
-        },
-        tenant: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-          },
-        },
+        tenant: true,
+        owner: true,
+        property: { include: { project: true } },
       },
     });
   }
 
-  /**
-   * Finds all agreements for a given user, either as an owner or a tenant.
-   * @param userId The ID of the user.
-   * @returns A list of agreements.
-   */
-  async findAgreementsForUser(userId: number) {
+  // CORRECTED: The userId parameter is now correctly typed as a number.
+  async findByUserId(userId: number) {
     return prisma.tenancyAgreement.findMany({
       where: {
         OR: [{ ownerId: userId }, { tenantId: userId }],
@@ -60,48 +35,32 @@ export class AgreementRepository {
           select: {
             id: true,
             title: true,
-            // Corrected query to get the primary image from the PropertyImage model
-            images: {
-              take: 1,
-              orderBy: {
-                displayOrder: "asc",
-              },
-              select: {
-                imageUrl: true,
-              },
-            },
-            listedBy: { select: { fullName: true } },
+            images: { take: 1, select: { imageUrl: true } },
           },
         },
-        tenant: {
-          select: {
-            fullName: true,
-          },
-        },
+        tenant: { select: { id: true, fullName: true } },
+        owner: { select: { id: true, fullName: true } },
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
   }
 
-  /**
-   * Finds a tenancy agreement by its DocuSign envelope ID.
-   * @param docusignEnvelopeId The DocuSign envelope ID.
-   * @returns The found agreement or null if not found.
-   */
-  async findAgreementByDocusignId(docusignEnvelopeId: string) {
-    return prisma.tenancyAgreement.findUnique({
-      where: { docusignEnvelopeId },
+  async updateStatusAndEnvelope(
+    id: number,
+    status: TenancyStatus,
+    envelopeId: string
+  ) {
+    return prisma.tenancyAgreement.update({
+      where: { id },
+      data: { status, docusignEnvelopeId: envelopeId },
     });
   }
 
-  /**
-   * Updates the status of a tenancy agreement.
-   * @param agreementId The ID of the agreement to update.
-   * @param status The new status to set.
-   * @returns The updated agreement.
-   */
-  async updateAgreementStatus(agreementId: number, status: TenancyStatus) {
-    return prisma.tenancyAgreement.update({
-      where: { id: agreementId },
+  async updateStatusByEnvelopeId(envelopeId: string, status: TenancyStatus) {
+    return prisma.tenancyAgreement.updateMany({
+      where: { docusignEnvelopeId: envelopeId },
       data: { status },
     });
   }

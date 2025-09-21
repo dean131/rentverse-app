@@ -4,14 +4,14 @@
 import { useState } from 'react';
 import { AgreementDetails } from '@/lib/definitions';
 import { useAuth } from '@/hooks/useAuth';
-import { approveAgreement } from '@/services/agreementService';
+import { approveAgreement, getSigningUrl } from '@/services/agreementService';
 import { Button } from '@/components/ui/Button';
 import Image from 'next/image';
 import axios from 'axios';
 
 interface AgreementListProps {
   agreements: AgreementDetails[];
-  onUpdate: () => void; // Function to refetch agreements after an action
+  onUpdate: () => void;
 }
 
 const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; onUpdate: () => void; }) => {
@@ -26,8 +26,8 @@ const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; o
         setError(null);
         try {
             await approveAgreement(agreement.id);
-            alert("Agreement approved! A signing request has been sent via DocuSign.");
-            onUpdate(); // Refresh the list
+            alert("Agreement approved! A signing request has been sent via DocuSign to both parties.");
+            onUpdate();
         } catch (err) {
             console.error("Failed to approve agreement:", err);
             if (axios.isAxiosError(err) && err.response) {
@@ -35,6 +35,20 @@ const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; o
             } else {
                 setError("An unexpected error occurred.");
             }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    const handleSign = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const signingUrl = await getSigningUrl(agreement.id);
+            window.location.href = signingUrl;
+        } catch (err) {
+            console.error("Failed to get signing URL:", err);
+            setError("Could not retrieve signing link. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -67,13 +81,20 @@ const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; o
                     </p>
                 </div>
             </div>
-            <div className="flex items-center space-x-4 w-full sm:w-auto">
+            <div className="flex items-center space-x-4">
                 {renderStatusBadge(agreement.status)}
+
                 {isOwner && agreement.status === 'PENDING_OWNER_APPROVAL' && (
-                    <Button onClick={handleApprove} disabled={isLoading} size="sm" className="w-full sm:w-auto">
-                        {isLoading ? 'Approving...' : 'Approve'}
+                    <Button onClick={handleApprove} disabled={isLoading} size="sm">Approve</Button>
+                )}
+                
+                {/* NEW: Show the "Sign" button when the document is ready for signing */}
+                {agreement.status === 'PENDING_SIGNATURES' && (
+                    <Button onClick={handleSign} disabled={isLoading} size="sm">
+                        {isLoading ? 'Loading...' : 'Sign Document'}
                     </Button>
                 )}
+
                  {error && <p className="text-xs text-red-500">{error}</p>}
             </div>
         </div>

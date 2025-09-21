@@ -15,6 +15,7 @@ export class AgreementController {
 
   createAgreement = asyncHandler(
     async (req: AuthenticatedRequest, res: Response) => {
+      // req.user.id from the middleware is a number
       const tenantId = req.user?.id;
       if (!tenantId) {
         throw new ApiError(401, "User not authenticated");
@@ -39,7 +40,6 @@ export class AgreementController {
     }
   );
 
-  // NEW: Handler for the owner approval endpoint
   approveAgreement = asyncHandler(
     async (req: AuthenticatedRequest, res: Response) => {
       const ownerId = req.user?.id;

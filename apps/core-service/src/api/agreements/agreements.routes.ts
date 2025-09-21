@@ -14,8 +14,6 @@ export const createAgreementRouter = (
   router.post("/", validate(createAgreementSchema), controller.createAgreement);
   router.get("/my-agreements", controller.getMyAgreements);
   router.patch("/:id/approve", controller.approveAgreement);
-
-  // NEW: Route to get a unique URL for the embedded signing ceremony
   router.get("/:id/signing-url", controller.getSigningUrl);
 
   return router;

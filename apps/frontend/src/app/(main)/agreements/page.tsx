@@ -6,13 +6,12 @@ import { getMyAgreements } from '@/services/agreementService';
 import { AgreementDetails } from '@/lib/definitions';
 import { AgreementList } from '@/components/agreements/AgreementList';
 
-// REMOVED: DashboardLayout import is no longer needed here.
-// This page now only needs to render its specific content.
 export default function MyAgreementsPage() {
   const [agreements, setAgreements] = useState<AgreementDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Use useCallback to create a stable function reference for refetching
   const fetchAgreements = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -31,7 +30,6 @@ export default function MyAgreementsPage() {
   }, [fetchAgreements]);
 
   return (
-    // The DashboardLayout is now applied by the parent layout.tsx file
     <div className="bg-white p-8 rounded-lg shadow-md">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">My Agreements</h1>
       {isLoading ? (

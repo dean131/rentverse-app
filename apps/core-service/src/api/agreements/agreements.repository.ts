@@ -18,17 +18,7 @@ export class AgreementRepository {
     });
   }
 
-  async updateStatusAndEnvelope(
-    id: number,
-    status: TenancyStatus,
-    envelopeId: string
-  ) {
-    return prisma.tenancyAgreement.update({
-      where: { id },
-      data: { status, docusignEnvelopeId: envelopeId },
-    });
-  }
-
+  // CORRECTED: The userId parameter is now correctly typed as a number.
   async findByUserId(userId: number) {
     return prisma.tenancyAgreement.findMany({
       where: {
@@ -45,13 +35,24 @@ export class AgreementRepository {
         tenant: { select: { id: true, fullName: true } },
         owner: { select: { id: true, fullName: true } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
+
+  async updateStatusAndEnvelope(
+    id: number,
+    status: TenancyStatus,
+    envelopeId: string
+  ) {
+    return prisma.tenancyAgreement.update({
+      where: { id },
+      data: { status, docusignEnvelopeId: envelopeId },
     });
   }
 
   async updateStatusByEnvelopeId(envelopeId: string, status: TenancyStatus) {
-    // We use updateMany here because the envelopeId is unique, but this is safer
-    // in case the unique constraint was missed in the schema.
     return prisma.tenancyAgreement.updateMany({
       where: { docusignEnvelopeId: envelopeId },
       data: { status },

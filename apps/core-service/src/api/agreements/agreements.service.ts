@@ -3,10 +3,9 @@ import { AgreementRepository } from "./agreements.repository.js";
 import { PropertyRepository } from "../properties/properties.repository.js";
 import { DocusignService } from "../../services/docusign.service.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { Property, Project } from "@prisma/client";
+import { Property, Project, User } from "@prisma/client";
 import { config } from "../../config/index.js";
 
-// Define and export a more specific type that includes the nested project data
 export type PropertyWithProject = Property & { project: Project | null };
 
 export class AgreementService {
@@ -37,11 +36,9 @@ export class AgreementService {
         "Property not found or is not available for booking"
       );
     }
-
     if (property.listedById === tenantId) {
       throw new ApiError(400, "You cannot book your own property.");
     }
-
     const agreementData = {
       propertyId: data.propertyId,
       tenantId: tenantId,
@@ -50,7 +47,6 @@ export class AgreementService {
       endDate: new Date(data.endDate),
       rentAmount: property.rentalPrice || 0,
     };
-
     return this.agreementRepository.create(agreementData);
   }
 
@@ -58,10 +54,8 @@ export class AgreementService {
     return this.agreementRepository.findByUserId(userId);
   }
 
-  // NEW: Method for an owner to approve a booking request
   async approveAgreement(agreementId: number, ownerId: number) {
     const agreement = await this.agreementRepository.findById(agreementId);
-
     if (!agreement) throw new ApiError(404, "Agreement not found.");
     if (agreement.ownerId !== ownerId)
       throw new ApiError(
@@ -71,14 +65,11 @@ export class AgreementService {
     if (agreement.status !== "PENDING_OWNER_APPROVAL")
       throw new ApiError(400, "This agreement is not pending approval.");
 
-    // This is the trigger for the DocuSign integration
     const envelopeId =
       await this.docusignService.createAndSendEnvelope(agreement);
-
     if (!envelopeId)
       throw new ApiError(500, "Failed to create DocuSign envelope.");
 
-    // Update the agreement in our database with the new status and envelope ID
     return this.agreementRepository.updateStatusAndEnvelope(
       agreementId,
       "PENDING_SIGNATURES",
@@ -105,8 +96,6 @@ export class AgreementService {
     const signer = isOwner ? agreement.owner : agreement.tenant;
     const recipientId = isOwner ? "1" : "2";
 
-    // CORRECTED: Use the public frontend URL from our configuration for the returnUrl.
-    // This provides DocuSign with a valid, browser-accessible address.
     const returnUrl = `${config.frontendUrl}/agreements?signing=complete`;
 
     return this.docusignService.getRecipientViewUrl(

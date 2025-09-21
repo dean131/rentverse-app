@@ -11,7 +11,7 @@ import axios from 'axios';
 
 interface AgreementListProps {
   agreements: AgreementDetails[];
-  onUpdate: () => void; // Function to refetch agreements after an action
+  onUpdate: () => void;
 }
 
 const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; onUpdate: () => void; }) => {
@@ -26,8 +26,8 @@ const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; o
         setError(null);
         try {
             await approveAgreement(agreement.id);
-            alert("Agreement approved! A signing request has been sent via DocuSign.");
-            onUpdate(); // Refresh the list
+            alert("Agreement approved! A signing request has been sent via DocuSign to both parties.");
+            onUpdate();
         } catch (err) {
             console.error("Failed to approve agreement:", err);
             if (axios.isAxiosError(err) && err.response) {
@@ -39,13 +39,12 @@ const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; o
             setIsLoading(false);
         }
     };
-
+    
     const handleSign = async () => {
         setIsLoading(true);
         setError(null);
         try {
             const signingUrl = await getSigningUrl(agreement.id);
-            // Redirect the user to the DocuSign signing ceremony
             window.location.href = signingUrl;
         } catch (err) {
             console.error("Failed to get signing URL:", err);
@@ -82,18 +81,20 @@ const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; o
                     </p>
                 </div>
             </div>
-            <div className="flex items-center space-x-4 w-full sm:w-auto">
+            <div className="flex items-center space-x-4">
                 {renderStatusBadge(agreement.status)}
+
                 {isOwner && agreement.status === 'PENDING_OWNER_APPROVAL' && (
-                    <Button onClick={handleApprove} disabled={isLoading} size="sm" className="w-full sm:w-auto">
-                        {isLoading ? 'Approving...' : 'Approve'}
-                    </Button>
+                    <Button onClick={handleApprove} disabled={isLoading} size="sm">Approve</Button>
                 )}
+                
+                {/* NEW: Show the "Sign" button when the document is ready for signing */}
                 {agreement.status === 'PENDING_SIGNATURES' && (
                     <Button onClick={handleSign} disabled={isLoading} size="sm">
                         {isLoading ? 'Loading...' : 'Sign Document'}
                     </Button>
                 )}
+
                  {error && <p className="text-xs text-red-500">{error}</p>}
             </div>
         </div>

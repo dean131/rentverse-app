@@ -34,6 +34,9 @@ export const approveAgreement = async (
   return response.data.data;
 };
 
+/**
+ * Fetches a unique, one-time URL for a user to sign an agreement.
+ */
 export const getSigningUrl = async (agreementId: number): Promise<string> => {
   const response = await apiClient.get(
     `/agreements/${agreementId}/signing-url`

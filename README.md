@@ -1,7 +1,3 @@
-Of course. Creating a comprehensive `README.md` is a critical step for your project submission. It's the first thing reviewers will see and it needs to clearly explain what your project is, what makes it special, and how to run it.
-
-Based on the submission requirements, here is the complete `README.md` file for the Rentverse project.
-
 ### **Rentverse: Full-Stack Property Rental & Management Platform**
 
 **Submission for the Rentverse Challenge**
@@ -51,7 +47,7 @@ Follow these steps to get the entire Rentverse application running on your local
 ### **Step 1: Clone the Repository**
 
 ```bash
-git clone [Your GitHub Repository Link]
+git clone https://github.com/dean131/rentverse-app
 cd rentverse-app
 ```
 
@@ -128,5 +124,5 @@ This feature automates the entire contract signing process, providing a secure a
 
 ### **4. Submission Links**
 
-- **GitHub Repository**: `[Link to Your GitHub Repository]`
-- **Demo System / Video**: `[Link to Live Deployment or Recorded Demo]`
+- **GitHub Repository**: `https://github.com/dean131/rentverse-app`
+- **Demo System / Video**: `https://rentverse.ilhamdean.cloud`

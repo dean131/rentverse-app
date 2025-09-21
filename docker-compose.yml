@@ -35,8 +35,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    environment:
-      NEXT_PUBLIC_API_URL: "https://rentverse_core_service.ilhamdean.cloud/api"
+    env_file: ./apps/frontend/.env
     depends_on:
       - core-service
     networks:

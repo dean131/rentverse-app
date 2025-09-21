@@ -59,28 +59,34 @@ export class DocusignService {
     tenant: User,
     property: PropertyWithProject
   ): string {
-    // CORRECTED: The 'property' parameter is now strongly typed, so 'property.project' is accessible.
-    let docHtml = `
-            <!DOCTYPE html><html><body style="font-family: sans-serif; line-height: 1.6;">
-                <h1 style="text-align: center;">Tenancy Agreement</h1>
-                <p>This agreement is made on <strong>${new Date().toLocaleDateString("en-GB")}</strong>.</p>
-                <h3>Parties Involved</h3>
-                <p><strong>Landlord/Owner:</strong> ${owner.fullName} (${owner.email})</p>
-                <p><strong>Tenant:</strong> ${tenant.fullName} (${tenant.email})</p>
-                <h3>Property Details</h3>
-                <p><strong>Property:</strong> ${property.title}</p>
-                <p><strong>Address:</strong> ${property.project?.address || "N/A"}</p>
-                <h3>Agreement Terms</h3>
-                <p><strong>Term:</strong> From ${new Date(agreement.startDate).toLocaleDateString("en-GB")} to ${new Date(agreement.endDate).toLocaleDateString("en-GB")}.</p>
-                <p><strong>Rent:</strong> MYR ${agreement.rentAmount.toLocaleString()} per ${property.paymentPeriod?.toLowerCase() || "period"}.</p>
-                <br/><br/>
-                <p><strong>Landlord Signature:</strong></p>
-                <div id="ownerSign" style="width: 200px; height: 50px;"></div>
-                <br/><br/>
-                <p><strong>Tenant Signature:</strong></p>
-                <div id="tenantSign" style="width: 200px; height: 50px;"></div>
-            </body></html>
-        `;
+    const docHtml = `
+    <!DOCTYPE html>
+    <html>
+      <body style="font-family: sans-serif; line-height: 1.6;">
+        <h1 style="text-align: center;">Tenancy Agreement</h1>
+        <p>This agreement is made on <strong>${new Date().toLocaleDateString("en-GB")}</strong>.</p>
+        
+        <h3>Parties Involved</h3>
+        <p><strong>Landlord/Owner:</strong> ${owner.fullName} (${owner.email})</p>
+        <p><strong>Tenant:</strong> ${tenant.fullName} (${tenant.email})</p>
+        
+        <h3>Property Details</h3>
+        <p><strong>Property:</strong> ${property.title}</p>
+        <p><strong>Address:</strong> ${property.project?.address || "N/A"}</p>
+        
+        <h3>Agreement Terms</h3>
+        <p><strong>Term:</strong> From ${new Date(agreement.startDate).toLocaleDateString("en-GB")} 
+           to ${new Date(agreement.endDate).toLocaleDateString("en-GB")}.</p>
+        <p><strong>Rent:</strong> MYR ${agreement.rentAmount.toLocaleString()} 
+           per ${property.paymentPeriod?.toLowerCase() || "period"}.</p>
+        
+        <br/><br/>
+        <p><strong>Landlord Signature:</strong> /ownerSign/</p>
+        <br/><br/>
+        <p><strong>Tenant Signature:</strong> /tenantSign/</p>
+      </body>
+    </html>
+  `;
     return Buffer.from(docHtml).toString("base64");
   }
 
@@ -95,14 +101,13 @@ export class DocusignService {
       property
     );
 
-    // CORRECTED: Added `clientUserId` to both signers.
-    // This ID must be a string and unique for each recipient. We'll use our database user ID.
+    // Define recipients with clientUserId for embedded signing
     const ownerSigner: docusign.Signer = {
       email: owner.email,
       name: owner.fullName,
-      recipientId: "1", // The owner is always recipient 1
+      recipientId: "1",
       routingOrder: "1",
-      clientUserId: owner.id.toString(), // CRUCIAL: Link this signer to our internal user ID
+      clientUserId: owner.id.toString(),
       tabs: {
         signHereTabs: [
           {
@@ -117,9 +122,9 @@ export class DocusignService {
     const tenantSigner: docusign.Signer = {
       email: tenant.email,
       name: tenant.fullName,
-      recipientId: "2", // The tenant is always recipient 2
+      recipientId: "2",
       routingOrder: "2",
-      clientUserId: tenant.id.toString(), // CRUCIAL: Link this signer to our internal user ID
+      clientUserId: tenant.id.toString(),
       tabs: {
         signHereTabs: [
           {
@@ -148,9 +153,10 @@ export class DocusignService {
     };
 
     const envelopesApi = new docusign.EnvelopesApi(this.apiClient);
-    const results = await envelopesApi.createEnvelope(this.accountId, {
-      envelopeDefinition,
-    });
+    const results = await envelopesApi.createEnvelope(
+      this.accountId,
+      envelopeDefinition
+    );
 
     return results.envelopeId;
   }

@@ -36,7 +36,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: "http://127.0.0.1:8080/api"
+      NEXT_PUBLIC_API_URL: "https://rentverse_core_service.ilhamdean.cloud/api"
     depends_on:
       - core-service
     networks:

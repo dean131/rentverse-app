@@ -4,7 +4,7 @@ import axios from "axios";
 const isServer = typeof window === "undefined";
 
 const baseURL = isServer
-  ? "https://rentverse_frontend.ilhamdean.cloud/api"
+  ? "https://rentverse_core_service.ilhamdean.cloud/api"
   : "http://127.0.0.1:8080/api";
 
 console.log(

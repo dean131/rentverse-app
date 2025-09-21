@@ -6,7 +6,7 @@ export const createWebhookRouter = (controller: WebhookController): Router => {
   const router = Router();
 
   // This is a public endpoint that DocuSign's servers will call.
-  // It does not use our standard JWT protection; it's secured by the HMAC signature.
+  // It is not protected by our JWT middleware; it is secured by the HMAC signature instead.
   router.post("/docusign", controller.handleDocusignWebhook);
 
   return router;

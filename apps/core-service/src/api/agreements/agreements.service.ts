@@ -57,6 +57,7 @@ export class AgreementService {
     return this.agreementRepository.findByUserId(userId);
   }
 
+  // NEW: Method for an owner to approve a booking request
   async approveAgreement(agreementId: number, ownerId: number) {
     const agreement = await this.agreementRepository.findById(agreementId);
 
@@ -69,12 +70,14 @@ export class AgreementService {
     if (agreement.status !== "PENDING_OWNER_APPROVAL")
       throw new ApiError(400, "This agreement is not pending approval.");
 
+    // This is the trigger for the DocuSign integration
     const envelopeId =
       await this.docusignService.createAndSendEnvelope(agreement);
 
     if (!envelopeId)
       throw new ApiError(500, "Failed to create DocuSign envelope.");
 
+    // Update the agreement in our database with the new status and envelope ID
     return this.agreementRepository.updateStatusAndEnvelope(
       agreementId,
       "PENDING_SIGNATURES",

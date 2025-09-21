@@ -28,6 +28,7 @@ export const config = {
     impersonatedUserId: validateEnv("DOCUSIGN_IMPERSONATED_USER_ID"),
     accountId: validateEnv("DOCUSIGN_ACCOUNT_ID"),
     privateKey: validateEnv("DOCUSIGN_PRIVATE_KEY_BASE64"),
+    // CORRECTED: Added the missing webhookSecret to the configuration object.
     webhookSecret: validateEnv("DOCUSIGN_WEBHOOK_SECRET"),
   },
 };

@@ -12,18 +12,19 @@ export class WebhookController {
   }
 
   handleDocusignWebhook = asyncHandler(async (req: Request, res: Response) => {
-    // The signature is passed in a header by DocuSign
-    const signature = req.header("x-docusign-signature-1"); // Headers are case-insensitive
+    // DocuSign sends the signature in a header (headers are case-insensitive)
+    const signature = req.header("x-docusign-signature-1");
     if (!signature) {
       throw new ApiError(400, "Missing DocuSign signature header.");
     }
 
-    // We use the raw body buffer for HMAC verification, so we need a special middleware for this route.
+    // We use the raw body buffer for HMAC verification. This is enabled by a special
+    // middleware in our main app.ts file.
     const rawPayload = (req as any).rawBody;
     if (!rawPayload) {
       throw new ApiError(
         400,
-        "Raw request body not available for signature verification."
+        "Raw request body is not available for signature verification."
       );
     }
 
@@ -33,7 +34,7 @@ export class WebhookController {
       rawPayload
     );
 
-    // Acknowledge receipt of the webhook to DocuSign
+    // Acknowledge receipt of the webhook to DocuSign with a 204 No Content response.
     res.status(204).send();
   });
 }

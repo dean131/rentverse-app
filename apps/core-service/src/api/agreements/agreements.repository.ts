@@ -7,19 +7,25 @@ export class AgreementRepository {
     return prisma.tenancyAgreement.create({ data });
   }
 
-  // NEW: Find a single agreement by its ID, including related user and property data
   async findById(id: number) {
     return prisma.tenancyAgreement.findUnique({
       where: { id },
       include: {
         tenant: true,
         owner: true,
-        property: {
-          include: {
-            project: true,
-          },
-        },
+        property: { include: { project: true } },
       },
+    });
+  }
+
+  async updateStatusAndEnvelope(
+    id: number,
+    status: TenancyStatus,
+    envelopeId: string
+  ) {
+    return prisma.tenancyAgreement.update({
+      where: { id },
+      data: { status, docusignEnvelopeId: envelopeId },
     });
   }
 
@@ -36,27 +42,17 @@ export class AgreementRepository {
             images: { take: 1, select: { imageUrl: true } },
           },
         },
-        // CORRECTED: Added 'id' to the select statement for both tenant and owner
         tenant: { select: { id: true, fullName: true } },
         owner: { select: { id: true, fullName: true } },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
     });
   }
 
-  async updateStatusAndEnvelope(
-    id: number,
-    status: TenancyStatus,
-    envelopeId: string
-  ) {
-    return prisma.tenancyAgreement.update({
-      where: { id },
-      data: { status, docusignEnvelopeId: envelopeId },
-    });
-  }
-
+  /**
+   * NEW METHOD: Finds an agreement by its unique DocuSign envelope ID and updates its status.
+   * This is used by the webhook to mark an agreement as ACTIVE once signing is complete.
+   */
   async updateStatusByEnvelopeId(envelopeId: string, status: TenancyStatus) {
     return prisma.tenancyAgreement.update({
       where: { docusignEnvelopeId: envelopeId },

@@ -15,6 +15,7 @@ export const createAgreementRouter = (
   router.post("/", validate(createAgreementSchema), controller.createAgreement);
   router.get("/my-agreements", controller.getMyAgreements);
 
+  // NEW: Route for an owner to approve a pending agreement
   router.patch("/:id/approve", controller.approveAgreement);
 
   return router;

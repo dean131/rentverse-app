@@ -15,7 +15,7 @@ export class WebhookService {
   /**
    * Verifies the HMAC signature from DocuSign to ensure the request is authentic.
    * @param signature The signature from the 'X-DocuSign-Signature-1' header.
-   * @param payload The raw request body.
+   * @param payload The raw request body buffer.
    * @returns {boolean} True if the signature is valid.
    */
   private verifySignature(signature: string, payload: Buffer): boolean {
@@ -47,26 +47,29 @@ export class WebhookService {
     const event = payload.event;
     const envelopeId = payload.data.envelopeId;
 
-    // 2. Check if the event is the one we care about: 'envelope-completed'
+    console.log(
+      `DocuSign Webhook: Received event '${event}' for envelope ${envelopeId}.`
+    );
+
+    // 2. Check if the event is the one we care about: when the envelope is fully signed
     if (event === "envelope_completed") {
       console.log(
-        `DocuSign Webhook: Envelope ${envelopeId} has been completed by all parties.`
+        `-> Envelope ${envelopeId} has been completed by all parties.`
       );
 
-      // 3. Update the agreement status in our database
+      // 3. Update the agreement status in our database to ACTIVE
       await this.agreementRepository.updateStatusByEnvelopeId(
         envelopeId,
         TenancyStatus.ACTIVE
       );
 
-      // In a real app, you would also trigger notifications (email, etc.) to the users here.
+      // In a real application, you would also trigger notifications (e.g., email)
+      // to inform the users that the contract is now active.
       console.log(
-        `Database updated: Agreement for envelope ${envelopeId} is now ACTIVE.`
+        `-> Database updated: Agreement for envelope ${envelopeId} is now ACTIVE.`
       );
     } else {
-      console.log(
-        `DocuSign Webhook: Received unhandled event '${event}' for envelope ${envelopeId}. Ignoring.`
-      );
+      console.log(`-> Ignoring unhandled event type.`);
     }
   }
 }

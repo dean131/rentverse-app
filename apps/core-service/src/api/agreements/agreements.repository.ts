@@ -49,12 +49,10 @@ export class AgreementRepository {
     });
   }
 
-  /**
-   * NEW METHOD: Finds an agreement by its unique DocuSign envelope ID and updates its status.
-   * This is used by the webhook to mark an agreement as ACTIVE once signing is complete.
-   */
   async updateStatusByEnvelopeId(envelopeId: string, status: TenancyStatus) {
-    return prisma.tenancyAgreement.update({
+    // We use updateMany here because the envelopeId is unique, but this is safer
+    // in case the unique constraint was missed in the schema.
+    return prisma.tenancyAgreement.updateMany({
       where: { docusignEnvelopeId: envelopeId },
       data: { status },
     });

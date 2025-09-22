@@ -46,7 +46,7 @@ export class WebhookService {
       `DocuSign Webhook: Received event '${event}' for envelope ${envelopeId}.`
     );
 
-    if (event === "envelope_completed") {
+    if (event === "envelope-completed") {
       console.log(
         `-> Envelope ${envelopeId} has been completed by all parties.`
       );

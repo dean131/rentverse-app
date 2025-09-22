@@ -240,3 +240,12 @@ export type AgreementDetails = {
   tenant: { id: number; fullName: string };
   owner: { id: number; fullName: string };
 };
+
+export type OwnerProperty = {
+  id: number;
+  title: string;
+  propertyType: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  createdAt: string;
+  images: { imageUrl: string }[];
+};

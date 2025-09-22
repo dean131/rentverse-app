@@ -25,5 +25,7 @@ export const createPropertyRouter = (
     controller.createProperty
   );
 
+  router.get("/mine/my-properties", protect, controller.getOwnerProperties);
+
   return router;
 };

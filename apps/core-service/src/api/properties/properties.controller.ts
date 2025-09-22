@@ -49,4 +49,16 @@ export class PropertyController {
     const property = await this.propertyService.getPropertyById(propertyId);
     ApiResponse.success(res, property);
   });
+
+  getOwnerProperties = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response) => {
+      const userId = req.user?.id;
+      if (!userId) {
+        throw new ApiError(401, "User not authenticated");
+      }
+      const properties =
+        await this.propertyService.getPropertiesForOwner(userId);
+      ApiResponse.success(res, properties);
+    }
+  );
 }

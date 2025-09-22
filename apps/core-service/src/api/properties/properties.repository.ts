@@ -96,10 +96,28 @@ export class PropertyRepository {
     });
   }
 
-  /**
-   * NEW METHOD: Fetches statistics for a specific property owner's listings.
-   * Counts properties by their status (PENDING, APPROVED, REJECTED).
-   */
+  async findByOwnerId(userId: number) {
+    return prisma.property.findMany({
+      where: {
+        listedById: userId,
+      },
+      select: {
+        id: true,
+        title: true,
+        propertyType: true,
+        status: true,
+        createdAt: true,
+        images: {
+          take: 1,
+          select: { imageUrl: true },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
+
   async getUserPropertyStats(userId: number) {
     const stats = await prisma.property.groupBy({
       by: ["status"],

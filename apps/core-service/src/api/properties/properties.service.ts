@@ -91,4 +91,8 @@ export class PropertyService {
 
     return formattedProperty;
   }
+
+  async getPropertiesForOwner(userId: number): Promise<any[]> {
+    return this.propertyRepository.findByOwnerId(userId);
+  }
 }

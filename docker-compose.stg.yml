@@ -5,16 +5,15 @@ services:
       - ./apps/core-service:/app
       - /app/node_modules # Anonymous volume to prevent local node_modules from overwriting the container's
     ports:
-      - "5432:5432"
+      - "8180:8080"
 
   frontend:
-    command: npm run dev
     volumes:
       - ./apps/frontend:/app
       - /app/node_modules
       - /app/.next
     ports:
-      - "3000:3000"
+      - "3100:3000"
 
   # NEW: Added development settings for the prediction-service
   prediction-service:
@@ -24,4 +23,4 @@ services:
       # Mount the local directory into the container for live code changes
       - ./apps/prediction-service:/app
     ports:
-      - "8000:8000"
+      - "8100:8000"

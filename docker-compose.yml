@@ -16,6 +16,7 @@ services:
     build:
       context: ./apps/core-service
       dockerfile: Dockerfile
+    command: npm run dev
     depends_on:
       - postgres
     env_file: ./apps/core-service/.env

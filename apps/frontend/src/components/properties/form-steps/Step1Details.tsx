@@ -14,6 +14,7 @@ interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
 interface FormSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
     label: string; name: Path<PropertySubmission>; register: UseFormRegister<PropertySubmission>; error?: FieldError; children: ReactNode;
 }
+
 const FormInput = ({ label, name, register, error, type = "text", ...props }: FormInputProps) => (
     <div>
         <label htmlFor={name} className="block text-sm font-medium text-gray-700">{label}</label>
@@ -86,7 +87,7 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
 
     return (
         <div className="space-y-6">
-            <h3 className="text-lg font-semibold">Property Details</h3>
+            <h3 className="text-lg font-semibold text-gray-800">Property Details</h3>
             <FormInput label="Property Title" name="title" register={register} error={errors.title} placeholder="e.g., Modern Apartment in Central Jakarta" />
             <div>
                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
@@ -95,10 +96,10 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormSelect label="Listing Type" name="listingType" register={register} error={errors.listingType}>
-                    <option value="">Select Listing Type</option><option value="RENT">For Rent</option><option value="SALE">For Sale</option>
+                    <option value="">Select Listing Type</option><option value="RENT">For Rent</option><option value="SALE">For Sale</option><option value="BOTH">Both</option>
                 </FormSelect>
                 <FormSelect label="Property Type" name="propertyType" register={register} error={errors.propertyType}>
-                    <option value="">Select Property Type</option><option value="APARTMENT">Apartment</option><option value="HOUSE">House</option>
+                    <option value="">Select Property Type</option><option value="APARTMENT">Apartment</option><option value="HOUSE">House</option><option value="PENTHOUSE">Penthouse</option><option value="STUDIO">Studio</option><option value="COMMERCIAL">Commercial</option>
                 </FormSelect>
                 <FormSelect label="Furnishing Status" name="furnishingStatus" register={register} error={errors.furnishingStatus}>
                     <option value="">Select Status</option><option value="UNFURNISHED">Unfurnished</option><option value="PARTIALLY_FURNISHED">Partially Furnished</option><option value="FULLY_FURNISHED">Fully Furnished</option>
@@ -124,12 +125,10 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                         register={register} 
                         error={errors.paymentPeriod}
                     >
-                        <option value="">Select Period</option>
-                        <option value="MONTHLY">Monthly</option>
-                        <option value="YEARLY">Yearly</option>
+                        <option value="">Select Period</option><option value="MONTHLY">Monthly</option><option value="YEARLY">Yearly</option>
                     </FormSelect>
                 </div>
-                {isPredictionLoading && <div className="mt-4 text-sm text-gray-500 p-3 bg-gray-50 rounded-md animate-pulse"><p>\u2728 Generating AI price suggestion...</p></div>}
+                {isPredictionLoading && <div className="mt-4 text-sm text-gray-500 p-3 bg-gray-50 rounded-md animate-pulse"><p>✨ Generating AI price suggestion...</p></div>}
                 {suggestedPrice !== null && !isPredictionLoading && (
                     <div className="mt-4 p-3 bg-green-50 rounded-md flex items-center justify-between">
                         <p className="text-sm text-green-800">
@@ -138,7 +137,7 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                         <button 
                             type="button" 
                             onClick={applySuggestion} 
-                            className="text-sm font-semibold text-orange-400 hover:text-orange-800 transition-colors"
+                            className="text-sm font-semibold text-orange-600 hover:text-orange-800 transition-colors"
                         >
                             Apply
                         </button>

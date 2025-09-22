@@ -6,17 +6,16 @@ interface StepperProps {
 
 const Step = ({ stepNumber, title, isActive, isCompleted }: { stepNumber: number; title: string; isActive: boolean; isCompleted: boolean; }) => (
     <div className="flex items-center">
-        <div className={`flex items-center justify-center h-8 w-8 rounded-full font-bold transition-colors ${isActive ? 'bg-orange-400 text-white' : isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+        <div className={`flex items-center justify-center h-8 w-8 rounded-full font-bold transition-colors ${isActive ? 'bg-orange-600 text-white' : isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
             {isCompleted ? '✓' : stepNumber}
         </div>
-        <span className={`ml-4 font-medium transition-colors ${isActive ? 'text-orange-400' : 'text-gray-600'}`}>
+        <span className={`ml-4 font-medium transition-colors ${isActive ? 'text-orange-600' : 'text-gray-600'}`}>
             {title}
         </span>
     </div>
 );
 
 export const FormStepper = ({ currentStep, totalSteps }: StepperProps) => {
-    // UPDATED: Reverted back to the 4-step process
     const steps = [
         { number: 1, title: "Property Details" },
         { number: 2, title: "Location" },

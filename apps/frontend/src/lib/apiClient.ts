@@ -3,7 +3,7 @@ import axios from "axios";
 
 const isServer = typeof window === "undefined";
 
-const baseURL = "https://rentverse_core.ilhamdean.cloud/api";
+const baseURL = "https://core.ilhamdean.cloud/api";
 
 const apiClient = axios.create({
   baseURL,

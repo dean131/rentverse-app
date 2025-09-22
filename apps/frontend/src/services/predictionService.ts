@@ -5,7 +5,7 @@ import { PredictionFeatures } from "@/lib/definitions";
 // We create a new Axios instance for this service because it communicates
 // with our Python API on a different port (8000) than our main backend (8080).
 const predictionApiClient = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: "predict.ilhamdean.cloud",
 });
 
 /**

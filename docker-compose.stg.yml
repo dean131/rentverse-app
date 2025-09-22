@@ -5,7 +5,7 @@ services:
       - ./apps/core-service:/app
       - /app/node_modules # Anonymous volume to prevent local node_modules from overwriting the container's
     ports:
-      - "8180:5432"
+      - "8180:8080"
 
   frontend:
     volumes:

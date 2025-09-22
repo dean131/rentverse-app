@@ -46,7 +46,7 @@ export const FileUpload = ({ onFilesChange }: FileUploadProps) => {
       <div
         {...getRootProps()}
         className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors
-          ${isDragActive ? 'border-orange-600 bg-orange-50' : 'border-gray-300 bg-gray-50 hover:border-orange-500'}`}
+          ${isDragActive ? 'border-orange-400 bg-orange-50' : 'border-gray-300 bg-gray-50 hover:border-orange-500'}`}
       >
         <input {...getInputProps()} />
         <p className="text-gray-500">Drag & drop photos here, or click to select files</p>

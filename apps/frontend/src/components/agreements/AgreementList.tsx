@@ -8,109 +8,113 @@ import { approveAgreement, getSigningUrl } from '@/services/agreementService';
 import { Button } from '@/components/ui/Button';
 import Image from 'next/image';
 import axios from 'axios';
+import Link from 'next/link';
 
 interface AgreementListProps {
   agreements: AgreementDetails[];
   onUpdate: () => void;
 }
 
-const AgreementCard = ({ agreement, onUpdate }: { agreement: AgreementDetails; onUpdate: () => void; }) => {
+const renderStatusBadge = (status: string) => {
+    const statusStyles: Record<string, string> = {
+        PENDING_OWNER_APPROVAL: 'bg-yellow-100 text-yellow-800',
+        PENDING_SIGNATURES: 'bg-blue-100 text-blue-800',
+        ACTIVE: 'bg-green-100 text-green-800',
+        OWNER_REJECTED: 'bg-red-100 text-red-800',
+    };
+    return (
+        <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
+            {status.replace(/_/g, ' ').toLowerCase()}
+        </span>
+    );
+};
+
+export const AgreementList = ({ agreements, onUpdate }: AgreementListProps) => {
     const { user } = useAuth();
-    const [isLoading, setIsLoading] = useState(false);
+    const [loadingStates, setLoadingStates] = useState<Record<number, boolean>>({});
     const [error, setError] = useState<string | null>(null);
 
-    const isOwner = user?.userId === agreement.owner.id;
-
-    const handleApprove = async () => {
-        setIsLoading(true);
+    const handleAction = async (action: 'approve' | 'sign', agreementId: number) => {
+        setLoadingStates(prev => ({ ...prev, [agreementId]: true }));
         setError(null);
         try {
-            await approveAgreement(agreement.id);
-            alert("Agreement approved! A signing request has been sent via DocuSign to both parties.");
-            onUpdate();
+            if (action === 'approve') {
+                await approveAgreement(agreementId);
+                alert("Agreement approved! A signing request has been sent via DocuSign.");
+            } else if (action === 'sign') {
+                const signingUrl = await getSigningUrl(agreementId);
+                window.location.href = signingUrl;
+            }
+            onUpdate(); // Refresh the list after any action
         } catch (err) {
-            console.error("Failed to approve agreement:", err);
+            console.error(`Failed to ${action} agreement:`, err);
             if (axios.isAxiosError(err) && err.response) {
-                setError(err.response.data?.message || "Failed to approve.");
+                setError(err.response.data?.message || `Failed to ${action} agreement.`);
             } else {
                 setError("An unexpected error occurred.");
             }
         } finally {
-            setIsLoading(false);
-        }
-    };
-    
-    const handleSign = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const signingUrl = await getSigningUrl(agreement.id);
-            window.location.href = signingUrl;
-        } catch (err) {
-            console.error("Failed to get signing URL:", err);
-            setError("Could not retrieve signing link. Please try again.");
-        } finally {
-            setIsLoading(false);
+            setLoadingStates(prev => ({ ...prev, [agreementId]: false }));
         }
     };
 
-    const renderStatusBadge = (status: string) => {
-        const statusStyles: Record<string, string> = {
-            PENDING_OWNER_APPROVAL: 'bg-yellow-100 text-yellow-800',
-            PENDING_SIGNATURES: 'bg-blue-100 text-blue-800',
-            ACTIVE: 'bg-green-100 text-green-800',
-            OWNER_REJECTED: 'bg-red-100 text-red-800',
-        };
-        return (
-            <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
-                {status.replace(/_/g, ' ').toLowerCase()}
-            </span>
-        );
-    };
-
-    return (
-        <div className="border rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
-            <div className="flex items-center space-x-4">
-                <div className="relative h-16 w-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
-                    <Image src={agreement.property.images[0]?.imageUrl || 'https://placehold.co/100x100'} alt={agreement.property.title} layout="fill" objectFit="cover" />
-                </div>
-                <div>
-                    <p className="font-semibold text-gray-800">{agreement.property.title}</p>
-                    <p className="text-sm text-gray-500">
-                        {isOwner ? `Tenant: ${agreement.tenant.fullName}` : `Owner: ${agreement.owner.fullName}`}
-                    </p>
-                </div>
-            </div>
-            <div className="flex items-center space-x-4">
-                {renderStatusBadge(agreement.status)}
-
-                {isOwner && agreement.status === 'PENDING_OWNER_APPROVAL' && (
-                    <Button onClick={handleApprove} disabled={isLoading} size="sm">Approve</Button>
-                )}
-                
-                {/* NEW: Show the "Sign" button when the document is ready for signing */}
-                {agreement.status === 'PENDING_SIGNATURES' && (
-                    <Button onClick={handleSign} disabled={isLoading} size="sm">
-                        {isLoading ? 'Loading...' : 'Sign Document'}
-                    </Button>
-                )}
-
-                 {error && <p className="text-xs text-red-500">{error}</p>}
-            </div>
-        </div>
-    );
-};
-
-
-export const AgreementList = ({ agreements, onUpdate }: AgreementListProps) => {
     if (agreements.length === 0) {
         return <p className="text-gray-500 text-center py-10">You have no agreements yet.</p>
     }
+
     return (
-        <div className="space-y-4">
-            {agreements.map(agreement => (
-                <AgreementCard key={agreement.id} agreement={agreement} onUpdate={onUpdate} />
-            ))}
+        <div className="overflow-x-auto">
+            {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+            <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                    <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Other Party</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                    {agreements.map((agreement) => {
+                        const isOwner = user?.userId === agreement.owner.id;
+                        const otherParty = isOwner ? agreement.tenant : agreement.owner;
+                        const isLoading = loadingStates[agreement.id];
+
+                        return (
+                            <tr key={agreement.id}>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="flex items-center">
+                                        <div className="flex-shrink-0 h-10 w-10">
+                                            <Image className="h-10 w-10 rounded-md object-cover" src={agreement.property.images[0]?.imageUrl || 'https://placehold.co/100x100'} alt="" width={40} height={40} />
+                                        </div>
+                                        <div className="ml-4">
+                                            <div className="text-sm font-medium text-gray-900">{agreement.property.title}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{otherParty.fullName}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {new Date(agreement.startDate).toLocaleDateString()} - {new Date(agreement.endDate).toLocaleDateString()}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">{renderStatusBadge(agreement.status)}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    {isOwner && agreement.status === 'PENDING_OWNER_APPROVAL' && (
+                                        <Button onClick={() => handleAction('approve', agreement.id)} disabled={isLoading} size="sm">
+                                            {isLoading ? '...' : 'Approve'}
+                                        </Button>
+                                    )}
+                                    {agreement.status === 'PENDING_SIGNATURES' && (
+                                        <Button onClick={() => handleAction('sign', agreement.id)} disabled={isLoading} size="sm">
+                                            {isLoading ? '...' : 'Sign Document'}
+                                        </Button>
+                                    )}
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
         </div>
     );
 };

@@ -10,11 +10,12 @@ import {
   RawPropertyFromAPI,
   PropertyFilters,
 } from "@/lib/definitions";
-
-// --- Fetch Functions (for dropdowns, etc.) ---
+import { OwnerProperty } from "@/lib/definitions";
 
 export const getProjects = async (): Promise<Project[]> => {
-  const response = await apiClient.get("/projects");
+  const response = await apiClient.get(
+    "/projectsimport { OwnerProperty } from '@/lib/definitions';"
+  );
   return response.data.data;
 };
 
@@ -23,14 +24,9 @@ export const getViews = async (): Promise<View[]> => {
   return response.data.data;
 };
 
-// --- Mutation Functions (for submitting data) ---
-
 export const submitProperty = async (
   data: PropertySubmission
 ): Promise<PropertyDetailed> => {
-  // In a real-world scenario, you would first upload the files from `data.images`
-  // to a service like AWS S3 and get back an array of URLs.
-  // For this MVP, we will simulate this by sending placeholder image URLs.
   const imageUrls = [
     {
       imageUrl:
@@ -43,8 +39,6 @@ export const submitProperty = async (
     },
   ];
 
-  // We construct the payload that our backend API expects.
-  // We exclude the client-side `images` FileList.
   const payload = {
     title: data.title,
     description: data.description,
@@ -97,5 +91,10 @@ export const getPropertyById = async (
 
 export const getAmenities = async (): Promise<Amenity[]> => {
   const response = await apiClient.get("/amenities");
+  return response.data.data;
+};
+
+export const getOwnerProperties = async (): Promise<OwnerProperty[]> => {
+  const response = await apiClient.get("/properties/mine/my-properties");
   return response.data.data;
 };

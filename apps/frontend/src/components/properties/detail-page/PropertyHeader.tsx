@@ -24,7 +24,7 @@ export const PropertyHeader = ({ title, address, price, period, onRequestBooking
             <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
             <p className="text-md text-gray-500 mt-1">{address}</p>
             <div className="flex justify-between items-center mt-4">
-                <p className="text-2xl font-bold text-orange-600">
+                <p className="text-2xl font-bold text-orange-400">
                     {formatPrice(price)}
                     {period && <span className="text-sm font-normal text-gray-500">/{period.toLowerCase()}</span>}
                 </p>

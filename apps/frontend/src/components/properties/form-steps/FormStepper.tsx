@@ -16,7 +16,6 @@ const Step = ({ stepNumber, title, isActive, isCompleted }: { stepNumber: number
 );
 
 export const FormStepper = ({ currentStep, totalSteps }: StepperProps) => {
-    // UPDATED: Reverted back to the 4-step process
     const steps = [
         { number: 1, title: "Property Details" },
         { number: 2, title: "Location" },

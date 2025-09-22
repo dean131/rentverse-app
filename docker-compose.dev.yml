@@ -2,13 +2,18 @@ services:
   postgres:
     ports:
       - "5432:5432"
+    networks:
+      - tunnel
+
   core-service:
     command: npm run dev
     volumes:
       - ./apps/core-service:/app
-      - /app/node_modules # Anonymous volume to prevent local node_modules from overwriting the container's
+      - /app/node_modules
     ports:
-      - "5432:5432"
+      - "8080:8080"
+    networks:
+      - tunnel
 
   frontend:
     command: npm run dev
@@ -18,13 +23,19 @@ services:
       - /app/.next
     ports:
       - "3000:3000"
+    env_file: ./apps/frontend/.env.dev
+    networks:
+      - tunnel
 
-  # NEW: Added development settings for the prediction-service
   prediction-service:
-    # The command uses --reload to automatically restart the server when code changes
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
-      # Mount the local directory into the container for live code changes
       - ./apps/prediction-service:/app
     ports:
       - "8000:8000"
+    networks:
+      - tunnel
+
+networks:
+  tunnel:
+    external: true

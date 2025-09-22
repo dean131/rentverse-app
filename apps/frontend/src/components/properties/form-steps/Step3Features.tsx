@@ -23,7 +23,7 @@ const FormCheckbox = ({ name, value, label, register }: FormCheckboxProps) => (
             type="checkbox"
             {...register(name)}
             value={value}
-            className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+            className="h-4 w-4 rounded border-gray-300 text-orange-400 focus:ring-orange-500"
         />
         <span className="text-sm text-gray-700">{label}</span>
     </label>

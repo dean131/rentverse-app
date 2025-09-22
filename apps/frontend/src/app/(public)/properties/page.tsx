@@ -72,7 +72,6 @@ export default function PropertyListPage() {
             <Suspense fallback={<div className="text-center py-20">Loading page...</div>}>
                 <SearchResults />
             </Suspense>
-            <Footer />
         </div>
     );
 }

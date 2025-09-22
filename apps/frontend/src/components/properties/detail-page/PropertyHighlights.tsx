@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 
 const HighlightItem = ({ icon, value, label }: { icon: ReactNode; value: string | number; label: string }) => (
     <div className="flex items-center space-x-3 bg-gray-100 p-3 rounded-lg">
-        <div className="text-orange-600">{icon}</div>
+        <div className="text-orange-400">{icon}</div>
         <div>
             <p className="font-semibold text-gray-800">{value}</p>
             <p className="text-sm text-gray-500">{label}</p>

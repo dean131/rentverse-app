@@ -28,7 +28,6 @@ services:
     build:
       context: ./apps/frontend
       dockerfile: Dockerfile
-    env_file: ./apps/frontend/.env
     depends_on:
       - core-service
     networks:

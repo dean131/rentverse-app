@@ -6,12 +6,12 @@ import { getMyAgreements } from '@/services/agreementService';
 import { AgreementDetails } from '@/lib/definitions';
 import { AgreementList } from '@/components/agreements/AgreementList';
 
+// REMOVED: The DashboardLayout wrapper is no longer needed here, as the parent layout handles it.
 export default function MyAgreementsPage() {
   const [agreements, setAgreements] = useState<AgreementDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Use useCallback to create a stable function reference for refetching
   const fetchAgreements = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -42,4 +42,3 @@ export default function MyAgreementsPage() {
     </div>
   );
 }
-

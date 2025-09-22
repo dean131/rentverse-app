@@ -23,7 +23,7 @@ export const config = {
   jwt: {
     accessSecret: validateEnv("JWT_ACCESS_SECRET"),
     refreshSecret: validateEnv("JWT_REFRESH_SECRET"),
-    accessExpiration: "15m",
+    accessExpiration: "60m",
     refreshExpiration: "7d",
   },
 

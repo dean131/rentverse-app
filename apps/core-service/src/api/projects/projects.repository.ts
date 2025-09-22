@@ -1,12 +1,11 @@
+// File Path: apps/core-service/src/api/projects/projects.repository.ts
 import { prisma } from "../../lib/prisma.js";
-import { Project } from "@prisma/client";
 
 export class ProjectRepository {
-  async findAllProjects(): Promise<Pick<Project, "id" | "projectName">[]> {
+  async findAll() {
     return prisma.project.findMany({
-      select: {
-        id: true,
-        projectName: true,
+      orderBy: {
+        projectName: "asc",
       },
     });
   }

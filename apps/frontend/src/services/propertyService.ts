@@ -13,9 +13,7 @@ import {
 import { OwnerProperty } from "@/lib/definitions";
 
 export const getProjects = async (): Promise<Project[]> => {
-  const response = await apiClient.get(
-    "/projectsimport { OwnerProperty } from '@/lib/definitions';"
-  );
+  const response = await apiClient.get("/projects");
   return response.data.data;
 };
 

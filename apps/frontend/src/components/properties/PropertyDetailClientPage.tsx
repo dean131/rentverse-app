@@ -8,7 +8,6 @@ import { PropertyHeader } from './detail-page/PropertyHeader';
 import { PropertyHighlights } from './detail-page/PropertyHighlights';
 import { AgentCard } from './detail-page/AgentCard';
 import { PropertyInfoTabs } from './detail-page/PropertyInfoTabs';
-import { Footer } from '@/components/home/Footer';
 import { BookingModal } from './detail-page/BookingModal'; // Import the new modal
 import { useAuth } from '@/hooks/useAuth';
 
@@ -53,7 +52,6 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
           </div>
         </div>
       </div>
-      <Footer />
 
       {/* Conditionally render the booking modal */}
       {isBookingModalOpen && (

@@ -6,8 +6,6 @@ services:
       POSTGRES_USER: amoeba
       POSTGRES_PASSWORD: pass123
       POSTGRES_DB: rentversedb
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -18,8 +16,6 @@ services:
     build:
       context: ./apps/core-service
       dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
     depends_on:
       - postgres
     env_file: ./apps/core-service/.env
@@ -31,8 +27,6 @@ services:
     build:
       context: ./apps/frontend
       dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
     env_file: ./apps/frontend/.env
     depends_on:
       - core-service
@@ -45,8 +39,7 @@ services:
     build:
       context: ./apps/prediction-service
       dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
+
     networks:
       - rentverse_network
 

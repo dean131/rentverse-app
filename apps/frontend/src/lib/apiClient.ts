@@ -1,9 +1,7 @@
 // File Path: apps/frontend/src/lib/apiClient.ts
 import axios from "axios";
 
-const baseURL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://rentverse_core_service.ilhamdean.cloud/api";
+const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080/api";
 
 const apiClient = axios.create({
   baseURL,

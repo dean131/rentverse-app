@@ -55,7 +55,7 @@ export const OwnerPropertyList = ({ properties }: OwnerPropertyListProps) => {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(property.createdAt).toLocaleDateString()}</td>
                             <td className="px-6 py-4 whitespace-nowrap">{renderStatusBadge(property.status)}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <Link href={`/properties/${property.id}`} className="text-orange-600 hover:text-orange-900">
+                                <Link href={`/properties/${property.id}`} className="text-orange-400 hover:text-orange-900">
                                     View
                                 </Link>
                             </td>

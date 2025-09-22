@@ -9,8 +9,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        solid: "bg-orange-600 text-white hover:bg-orange-700 focus:ring-orange-600",
-        outline: "bg-transparent border border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white focus:ring-orange-600",
+        solid: "bg-orange-400 text-white hover:bg-orange-700 focus:ring-orange-400",
+        outline: "bg-transparent border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white focus:ring-orange-400",
       },
       size: {
         default: "px-6 py-2 text-sm",

@@ -138,7 +138,7 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                         <button 
                             type="button" 
                             onClick={applySuggestion} 
-                            className="text-sm font-semibold text-orange-600 hover:text-orange-800 transition-colors"
+                            className="text-sm font-semibold text-orange-400 hover:text-orange-800 transition-colors"
                         >
                             Apply
                         </button>

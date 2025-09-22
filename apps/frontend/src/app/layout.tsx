@@ -1,46 +1,34 @@
-// File Path: apps/frontend/src/app/(main)/layout.tsx
-'use client'; 
+// File Path: apps/frontend/src/app/layout.tsx
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { AuthProvider } from "@/contexts/AuthContext";
 
-import { ReactNode } from "react";
-import { usePathname } from 'next/navigation';
-import { useAuth } from "@/hooks/useAuth";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/home/Footer";
+const inter = Inter({ subsets: ["latin"] });
 
-// This "smart" layout component now uses an explicit list of dashboard routes.
-export default function MainAppLayout({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const { user, isLoading } = useAuth();
+export const metadata: Metadata = {
+  title: "Rentverse App",
+  description: "An integrated property listing platform",
+};
 
-  // CORRECTED: Define which routes should use the full dashboard layout.
-  // The property detail page is NOT on this list.
-  const dashboardRoutes = [
-    '/dashboard',
-    '/agreements',
-    '/properties/submit',
-  ];
-
-  const isDashboardRoute = dashboardRoutes.some(route => pathname.startsWith(route));
-
-  if (isLoading) {
-    return <div className="flex h-screen items-center justify-center">Loading Application...</div>;
-  }
-
-  // If the user is on a dashboard route AND is logged in, show the dashboard layout.
-  if (isDashboardRoute && user) {
-    return <DashboardLayout>{children}</DashboardLayout>;
-  }
-
-  // Otherwise, for all other pages (homepage, property details, etc.),
-  // show the standard public layout with a navbar and footer.
+// This RootLayout is the top-level component for your entire application.
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <Navbar />
-      <main className="flex-grow">
-        {children}
-      </main>
-      <Footer />
-    </div>
+    <html lang="en">
+      <body className={inter.className}>
+        {/* The AuthProvider wraps the entire application. This is what makes
+            the useAuth() hook available to all child components and layouts.
+            By placing it here at the root, we ensure that every page,
+            including error pages, is within the context. */}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
+    </html>
   );
 }
+

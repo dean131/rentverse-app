@@ -2,7 +2,6 @@
 import { Hero } from '@/components/home/Hero';
 import { Stats } from '@/components/home/Stats';
 import { FeaturedProperties } from '@/components/home/FeaturedProperties';
-import { Footer } from '@/components/home/Footer';
 
 export default function HomePage() {
   return (
@@ -10,7 +9,6 @@ export default function HomePage() {
       <Hero />
       <Stats />
       <FeaturedProperties />
-      <Footer />
     </div>
   );
 }

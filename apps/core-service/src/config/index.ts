@@ -23,8 +23,8 @@ export const config = {
   jwt: {
     accessSecret: validateEnv("JWT_ACCESS_SECRET"),
     refreshSecret: validateEnv("JWT_REFRESH_SECRET"),
-    accessExpiration: "60m",
-    refreshExpiration: "7d",
+    accessExpiration: validateEnv("JWT_ACCESS_TOKEN_EXPIRES_IN"),
+    refreshExpiration: validateEnv("JWT_REFRESH_TOKEN_EXPIRES_IN_DAYS"),
   },
 
   docusign: {
@@ -33,5 +33,14 @@ export const config = {
     accountId: validateEnv("DOCUSIGN_ACCOUNT_ID"),
     privateKey: validateEnv("DOCUSIGN_PRIVATE_KEY_BASE64"),
     webhookSecret: validateEnv("DOCUSIGN_WEBHOOK_SECRET"),
+  },
+
+  minio: {
+    endpoint: validateEnv("MINIO_ENDPOINT"),
+    port: parseInt(validateEnv("MINIO_PORT"), 10),
+    useSSL: process.env.MINIO_USE_SSL === "true",
+    bucket: validateEnv("MINIO_BUCKET_NAME", "rentverse"),
+    accessKey: validateEnv("MINIO_ACCESS_KEY"),
+    secretKey: validateEnv("MINIO_SECRET_KEY"),
   },
 };

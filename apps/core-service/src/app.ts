@@ -49,6 +49,10 @@ import { WebhookService } from "./api/webhooks/webhooks.service.js";
 import { WebhookController } from "./api/webhooks/webhooks.controller.js";
 import { createWebhookRouter } from "./api/webhooks/webhooks.routes.js";
 
+import { StorageService } from "./services/storage.service.js";
+import { UploadController } from "./api/uploads/uploads.controller.js";
+import { createUploadRouter } from "./api/uploads/uploads.routes.js";
+
 import { DocusignService } from "./services/docusign.service.js";
 
 const app = express();
@@ -131,6 +135,9 @@ const agreementController = new AgreementController(agreementService);
 const webhookService = new WebhookService(agreementRepository);
 const webhookController = new WebhookController(webhookService);
 
+const storageService = new StorageService();
+const uploadController = new UploadController(storageService);
+
 // --- API Routes ---
 app.use("/api/auth", createAuthRouter(authController));
 app.use("/api/properties", createPropertyRouter(propertyController));
@@ -141,6 +148,7 @@ app.use("/api/views", createViewRouter(viewController));
 app.use("/api/amenities", createAmenityRouter(amenityController));
 app.use("/api/agreements", createAgreementRouter(agreementController));
 app.use("/api/webhooks", createWebhookRouter(webhookController));
+app.use("/api/uploads", createUploadRouter(uploadController));
 
 // --- Error Handler ---
 app.use(errorHandler);

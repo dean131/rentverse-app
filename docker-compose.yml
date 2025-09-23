@@ -1,13 +1,25 @@
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: rentverse_db
+    container_name: rentverse_postgres
     environment:
-      POSTGRES_USER: amoeba
-      POSTGRES_PASSWORD: pass123
-      POSTGRES_DB: rentversedb
+      POSTGRES_USER: ${DB_USER:-dbadmin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-dbadmin}
+      POSTGRES_DB: ${DB_NAME:-rentversedb}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rentverse_network
+
+  minio:
+    image: minio/minio:latest
+    container_name: rentverse_minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
     networks:
       - rentverse_network
 
@@ -33,13 +45,11 @@ services:
     networks:
       - rentverse_network
 
-  # NEW: Added the prediction-service to our composition
   prediction-service:
     container_name: rentverse_prediction_service
     build:
       context: ./apps/prediction-service
       dockerfile: Dockerfile
-
     networks:
       - rentverse_network
 
@@ -49,3 +59,4 @@ networks:
 
 volumes:
   postgres_data:
+  minio_data: 

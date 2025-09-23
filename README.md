@@ -1,7 +1,7 @@
 ### **Rentverse: Full-Stack Property Rental & Management Platform**
 
 **Submission for the Rentverse Challenge**
-**Team**: [Your Team Name Here]
+**Team**: [Amoeba]
 **Submission Date**: September 21, 2025
 
 ---
@@ -47,7 +47,7 @@ Follow these steps to get the entire Rentverse application running on your local
 ### **Step 1: Clone the Repository**
 
 ```bash
-git clone https://github.com/dean131/rentverse-app
+git clone [https://github.com/dean131/rentverse-app]
 cd rentverse-app
 ```
 
@@ -124,5 +124,5 @@ This feature automates the entire contract signing process, providing a secure a
 
 ### **4. Submission Links**
 
-- **GitHub Repository**: `https://github.com/dean131/rentverse-app`
-- **Demo System / Video**: `https://rentverse.ilhamdean.cloud`
+- **GitHub Repository**: `[https://github.com/dean131/rentverse-app]`
+- **Demo System**: `[https://rentverse.ilhamdean.cloud]`

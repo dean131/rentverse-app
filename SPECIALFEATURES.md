@@ -1,38 +1,45 @@
-### Special Features (Current Implementation)
+Of course. It's a great idea to have a dedicated document that explains the most innovative and complex parts of your project. This will be very impressive for your final submission.
 
-Rentverse is more than just a standard property listing website. We have engineered a full-stack, multi-service platform with a focus on solving real-world problems through advanced technology. Our two most significant special features are the AI-Powered Price Simulator and the End-to-End E-Signature Flow with DocuSign.
-
-#### 1. AI-Powered Price Simulator
-
-This feature provides property owners with real-time, data-driven price suggestions as they fill out the property submission form, helping them set competitive market rates.
-
-**How it works:**
-
-- **Data Collection**: We built a sophisticated web scraper using Python and Selenium to collect thousands of real-world property listings.
-- **Data Cleaning**: A dedicated Python script cleans this raw data, parsing prices, sizes, and locations into a structured, analysis-ready CSV file.
-- **Model Training**: We use this clean data to train several machine learning models. Our script compares their performance and automatically selects the best one (a `RandomForestRegressor` in our case, with an R� score of 0.83).
-- **Prediction API**: A FastAPI server loads the saved model and exposes a `/predict` endpoint.
-- **Frontend Integration**: The submission form calls this API in real-time to display the suggested price to the user.
-
-#### 2. End-to-End E-Signature Flow with DocuSign
-
-This feature automates the entire contract signing process, providing a secure and legally binding workflow.
-
-**How it works:**
-
-- **Booking & Approval**: A tenant requests to book a property, and the owner approves the request in their dashboard.
-- **Envelope Creation**: The owner's approval triggers our backend `DocusignService`, which generates an HTML tenancy agreement and uses the DocuSign API to create a secure "envelope" for signing.
-- **Signing Ceremony**: Users click a "Sign Document" button in their dashboard. Our backend generates a secure, one-time URL that redirects them to the DocuSign signing interface.
-- **Webhook Confirmation**: Once both parties have signed, DocuSign sends a notification to our secure webhook. Our backend verifies the request and automatically updates the agreement's status to `ACTIVE`.
+Here is a detailed explanation of the special features we've built for the Rentverse application.
 
 ---
 
-### Future Features (Roadmap)
+### **Rentverse: Special Features Explanation**
 
-The current Rentverse platform is a powerful MVP. Here are three key features we would prioritize next to further enhance its value.
+Rentverse is more than just a standard property listing website. We have engineered a full-stack, multi-service platform with a focus on solving real-world problems through advanced technology. Our two most significant special features are the AI-Powered Price Simulator and the End-to-End E-Signature Flow with DocuSign.
 
-1.  **Integrated Payment Gateway**: The most logical next step is to integrate a secure payment gateway (like **Midtrans** or **Xendit** for the Indonesian market). This would allow tenants to pay deposits and monthly rent directly through the platform, creating a complete transactional experience.
+### 1. AI-Powered Price Simulator
 
-2.  **In-App Messaging System**: To keep all communication centralized and secure, we would build a real-time chat feature. This would allow tenants and property owners to discuss details, schedule viewings, or handle maintenance requests directly within the Rentverse app.
+This feature is a key differentiator, providing immense value to property owners by helping them set competitive and fair prices for their listings. Instead of guessing, owners get real-time, data-driven suggestions directly within the submission form.
 
-3.  **A Reviews and Ratings System**: Trust is the most important currency in the rental market. We would implement a two-way review system where tenants and owners can rate each other after a tenancy period ends. This would help good users build a positive reputation and foster a safer, more transparent community.
+**How it works:**
+The entire feature is powered by a complete, end-to-end data science pipeline that we built from scratch:
+
+- **Data Collection**: We built a sophisticated web scraper using **Python** and **Selenium** to collect thousands of real-world property listings from public websites like `fazwaz.my`. This ensures our model is trained on recent and relevant market data.
+
+- **Data Cleaning**: A dedicated Python script cleans this raw data using the **Pandas** library. This script standardizes prices (e.g., converting "RM 1,200/mo" to `1200`), parses features (e.g., "1,645 Sqft" to `1645`), and engineers a consistent location feature, saving the output to a clean, analysis-ready CSV file.
+
+- **Model Training & Selection**: To ensure we used the best algorithm, we implemented a "model bake-off." Our training script automatically trains and evaluates several industry-standard models (like Linear Regression and Gradient Boosting). It then compares their performance and selects the best one. For our dataset, the **Random Forest Regressor** was the clear winner, achieving a high **R² score of 0.83**. This means our model can explain 83% of the price variance, making it highly effective. The script then saves the trained model for use in our API.
+
+- **Prediction API**: We built a lightweight, high-performance API using **Python** and **FastAPI**. When this service starts, it loads our trained machine learning model. It exposes a simple `/predict` endpoint that receives property details (like size, bedrooms, location) and instantly returns a price prediction.
+
+- **Frontend Integration**: The user experience is seamless. As a property owner fills out the submission form, the frontend "watches" the relevant fields. Using a debounced request to prevent spamming, it calls our prediction API and displays the suggested price directly in the UI, complete with an "Apply" button to use the suggestion.
+
+### 2. End-to-End E-Signature Flow with DocuSign
+
+This feature transforms Rentverse from a simple listing site into a true transaction platform by automating the entire contract signing process. This provides security, convenience, and legal validity to the agreements made between tenants and owners.
+
+**How it works:**
+The workflow is fully automated and integrated across our services:
+
+- **Booking Initiation**: A logged-in tenant can request to book a property directly from the detail page. This creates a `TenancyAgreement` in our database with a `PENDING_OWNER_APPROVAL` status.
+
+- **Owner Approval & Envelope Creation**: The property owner sees this request in their "My Agreements" dashboard. When they click "Approve," it triggers the `DocusignService` on our backend. This service:
+  1.  Dynamically generates a legal tenancy agreement in HTML with all the relevant details (names, dates, price, property address).
+  2.  Uses the DocuSign eSignature API to create a secure "envelope" containing this document.
+  3.  Defines the two signers (owner and tenant), including where they need to sign, and sends the envelope. This causes DocuSign to email both parties, notifying them that a document is ready for their signature.
+  4.  Saves the unique `envelopeId` from DocuSign to our database to track the signing status.
+
+- **Embedded Signing Ceremony**: Users don't have to leave our platform. When they click "Sign Document" in their dashboard, our backend calls the DocuSign API to generate a secure, one-time URL. The user is then seamlessly redirected to this URL to review and sign the document in an embedded interface.
+
+- **Webhook Confirmation**: The final step is fully automated. We configured a **webhook** in our DocuSign account. Once both parties have signed, DocuSign sends a real-time notification to a secure endpoint on our backend (`/api/webhooks/docusign`). Our backend verifies the request's authenticity using an HMAC signature and then automatically updates the agreement's status in our database to `ACTIVE`, finalizing the booking.

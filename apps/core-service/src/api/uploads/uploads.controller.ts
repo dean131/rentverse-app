@@ -16,10 +16,10 @@ export class UploadController {
   getPresignedUrl = asyncHandler(
     async (req: AuthenticatedRequest, res: Response) => {
       const { contentType } = req.body;
+      console.info(`BACKEND: ${contentType}`);
       if (!contentType) {
         throw new ApiError(400, "Content type of the file is required.");
       }
-
       const result =
         await this.storageService.getPresignedUploadUrl(contentType);
       ApiResponse.success(res, result);

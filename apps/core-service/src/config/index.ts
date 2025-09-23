@@ -36,8 +36,7 @@ export const config = {
   },
 
   minio: {
-    endpoint: validateEnv("MINIO_ENDPOINT"),
-    port: parseInt(validateEnv("MINIO_PORT"), 10),
+    url: validateEnv("MINIO_URL"),
     useSSL: process.env.MINIO_USE_SSL === "true",
     bucket: validateEnv("MINIO_BUCKET_NAME", "rentverse"),
     accessKey: validateEnv("MINIO_ACCESS_KEY"),

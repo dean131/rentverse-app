@@ -1,4 +1,4 @@
-import { Project } from "@prisma/client";
+// File Path: apps/core-service/src/api/projects/projects.service.ts
 import { ProjectRepository } from "./projects.repository.js";
 
 export class ProjectService {
@@ -8,7 +8,7 @@ export class ProjectService {
     this.projectRepository = projectRepository;
   }
 
-  async getAllProjects(): Promise<Pick<Project, "id" | "projectName">[]> {
-    return this.projectRepository.findAllProjects();
+  async getAllProjects() {
+    return this.projectRepository.findAll();
   }
 }

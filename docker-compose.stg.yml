@@ -18,7 +18,7 @@ services:
       - /app/.next
     ports:
       - "3100:3000"
-    env_file: ./apps/frontend/.env.stg
+    env_file: ./apps/frontend/.env.local
 
   prediction-service:
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload

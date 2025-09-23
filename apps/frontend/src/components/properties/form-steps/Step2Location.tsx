@@ -1,7 +1,7 @@
 // File Path: apps/frontend/src/components/properties/form-steps/Step2Location.tsx
 'use client';
 
-import { useEffect, useState, ReactNode, SelectHTMLAttributes } from 'react';
+import { useEffect, useState, SelectHTMLAttributes, ReactNode } from 'react';
 import { UseFormRegister, FieldErrors, Path, FieldError } from 'react-hook-form';
 import { PropertySubmission, Project } from '@/lib/definitions';
 import { getProjects } from '@/services/propertyService';
@@ -11,16 +11,10 @@ interface Step2Props {
     errors: FieldErrors<PropertySubmission>;
 }
 
-// Define strong types for the reusable FormSelect component's props
 interface FormSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
-    label: string;
-    name: Path<PropertySubmission>;
-    register: UseFormRegister<PropertySubmission>;
-    error?: FieldError;
-    children: ReactNode;
+    label: string; name: Path<PropertySubmission>; register: UseFormRegister<PropertySubmission>; error?: FieldError; children: ReactNode;
 }
 
-// Reusable select component, now fully type-safe
 const FormSelect = ({ label, name, register, error, children, ...props }: FormSelectProps) => (
      <div>
         <label htmlFor={name} className="block text-sm font-medium text-gray-700">{label}</label>
@@ -35,7 +29,6 @@ const FormSelect = ({ label, name, register, error, children, ...props }: FormSe
         {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
     </div>
 );
-
 
 export const Step2Location = ({ register, errors }: Step2Props) => {
     const [projects, setProjects] = useState<Project[]>([]);
@@ -59,7 +52,7 @@ export const Step2Location = ({ register, errors }: Step2Props) => {
         <div className="space-y-6">
             <h3 className="text-lg font-semibold">Property Location</h3>
             <p className="text-sm text-gray-500">
-                You can either link this property to an existing project/building or provide a new address.
+                Link this property to an existing project or building to automatically fill in the address.
             </p>
             
             <FormSelect

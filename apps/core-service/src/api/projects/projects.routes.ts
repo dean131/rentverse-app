@@ -1,12 +1,15 @@
+// File Path: apps/core-service/src/api/projects/projects.routes.ts
 import { Router } from "express";
 import { ProjectController } from "./projects.controller.js";
-import { authenticate } from "../../middleware/auth.middleware.js"; // Import the middleware
+import { protect } from "../../middleware/auth.middleware.js";
 
 export const createProjectRouter = (controller: ProjectController): Router => {
   const router = Router();
 
-  // Protect this route with the auth middleware
-  router.get("/", authenticate, controller.getAllProjects);
+  // This route should be protected so only logged-in users (like property owners) can see it
+  router.use(protect);
+
+  router.get("/", controller.getAllProjects);
 
   return router;
 };

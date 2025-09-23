@@ -6,37 +6,55 @@ import { useForm, Path } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { propertySubmissionSchema, PropertySubmission } from '@/lib/definitions';
 import { Step1Details } from './form-steps/Step1Details';
+import { Step2Location } from './form-steps/Step2Location';
+import { Step3Features } from './form-steps/Step3Features';
+import { Step4UploadPhotos } from './form-steps/Step4UploadPhotos';
 import { FormStepper } from './form-steps/FormStepper';
 import { Button } from '@/components/ui/Button';
-
-// We will add imports for other steps here as we build them.
+import { submitProperty } from '@/services/propertyService';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 export const PropertySubmissionForm = () => {
     const [currentStep, setCurrentStep] = useState(1);
-    const totalSteps = 4; // This will increase as we add more steps
+    const [serverError, setServerError] = useState<string | null>(null);
+    const router = useRouter();
+    const totalSteps = 4;
 
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
         trigger,
+        setValue,
         watch,
-        setValue
     } = useForm<PropertySubmission>({
         resolver: zodResolver(propertySubmissionSchema),
-        mode: 'onChange',
+        mode: 'onBlur',
     });
     
-    // Define which fields belong to each step for validation
     const fieldsByStep: Record<number, Path<PropertySubmission>[]> = {
         1: ["title", "description", "listingType", "propertyType", "bedrooms", "bathrooms", "sizeSqft", "furnishingStatus", "rentalPrice", "paymentPeriod", "ownershipDocumentUrl"],
-        // We will add fields for other steps here
+        2: ["projectId"],
+        3: ["viewIds", "amenityIds"],
+        4: ["images"],
     };
 
-    const onSubmit = (data: PropertySubmission) => {
-        console.log("Final Form Data:", data);
-        alert("Property submitted! Check the console for the data.");
-        // Later, we will call our API service here.
+    const onSubmit = async (data: PropertySubmission) => {
+        setServerError(null);
+        try {
+            await submitProperty(data);
+            alert("Property submitted successfully! It is now pending admin approval.");
+            router.push('/dashboard');
+        } catch (error) {
+            console.error("Failed to submit property:", error);
+            if (axios.isAxiosError(error) && error.response) {
+                const message = error.response.data?.message || "An error occurred on the server.";
+                setServerError(`Failed to submit property: ${message}`);
+            } else {
+                setServerError(`Failed to submit property: An unexpected error occurred.`);
+            }
+        }
     };
     
     const handleNextStep = async () => {
@@ -60,18 +78,20 @@ export const PropertySubmissionForm = () => {
             
             <div className="p-8 flex-grow">
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    {/* Render the current step's component */}
                     {currentStep === 1 && <Step1Details register={register} errors={errors} watch={watch} setValue={setValue} />}
-                    {/* We will add other steps here, e.g., {currentStep === 2 && <Step2Location />} */}
+                    {currentStep === 2 && <Step2Location register={register} errors={errors} />}
+                    {currentStep === 3 && <Step3Features register={register} errors={errors} />}
+                    {currentStep === 4 && <Step4UploadPhotos setValue={setValue} errors={errors} />}
 
-                    {/* Navigation Buttons */}
+                    {serverError && <p className="text-sm text-red-600 mt-4 text-center">{serverError}</p>}
+
                     <div className="mt-8 pt-6 border-t flex justify-between">
                         {currentStep > 1 ? (
                             <Button type="button" variant="outline" onClick={handlePrevStep}>
                                 Previous Step
                             </Button>
                         ) : (
-                            <div /> // Placeholder to keep "Next" on the right
+                            <div />
                         )}
 
                         {currentStep < totalSteps ? (

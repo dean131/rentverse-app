@@ -1,3 +1,4 @@
+// File Path: apps/core-service/src/api/projects/projects.controller.ts
 import { Request, Response } from "express";
 import { ProjectService } from "./projects.service.js";
 import { ApiResponse } from "../../utils/response.helper.js";

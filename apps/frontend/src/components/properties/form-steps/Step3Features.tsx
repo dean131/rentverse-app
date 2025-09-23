@@ -77,4 +77,3 @@ export const Step3Features = ({ register, errors }: Step3Props) => {
         </div>
     );
 };
-

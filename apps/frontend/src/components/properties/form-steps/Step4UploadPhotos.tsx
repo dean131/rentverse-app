@@ -30,4 +30,3 @@ export const Step4UploadPhotos = ({ setValue, errors }: Step4Props) => {
     </div>
   );
 };
-

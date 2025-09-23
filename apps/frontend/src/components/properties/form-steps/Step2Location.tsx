@@ -1,34 +1,17 @@
 // File Path: apps/frontend/src/components/properties/form-steps/Step2Location.tsx
 'use client';
 
-import { useEffect, useState, SelectHTMLAttributes, ReactNode } from 'react';
-import { UseFormRegister, FieldErrors, Path, FieldError } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { PropertySubmission, Project } from '@/lib/definitions';
 import { getProjects } from '@/services/propertyService';
+import { FormSelect } from '@/components/ui/FormSelect';
 
 interface Step2Props {
     register: UseFormRegister<PropertySubmission>;
     errors: FieldErrors<PropertySubmission>;
 }
 
-interface FormSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
-    label: string; name: Path<PropertySubmission>; register: UseFormRegister<PropertySubmission>; error?: FieldError; children: ReactNode;
-}
-
-const FormSelect = ({ label, name, register, error, children, ...props }: FormSelectProps) => (
-     <div>
-        <label htmlFor={name} className="block text-sm font-medium text-gray-700">{label}</label>
-        <select
-            id={name}
-            {...register(name)}
-            {...props}
-            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm ${error ? 'border-red-500' : ''}`}
-        >
-            {children}
-        </select>
-        {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
-    </div>
-);
 
 export const Step2Location = ({ register, errors }: Step2Props) => {
     const [projects, setProjects] = useState<Project[]>([]);
@@ -72,4 +55,3 @@ export const Step2Location = ({ register, errors }: Step2Props) => {
         </div>
     );
 };
-

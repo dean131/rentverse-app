@@ -36,7 +36,10 @@ export const config = {
   },
 
   minio: {
+    // Internal URL used by the backend to talk to MinIO (e.g., http://minio:9000 when running in Docker)
     url: validateEnv("MINIO_URL"),
+    // Public URL used for generating presigned URLs that the browser will call (e.g., http://127.0.0.1:9000)
+    publicUrl: validateEnv("MINIO_PUBLIC_URL", process.env.MINIO_URL),
     useSSL: process.env.MINIO_USE_SSL === "true",
     bucket: validateEnv("MINIO_BUCKET_NAME", "rentverse"),
     accessKey: validateEnv("MINIO_ACCESS_KEY"),

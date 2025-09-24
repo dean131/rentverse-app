@@ -23,14 +23,6 @@ export const registerSchema = z
   });
 export type RegisterCredentials = z.infer<typeof registerSchema>;
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-];
-
 export const propertySubmissionSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
@@ -83,25 +75,9 @@ export const propertySubmissionSchema = z.object({
     .string()
     .url("A valid document URL is required.")
     .min(1, "Document URL is required."),
-
   images: z
-    .any()
-    .refine(
-      (files) => (files as FileList)?.length >= 1,
-      "At least one image is required."
-    )
-    .refine((files) => {
-      if (!files || files.length === 0) return true;
-      return Array.from(files as FileList).every(
-        (file) => file.size <= MAX_FILE_SIZE
-      );
-    }, `Max file size is 5MB.`)
-    .refine((files) => {
-      if (!files || files.length === 0) return true;
-      return Array.from(files as FileList).every((file) =>
-        ACCEPTED_IMAGE_TYPES.includes(file.type)
-      );
-    }, "Only .jpg, .jpeg, .png and .webp formats are supported."),
+    .array(z.string().url("Each image must be a valid URL."))
+    .min(1, "At least one image is required."),
 });
 
 export type PropertySubmission = z.infer<typeof propertySubmissionSchema>;

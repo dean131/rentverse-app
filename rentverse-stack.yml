@@ -1,0 +1,112 @@
+services:
+  core-service:
+    image: rentverse-app-core-service:latest
+    networks:
+      - traefik-public
+      - rentverse-internal
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-dbadmin}
+      DB_PASSWORD: ${DB_PASSWORD:-dbadmin}
+      DB_NAME: ${DB_NAME:-rentversedb}
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == rentverse
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.rentverse_core.rule=Host(`${CORE_DOMAIN}`)"
+        - "traefik.http.routers.rentverse_core.entrypoints=websecure"
+        - "traefik.http.routers.rentverse_core.tls.certresolver=le"
+        - "traefik.http.services.rentverse_core.loadbalancer.server.port=8080"
+
+  frontend:
+    image: rentverse-app-frontend:latest
+    networks:
+      - traefik-public
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == rentverse
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.rentverse_frontend.rule=Host(`${FRONT_DOMAIN}`)"
+        - "traefik.http.routers.rentverse_frontend.entrypoints=websecure"
+        - "traefik.http.routers.rentverse_frontend.tls.certresolver=le"
+        - "traefik.http.services.rentverse_frontend.loadbalancer.server.port=3000"
+
+  prediction-service:
+    image: rentverse-app-prediction-service:latest
+    networks:
+      - traefik-public
+      - rentverse-internal
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-dbadmin}
+      DB_PASSWORD: ${DB_PASSWORD:-dbadmin}
+      DB_NAME: ${DB_NAME:-rentversedb}
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == rentverse
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.rentverse_prediction.rule=Host(`${PRED_DOMAIN}`)"
+        - "traefik.http.routers.rentverse_prediction.entrypoints=websecure"
+        - "traefik.http.routers.rentverse_prediction.tls.certresolver=le"
+        - "traefik.http.services.rentverse_prediction.loadbalancer.server.port=8000"
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9090"
+    networks:
+      - traefik-public
+    volumes:
+      - minio-data:/data
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == rentverse
+      labels:
+        - "traefik.enable=true"
+        # API
+        - "traefik.http.routers.rentverse_minio_api.rule=Host(`${MINIO_API_DOMAIN}`)"
+        - "traefik.http.routers.rentverse_minio_api.entrypoints=websecure"
+        - "traefik.http.routers.rentverse_minio_api.tls.certresolver=le"
+        - "traefik.http.services.rentverse_minio_api.loadbalancer.server.port=9000"
+        # Console
+        - "traefik.http.routers.rentverse_minio_console.rule=Host(`${MINIO_CONSOLE_DOMAIN}`)"
+        - "traefik.http.routers.rentverse_minio_console.entrypoints=websecure"
+        - "traefik.http.routers.rentverse_minio_console.tls.certresolver=le"
+        - "traefik.http.services.rentverse_minio_console.loadbalancer.server.port=9090"
+
+  postgres:
+    image: postgres:15-alpine
+    networks:
+      - rentverse-internal
+    environment:
+      POSTGRES_USER: ${DB_USER:-dbadmin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-dbadmin}
+      POSTGRES_DB: ${DB_NAME:-rentversedb}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == rentverse
+
+volumes:
+  minio-data:
+  postgres-data:
+
+networks:
+  traefik-public:
+    external: true
+  rentverse-internal:

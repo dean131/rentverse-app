@@ -13,7 +13,7 @@ services:
       - "traefik.http.routers.rentverse_core.rule=Host(`core_rv.ilhamdean.cloud`)"
       - "traefik.http.routers.rentverse_core.entrypoints=websecure"
       - "traefik.http.routers.rentverse_core.tls.certresolver=le"
-      - "traefik.http.services.myapp.loadbalancer.server.port=8080"
+      - "traefik.http.services.rentverse_core.loadbalancer.server.port=8080"
 
   frontend:
     volumes:
@@ -26,7 +26,7 @@ services:
       - "traefik.http.routers.rentverse_frontend.rule=Host(`front_rv.ilhamdean.cloud`)"
       - "traefik.http.routers.rentverse_frontend.entrypoints=websecure"
       - "traefik.http.routers.rentverse_frontend.tls.certresolver=le"
-      - "traefik.http.services.myapp.loadbalancer.server.port=3000"
+      - "traefik.http.services.rentverse_frontend.loadbalancer.server.port=3000"
 
   prediction-service:
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -37,7 +37,7 @@ services:
       - "traefik.http.routers.rentverse_prediction.rule=Host(`pred_rv.ilhamdean.cloud`)"
       - "traefik.http.routers.rentverse_prediction.entrypoints=websecure"
       - "traefik.http.routers.rentverse_prediction.tls.certresolver=le"
-      - "traefik.http.services.myapp.loadbalancer.server.port=8000"
+      - "traefik.http.services.rentverse_prediction.loadbalancer.server.port=8000"
 
   minio:
     labels:

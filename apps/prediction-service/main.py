@@ -21,6 +21,7 @@ origins = [
     "http://127.0.0.1:3000",
     "https://rentverse_frontend.ilhamdean.cloud",
     "https://rentverse.ilhamdean.cloud",
+    "https://front_rv.ilhamdean.cloud",
 ]
 
 app.add_middleware(

@@ -47,6 +47,9 @@ importers:
       docusign-esign:
         specifier: ^8.4.0
         version: 8.4.0
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.6.1
       express:
         specifier: ^4.18.2
         version: 4.21.2

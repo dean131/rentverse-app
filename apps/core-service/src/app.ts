@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./middleware/errorHandler.middleware.js";
+import { config } from "./config/index.js";
 
 // Import modules
 import { AuthRepository } from "./api/auth/auth.repository.js";
@@ -58,13 +59,9 @@ import { DocusignService } from "./services/docusign.service.js";
 const app = express();
 
 // --- CORS Configuration ---
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-  "https://rentverse_frontend.ilhamdean.cloud",
-  "https://rentverse.ilhamdean.cloud",
-  "https://front_rv.ilhamdean.cloud",
-];
+const allowedOrigins = config.cors.allowedOrigins
+  .split(",")
+  .map((origin) => origin.trim());
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {

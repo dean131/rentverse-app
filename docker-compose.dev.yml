@@ -8,8 +8,8 @@ services:
 
   minio:
     ports:
-      - "9000:9000" 
-      - "9001:9001" 
+      - "9000:9000"
+      - "9001:9001"
     networks:
       - rentverse_network
       - tunnel
@@ -45,6 +45,7 @@ services:
       - ./apps/prediction-service:/app
     ports:
       - "8000:8000"
+    env_file: ./apps/prediction-service/.env
     networks:
       - rentverse_network
       - tunnel

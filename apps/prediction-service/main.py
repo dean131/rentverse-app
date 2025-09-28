@@ -1,35 +1,30 @@
 # File Path: apps/prediction-service/main.py
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 import joblib
 import pandas as pd
 import numpy as np
 import os
 
-# NEW: Import the CORSMiddleware
-from fastapi.middleware.cors import CORSMiddleware
-
 app = FastAPI(title="Rentverse Price Prediction API")
 
-# --- NEW: CORS Configuration ---
-# This is the crucial part that will fix the "Method Not Allowed" error.
-
-# Define the list of origins that are allowed to make requests to this API.
-# For development, this is our frontend's address.
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://rentverse_frontend.ilhamdean.cloud",
-    "https://rentverse.ilhamdean.cloud",
-    "https://front_rv.ilhamdean.cloud",
-]
+# --- CORS Configuration ---
+origins_string = os.getenv("CORS_ALLOWED_ORIGINS")
+if origins_string:
+    origins = [origin.strip() for origin in origins_string.split(",")]
+else:
+    origins = []
+    print(
+        "Warning: CORS_ALLOWED_ORIGINS environment variable not found. CORS is disabled for non-listed origins."
+    )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allow the origins listed above
-    allow_credentials=True,  # Allow cookies to be sent
-    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # --- Model Loading ---

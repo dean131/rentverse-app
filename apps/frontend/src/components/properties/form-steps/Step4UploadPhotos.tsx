@@ -13,7 +13,9 @@ interface Step4Props {
 export const Step4UploadPhotos = ({ setValue, errors }: Step4Props) => {
   const handleUploadComplete = (keys: string[]) => {
     const bucketName = 'rentverse'; // This should match your MinIO bucket name
-    const imageUrls = keys.map(key => `${process.env.NEXT_PUBLIC_MINIO_URL}/${bucketName}/${key}`);
+    // Support both env names; prefer MINIO, fallback to STORAGE_SERVICE
+    const baseUrl = process.env.NEXT_PUBLIC_MINIO_URL || process.env.NEXT_PUBLIC_STORAGE_SERVICE_URL || '';
+    const imageUrls = keys.map(key => `${baseUrl}/${bucketName}/${key}`);
     
     setValue('images', imageUrls, { shouldValidate: true });
   };

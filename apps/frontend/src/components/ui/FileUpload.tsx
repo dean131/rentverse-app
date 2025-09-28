@@ -74,9 +74,9 @@ export const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
             <h4 className="font-semibold text-sm mb-2">Image Previews:</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {previews.map((preview, index) => (
-                <div key={index} className="relative w-full h-32 rounded-md overflow-hidden">
-                    <Image src={preview} alt={`Preview ${index + 1}`} layout="fill" objectFit="cover" />
-                </div>
+        <div key={index} className="relative w-full h-32 rounded-md overflow-hidden">
+          <Image src={preview} alt={`Preview ${index + 1}`} fill style={{ objectFit: 'cover' }} />
+        </div>
             ))}
             </div>
         </div>

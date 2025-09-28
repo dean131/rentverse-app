@@ -12,6 +12,35 @@ import {
   OwnerProperty,
 } from "@/lib/definitions";
 
+// Normalize MinIO image base so Next.js (running inside Docker) can fetch images server-side.
+// - On the server (SSR), replace loopback hosts with the Docker service host (minio:9000 by default).
+// - On the client, keep public/base URL (NEXT_PUBLIC_MINIO_URL or NEXT_PUBLIC_STORAGE_SERVICE_URL) if provided.
+const normalizeImageUrl = (url: string): string => {
+  if (!url) return url;
+  const isServer = typeof window === 'undefined';
+  if (isServer) {
+    const serverMinioBase = process.env.MINIO_INTERNAL_URL || 'http://minio:9000';
+    if (url.startsWith('http://127.0.0.1:9000')) {
+      return url.replace('http://127.0.0.1:9000', serverMinioBase);
+    }
+    if (url.startsWith('http://localhost:9000')) {
+      return url.replace('http://localhost:9000', serverMinioBase);
+    }
+    return url;
+  }
+  // Browser: if a public base is configured, normalize to that for consistency
+  const clientBase = process.env.NEXT_PUBLIC_MINIO_URL || process.env.NEXT_PUBLIC_STORAGE_SERVICE_URL;
+  if (clientBase) {
+    if (url.startsWith('http://127.0.0.1:9000')) {
+      return url.replace('http://127.0.0.1:9000', clientBase);
+    }
+    if (url.startsWith('http://localhost:9000')) {
+      return url.replace('http://localhost:9000', clientBase);
+    }
+  }
+  return url;
+};
+
 /**
  * Fetches a list of projects from the backend.
  */
@@ -98,6 +127,9 @@ export const getPublicProperties = async (
   return response.data.data.map((p: RawPropertyFromAPI) => ({
     ...p,
     address: p.project?.address || "Address not available",
+    images: (p.images || []).map((img: { imageUrl: string }) => ({
+      imageUrl: normalizeImageUrl(img.imageUrl),
+    })),
   }));
 };
 
@@ -108,7 +140,13 @@ export const getPropertyById = async (
   id: number
 ): Promise<PropertyDetailed> => {
   const response = await apiClient.get(`/properties/${id}`);
-  return response.data.data;
+  const data = response.data.data as PropertyDetailed;
+  return {
+    ...data,
+    images: (data.images || []).map((img) => ({
+      imageUrl: normalizeImageUrl(img.imageUrl),
+    })),
+  };
 };
 
 /**
@@ -116,5 +154,11 @@ export const getPropertyById = async (
  */
 export const getOwnerProperties = async (): Promise<OwnerProperty[]> => {
   const response = await apiClient.get("/properties/mine/my-properties");
-  return response.data.data;
+  const items: OwnerProperty[] = response.data.data;
+  return items.map((it) => ({
+    ...it,
+    images: (it.images || []).map((img) => ({
+      imageUrl: normalizeImageUrl(img.imageUrl),
+    })),
+  }));
 };

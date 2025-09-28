@@ -19,26 +19,34 @@ export const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
     setIsUploading(true);
     const newPreviews = acceptedFiles.map(file => URL.createObjectURL(file));
     setPreviews(prev => [...prev, ...newPreviews]);
-    
-    const uploadedFileKeys: string[] = [];
 
-    for (const file of acceptedFiles) {
-      try {
+    // Upload all files in parallel
+    const results = await Promise.allSettled(
+      acceptedFiles.map(async (file) => {
         const { uploadUrl, key } = await getPresignedUrl(file.type);
         await uploadFileToBucket(uploadUrl, file);
-        uploadedFileKeys.push(key);
-      } catch (error) {
-        console.error("Failed to upload file:", file.name, error);
-        alert(`Failed to upload ${file.name}. Please try again.`);
-        setPreviews(currentPreviews => currentPreviews.filter(p => p !== URL.createObjectURL(file)));
+        return key;
+      })
+    );
+
+    const successKeys: string[] = [];
+    const failedFiles: string[] = [];
+    results.forEach((res, idx) => {
+      if (res.status === 'fulfilled') {
+        successKeys.push(res.value);
+      } else {
+        failedFiles.push(acceptedFiles[idx]?.name || `File-${idx + 1}`);
       }
-    }
+    });
 
     setIsUploading(false);
-    onUploadComplete(uploadedFileKeys);
+    if (successKeys.length) onUploadComplete(successKeys);
 
     if (fileRejections.length > 0) {
-        alert("Some files were rejected. Please ensure they are valid image files under 5MB.");
+      alert("Some files were rejected. Please ensure they are valid image files under 5MB.");
+    }
+    if (failedFiles.length > 0) {
+      alert(`Failed to upload: ${failedFiles.join(', ')}. Please try again.`);
     }
   }, [onUploadComplete]);
 

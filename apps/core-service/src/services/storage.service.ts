@@ -5,6 +5,7 @@ import {
   HeadBucketCommand,
   CreateBucketCommand,
   PutBucketCorsCommand,
+  PutBucketPolicyCommand,
   type CORSConfiguration,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -85,6 +86,30 @@ export class StorageService {
     } catch (err) {
       // Non-fatal if we lack permission; uploads may still work if CORS was set manually
       console.info("StorageService: Skipping CORS setup:", (err as Error).message);
+    }
+
+    // Ensure bucket policy allows public read of objects so images can be fetched without auth
+    const publicReadPolicy = {
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Sid: "PublicReadGetObject",
+          Effect: "Allow",
+          Principal: "*",
+          Action: ["s3:GetObject"],
+          Resource: [`arn:aws:s3:::${this.bucketName}/*`],
+        },
+      ],
+    };
+    try {
+      await this.s3Client.send(
+        new PutBucketPolicyCommand({
+          Bucket: this.bucketName,
+          Policy: JSON.stringify(publicReadPolicy),
+        })
+      );
+    } catch (err) {
+      console.info("StorageService: Skipping bucket policy setup:", (err as Error).message);
     }
   }
 

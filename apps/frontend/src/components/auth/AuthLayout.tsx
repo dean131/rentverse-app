@@ -16,8 +16,8 @@ export const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
         <Image
           src="/login-bg.jpg"
           alt="Comfortable modern living room"
-          layout="fill"
-          objectFit="cover"
+          fill
+          style={{ objectFit: 'cover' }}
           quality={100}
           priority
         />

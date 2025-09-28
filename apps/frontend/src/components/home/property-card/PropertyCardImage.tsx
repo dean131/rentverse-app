@@ -15,8 +15,8 @@ export const PropertyCardImage = ({ property }: Props) => {
       <Image
         src={imageUrl}
         alt={`Image of ${property.title}`}
-        layout="fill"
-        objectFit="cover"
+        fill
+        style={{ objectFit: 'cover' }}
       />
       <ListingTypeTag listingType={property.listingType} />
     </div>

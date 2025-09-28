@@ -1,3 +1,4 @@
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -21,7 +22,26 @@ const nextConfig: NextConfig = {
         port: "9000",
         pathname: "/**",
       },
+      {
+        protocol: "http",
+        hostname: "minio",
+        port: "9000",
+        pathname: "/**",
+      },
     ],
+  },
+  async rewrites() {
+    const target =
+      process.env.CORE_SERVICE_URL ||
+      "http://core-service:8080" ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      "http://127.0.0.1:8080";
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${target}/api/:path*`,
+      },
+    ];
   },
 };
 

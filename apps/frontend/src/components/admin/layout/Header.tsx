@@ -14,8 +14,8 @@ export const Header = () => {
                     <Image 
                         src={'https://placehold.co/100x100/CCCCCC/FFFFFF/png?text=User'}
                         alt="User Profile"
-                        layout="fill"
-                        objectFit="cover"
+                        fill
+                        style={{ objectFit: 'cover' }}
                     />
                 </div>
                 <div>

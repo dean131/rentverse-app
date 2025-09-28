@@ -24,8 +24,8 @@ export const SocialIcon = ({ href, src, alt }: Props) => (
       <Image
         src={src}
         alt={alt}
-        layout="fill"
-        objectFit="contain" // Ensures the icon fits within the box without being stretched
+        fill
+        style={{ objectFit: 'contain' }} // Ensures the icon fits within the box without being stretched
       />
     </div>
   </Link>

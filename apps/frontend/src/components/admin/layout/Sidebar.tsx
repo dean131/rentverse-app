@@ -31,9 +31,8 @@ export const Sidebar = () => {
       <div className="flex flex-col h-full">
         {/* REMOVED: 'border-b' class from the logo container */}
         <div className="h-20 flex items-center justify-center mb-10">
-          <Link href="/">
-            <Logo className="h-8 w-auto text-orange-400" />
-          </Link>
+          {/* Logo component already renders a Link to "/", so don't wrap it again */}
+          <Logo className="h-8 w-auto text-orange-400" />
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
           {navItems.map((item) => (

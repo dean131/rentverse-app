@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setAuthHeader(accessToken);
       sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     } catch (error) {
-      console.log('No active session found or refresh failed.');
+      console.log(`No active session found or refresh failed. \nError: ${error}`);
       setUser(null);
       setAuthHeader(null);
       sessionStorage.removeItem(ACCESS_TOKEN_KEY);

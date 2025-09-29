@@ -24,7 +24,7 @@ export const AdminDashboard = () => {
         const data = await getPendingProperties();
         setProperties(data);
       } catch (err) {
-        setError("Could not load pending properties.");
+        setError(`Could not load pending properties. \nError: ${err}`);
       } finally {
         setIsLoading(false);
       }

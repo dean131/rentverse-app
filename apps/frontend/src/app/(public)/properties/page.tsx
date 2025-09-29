@@ -6,7 +6,6 @@ import { useSearchParams } from 'next/navigation';
 import { PropertyPublic, PropertyFilters } from '@/lib/definitions';
 import { getPublicProperties } from '@/services/propertyService';
 import { PropertyCard } from '@/components/home/PropertyCard';
-import { Footer } from '@/components/home/Footer';
 import { PropertySearchFilters } from '@/components/properties/PropertySearchFilters';
 
 const SearchResults = () => {

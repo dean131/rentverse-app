@@ -5,7 +5,6 @@ import { useState, useCallback } from 'react';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import Image from 'next/image';
 import { getPresignedUrl, uploadFileToBucket } from '@/services/uploadService';
-import { Button } from './Button';
 
 interface FileUploadProps {
   onUploadComplete: (keys: string[]) => void;

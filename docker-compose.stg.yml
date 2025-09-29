@@ -1,10 +1,5 @@
 services:
-  postgres:
-    ports:
-      - "5432:5432"
-
   core-service:
-    command: npm run dev
     volumes:
       - ./apps/core-service:/app
       - /app/node_modules
@@ -30,8 +25,6 @@ services:
 
   prediction-service:
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    volumes:
-      - ./apps/prediction-service:/app
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.rentverse_prediction.rule=Host(`pred_rv.ilhamdean.cloud`)"
@@ -42,13 +35,11 @@ services:
   minio:
     labels:
       - "traefik.enable=true"
-
       # --- Router untuk API (port 9000) ---
       - "traefik.http.routers.rentverse_minio_api.rule=Host(`minio_rv.ilhamdean.cloud`)"
       - "traefik.http.routers.rentverse_minio_api.entrypoints=websecure"
       - "traefik.http.routers.rentverse_minio_api.tls.certresolver=le"
       - "traefik.http.services.rentverse_minio_api.loadbalancer.server.port=9000"
-
       # --- Router untuk Console (port 9090) ---
       - "traefik.http.routers.rentverse_minio_console.rule=Host(`minio_console_rv.ilhamdean.cloud`)"
       - "traefik.http.routers.rentverse_minio_console.entrypoints=websecure"

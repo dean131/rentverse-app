@@ -51,6 +51,9 @@ services:
     build:
       context: ./apps/prediction-service
       dockerfile: Dockerfile
+    volumes:
+      - ./train/property_price_model.joblib:/app/property_price_model.joblib
+      - ./train/model_columns.joblib:/app/model_columns.joblib
     networks:
       - rentverse_network
 

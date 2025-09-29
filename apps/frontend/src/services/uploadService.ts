@@ -20,7 +20,9 @@ export const uploadFileToBucket = async (
   uploadUrl: string,
   file: File
 ): Promise<void> => {
-  await axios.put(uploadUrl, file, {
+  const buffer = await file.arrayBuffer();
+
+  await axios.put(uploadUrl, buffer, {
     headers: {
       "Content-Type": file.type,
     },

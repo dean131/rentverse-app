@@ -1,7 +1,7 @@
 // File Path: apps/frontend/src/app/(public)/layout.tsx
 import { ReactNode } from "react";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/home/Footer";
+import { Navbar } from "@/ui/layout/Navbar";
+import { Footer } from "@/features/home/components/Footer";
 
 // This layout is for all public-facing pages (homepage, property search, property details).
 export default function PublicLayout({ children }: { children: ReactNode }) {

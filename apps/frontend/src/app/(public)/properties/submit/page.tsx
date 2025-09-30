@@ -1,5 +1,5 @@
 // File Path: apps/frontend/src/app/(main)/properties/submit/page.tsx
-import { PropertySubmissionForm } from "@/components/properties/PropertySubmissionForm";
+import { PropertySubmissionForm } from "@/features/properties/components/PropertySubmissionForm";
 
 // This page now provides a clean background and title for the form.
 export default function SubmitPropertyPage() {

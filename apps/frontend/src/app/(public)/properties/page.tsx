@@ -4,9 +4,9 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PropertyPublic, PropertyFilters } from '@/lib/definitions';
-import { getPublicProperties } from '@/services/propertyService';
-import { PropertyCard } from '@/components/home/PropertyCard';
-import { PropertySearchFilters } from '@/components/properties/PropertySearchFilters';
+import { getPublicProperties } from '@/features/properties/propertyService';
+import { PropertyCard } from '@/features/home/components/PropertyCard';
+import { PropertySearchFilters } from '@/features/properties/components/PropertySearchFilters';
 
 const SearchResults = () => {
     const searchParams = useSearchParams();

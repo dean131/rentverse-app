@@ -2,9 +2,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { getMyAgreements } from '@/services/agreementService';
+import { getMyAgreements } from '@/features/agreements/agreementService';
 import { AgreementDetails } from '@/lib/definitions';
-import { AgreementList } from '@/components/agreements/AgreementList';
+import { AgreementList } from '@/features/agreements/components/AgreementList';
 
 // REMOVED: The DashboardLayout wrapper is no longer needed here, as the parent layout handles it.
 export default function MyAgreementsPage() {

@@ -1,6 +1,6 @@
 // File Path: apps/frontend/src/app/(main)/properties/[id]/page.tsx
-import { getPropertyById } from '@/services/propertyService';
-import { PropertyDetailClientPage } from '@/components/properties/PropertyDetailClientPage';
+import { getPropertyById } from '@/features/properties/propertyService';
+import { PropertyDetailClientPage } from '@/features/properties/components/PropertyDetailClientPage';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 

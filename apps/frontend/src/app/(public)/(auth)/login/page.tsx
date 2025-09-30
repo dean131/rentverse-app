@@ -1,6 +1,6 @@
 // File Path: apps/frontend/src/app/(auth)/login/page.tsx
-import { AuthLayout } from '@/components/auth/AuthLayout';
-import { LoginForm } from '@/components/auth/LoginForm';
+import { AuthLayout } from '@/features/auth/components/AuthLayout';
+import { LoginForm } from '@/features/auth/components/LoginForm';
 
 export default function LoginPage() {
   const title = "Welcome to Rentverse";

@@ -2,8 +2,8 @@
 'use client';
 
 import { ReactNode, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { useAuth } from "@/features/auth/useAuth";
+import { DashboardLayout } from "@/ui/layout/DashboardLayout";
 import { useRouter } from "next/navigation";
 
 // This layout is for all private, authenticated pages (dashboard, agreements, etc.).

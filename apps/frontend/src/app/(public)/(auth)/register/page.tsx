@@ -1,6 +1,6 @@
 // File Path: apps/frontend/src/app/(auth)/register/page.tsx
-import { AuthLayout } from '@/components/auth/AuthLayout';
-import { RegisterForm } from '@/components/auth/RegisterForm';
+import { AuthLayout } from '@/features/auth/components/AuthLayout';
+import { RegisterForm } from '@/features/auth/components/RegisterForm';
 
 export default function RegisterPage() {
   const title = "Create Your Rentverse Account";

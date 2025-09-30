@@ -225,3 +225,10 @@ export type OwnerProperty = {
   createdAt: string;
   images: { imageUrl: string }[];
 };
+
+export interface AdminDashboardStats {
+  totalDocuments: number;
+  registeredUsers: number;
+  pendingProperties: number;
+  documentsThisMonth: number;
+}

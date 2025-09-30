@@ -1,6 +1,10 @@
 // File Path: apps/frontend/src/services/adminService.ts
 import apiClient from "@/lib/apiClient";
-import { PropertyWithLister, StatusUpdatePayload } from "@/lib/definitions";
+import {
+  PropertyWithLister,
+  StatusUpdatePayload,
+  AdminDashboardStats,
+} from "@/lib/definitions";
 
 export const getPendingProperties = async (): Promise<PropertyWithLister[]> => {
   const response = await apiClient.get("/admin/properties/pending");
@@ -15,3 +19,9 @@ export const updatePropertyStatus = async (
   const payload: StatusUpdatePayload = { status };
   await apiClient.patch(`/admin/properties/${id}/status`, payload);
 };
+
+export const getAdminDashboardStats =
+  async (): Promise<AdminDashboardStats> => {
+    const response = await apiClient.get("/admin/dashboard/stats");
+    return response.data.data;
+  };

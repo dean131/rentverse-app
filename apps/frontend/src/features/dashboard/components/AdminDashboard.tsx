@@ -14,10 +14,12 @@ export const AdminDashboard = () => {
 
   const handlePropertyUpdate = (propertyId: number) => {
     setProperties(currentProperties => currentProperties.filter(p => p.id !== propertyId));
+    // Note: For real-time updates, you might want to trigger a refetch of the stats here.
   };
 
   useEffect(() => {
     const fetchProperties = async () => {
+      setIsLoading(true);
       try {
         const data = await getPendingProperties();
         setProperties(data);
@@ -38,7 +40,7 @@ export const AdminDashboard = () => {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
-        <AdminStats properties={properties} isLoading={isLoading} />
+        <AdminStats />
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow">

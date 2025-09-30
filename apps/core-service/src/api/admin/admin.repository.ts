@@ -1,4 +1,3 @@
-// File Path: apps/core-service/src/api/admin/admin.repository.ts
 import { prisma } from "../../lib/prisma.js";
 import { Property, PropertyStatus } from "@prisma/client";
 
@@ -17,7 +16,7 @@ export class AdminRepository {
         },
       },
       orderBy: {
-        id: "asc", // Consistently order by ID
+        id: "asc",
       },
     });
   }
@@ -32,11 +31,7 @@ export class AdminRepository {
     });
   }
 
-  /**
-   * NEW METHOD: Fetches aggregate statistics for the admin dashboard.
-   */
   async getAdminDashboardStats() {
-    // Use Prisma's transaction feature to run multiple queries concurrently for efficiency
     const [
       totalDocuments,
       registeredUsers,

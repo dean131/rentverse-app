@@ -1,16 +1,16 @@
 // File Path: apps/core-service/src/api/admin/admin.routes.ts
 import { Router } from "express";
 import { AdminController } from "./admin.controller.js";
-import { protect } from "../../middleware/auth.middleware.js";
-import { authorize } from "../../middleware/authorize.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import { updateStatusSchema } from "./admin.validation.js";
+import { protect } from "../../middleware/auth.middleware.js";
+import { authorize } from "../../middleware/authorize.middleware.js";
+import { Role } from "@prisma/client";
 
 export const createAdminRouter = (controller: AdminController): Router => {
   const router = Router();
 
-  // Middleware pipeline: Check for login, then check for ADMIN role.
-  router.use(protect, authorize("ADMIN"));
+  router.use(protect, authorize(Role.ADMIN));
 
   router.get("/properties/pending", controller.getPendingProperties);
 
@@ -19,6 +19,8 @@ export const createAdminRouter = (controller: AdminController): Router => {
     validate(updateStatusSchema),
     controller.updatePropertyStatus
   );
+
+  router.get("/dashboard/stats", controller.getDashboardStats);
 
   return router;
 };

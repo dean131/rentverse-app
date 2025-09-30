@@ -101,7 +101,7 @@ const projectService = new ProjectService(projectRepository);
 const projectController = new ProjectController(projectService);
 
 const adminRepository = new AdminRepository();
-const adminService = new AdminService(adminRepository);
+const adminService = new AdminService(adminRepository, propertyRepository);
 const adminController = new AdminController(adminService);
 
 const userRepository = new UserRepository();

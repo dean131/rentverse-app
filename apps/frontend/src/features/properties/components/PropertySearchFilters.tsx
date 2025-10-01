@@ -2,28 +2,26 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import { PropertyFilters } from '@/lib/definitions';
-import { FilterButton } from './FilterButton'; // Import the new component
+import { FilterButton } from './FilterButton';
+import { Button } from '@/ui/ui/Button';
 
+// The props now only handle filter changes, search is separate.
 interface PropertySearchFiltersProps {
-    onSearch: (filters: PropertyFilters) => void;
-    initialFilters: PropertyFilters;
+    onFilterChange: (filters: Omit<PropertyFilters, 'search' | 'page'>) => void;
+    initialFilters: Omit<PropertyFilters, 'search' | 'page'>;
 }
 
-export const PropertySearchFilters = ({ onSearch, initialFilters }: PropertySearchFiltersProps) => {
-    const [searchTerm, setSearchTerm] = useState(initialFilters.search || '');
-    const [propertyType, setPropertyType] = useState(initialFilters.type || '');
-    const [bedrooms, setBedrooms] = useState(initialFilters.beds || '');
-    
-    const router = useRouter();
-    const pathname = usePathname();
+export const PropertySearchFilters = ({ onFilterChange, initialFilters }: PropertySearchFiltersProps) => {
+    const [propertyType, setPropertyType] = useState(initialFilters.type || 'ALL');
+    const [bedrooms, setBedrooms] = useState(initialFilters.beds || 'ALL');
 
     const propertyTypes = [
         { value: 'ALL', label: 'Any Type' },
         { value: 'APARTMENT', label: 'Apartment' },
         { value: 'HOUSE', label: 'House' },
         { value: 'PENTHOUSE', label: 'Penthouse' },
+        { value: 'COMMERCIAL', label: 'Commercial' },
     ];
     
     const bedOptions = [
@@ -36,71 +34,50 @@ export const PropertySearchFilters = ({ onSearch, initialFilters }: PropertySear
 
     const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
-        const filters: PropertyFilters = {
-            search: searchTerm,
-            type: propertyType,
-            beds: bedrooms,
-        };
-
-        const params = new URLSearchParams();
-        if (filters.search) params.set('search', filters.search);
-        if (filters.type && filters.type !== 'ALL') params.set('type', filters.type);
-        if (filters.beds && filters.beds !== 'ALL') params.set('beds', filters.beds);
-        
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
-        onSearch(filters);
+        onFilterChange({ type: propertyType, beds: bedrooms });
     };
     
     const handleReset = () => {
-        setSearchTerm('');
-        setPropertyType('');
-        setBedrooms('');
-        router.push(pathname, { scroll: false });
-        onSearch({});
+        setPropertyType('ALL');
+        setBedrooms('ALL');
+        onFilterChange({ type: 'ALL', beds: 'ALL'});
     };
 
     return (
-        <form onSubmit={handleFormSubmit} className="bg-white p-6 rounded-lg shadow">
-            {/* Main Search Input */}
-            <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                 <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search by location, project, or title..."
-                    className="flex-grow p-3 focus:outline-none text-gray-700"
-                />
-                <button type="submit" className="bg-orange-400 text-white p-3 hover:bg-orange-700 transition-colors">
-                    <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </button>
-            </div>
-            
-            {/* Filter Buttons */}
-            <div className="mt-4 flex flex-wrap items-center gap-4">
-                <FilterButton 
-                    label="Property Type" 
-                    options={propertyTypes} 
-                    selectedValue={propertyType}
-                    onValueChange={setPropertyType}
-                />
-                 <FilterButton 
-                    label="Beds" 
-                    options={bedOptions} 
-                    selectedValue={bedrooms}
-                    onValueChange={setBedrooms}
-                />
-                {/* Add more FilterButton components here */}
+        <form onSubmit={handleFormSubmit} className="bg-white p-6 rounded-lg border border-gray-200 sticky top-24">
+            <h3 className="text-lg font-bold text-gray-900 mb-6 border-b pb-4">Filter Properties</h3>
+            <div className="space-y-6">
+                {/* Filter Dropdowns */}
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Property Type</label>
+                    <FilterButton 
+                        label="Property Type" 
+                        options={propertyTypes} 
+                        selectedValue={propertyType}
+                        onValueChange={setPropertyType}
+                    />
+                </div>
+                 <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Bedrooms</label>
+                    <FilterButton 
+                        label="Beds" 
+                        options={bedOptions} 
+                        selectedValue={bedrooms}
+                        onValueChange={setBedrooms}
+                    />
+                </div>
                 
-                <div className="flex-grow flex items-center justify-end space-x-4">
-                     <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                        Save Search
-                     </button>
-                     <button type="button" onClick={handleReset} className="text-sm text-gray-600 hover:text-orange-400 font-medium">
-                        Reset Search
-                     </button>
+                {/* Action Buttons */}
+                <div className="pt-6 border-t border-gray-200 space-y-3">
+                     <Button type="submit" className="w-full flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        Apply Filters
+                     </Button>
+                     <Button type="button" variant="outline" onClick={handleReset} className="w-full">
+                        Reset Filters
+                     </Button>
                 </div>
             </div>
         </form>

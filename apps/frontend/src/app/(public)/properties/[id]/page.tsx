@@ -3,19 +3,34 @@ import { getPropertyById } from '@/features/properties/propertyService';
 import { PropertyDetailClientPage } from '@/features/properties/components/PropertyDetailClientPage';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
+import { AxiosError } from "axios";
 
 export default async function PropertyDetailPage(
   props: PageProps<'/properties/[id]'>
 ) {
-  const { params } = props;
-  const { id } = await params;  // params sekarang Promise<{ id: string }>
+  const { id } = await props.params;
 
   const propertyId = parseInt(id, 10);
   if (isNaN(propertyId)) {
     notFound();
   }
 
-  const property = await getPropertyById(propertyId);
+  let property = null;
+  try {
+    property = await getPropertyById(propertyId);
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 404) {
+        return (
+          <div className="text-center py-20">
+            Property belum tersedia atau masih dalam proses approval.
+          </div>
+        );
+      }
+    }
+    throw error;
+  }
+
   if (!property) {
     notFound();
   }

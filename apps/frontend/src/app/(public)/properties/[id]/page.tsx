@@ -23,7 +23,7 @@ export default async function PropertyDetailPage(
       if (error.response?.status === 404) {
         return (
           <div className="text-center py-20">
-            Property belum tersedia atau masih dalam proses approval.
+            The property is not yet available or is still under approval.
           </div>
         );
       }

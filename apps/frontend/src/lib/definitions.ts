@@ -146,6 +146,8 @@ export type PropertyDetailed = {
   title: string;
   description: string;
   address: string;
+  latitude: number | null;
+  longitude: number | null;
   rentalPrice: number | null;
   paymentPeriod: string | null;
   bedrooms: number;

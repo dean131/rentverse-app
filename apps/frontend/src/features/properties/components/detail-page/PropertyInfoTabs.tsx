@@ -3,18 +3,25 @@
 
 import { useState } from 'react';
 import { PropertyDetailed } from '@/lib/definitions';
+import dynamic from 'next/dynamic';
+
+const PropertyLocationMap = dynamic(() => import('./PropertyLocationMap').then(mod => mod.PropertyLocationMap), { ssr: false });
+
 
 interface TabsProps {
   description: string;
   amenities: PropertyDetailed['amenities'];
+  latitude: number | null;
+  longitude: number | null;
 }
 
-export const PropertyInfoTabs = ({ description, amenities }: TabsProps) => {
+export const PropertyInfoTabs = ({ description, amenities, latitude, longitude }: TabsProps) => {
   const [activeTab, setActiveTab] = useState('description');
 
   const tabs = [
     { id: 'description', label: 'Description' },
     { id: 'amenities', label: 'Features & Amenities' },
+    { id: 'location', label: 'Location' },
   ];
 
   return (
@@ -54,8 +61,16 @@ export const PropertyInfoTabs = ({ description, amenities }: TabsProps) => {
                 ))}
             </ul>
         )}
+        {activeTab === 'location' && (
+          <div>
+            {latitude && longitude ? (
+              <PropertyLocationMap position={[latitude, longitude]} />
+            ) : (
+              <p className="text-gray-500">Location information is not available for this property.</p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
 };
-

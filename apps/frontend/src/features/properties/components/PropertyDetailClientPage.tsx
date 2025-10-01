@@ -44,6 +44,8 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
             <PropertyInfoTabs 
               description={property.description}
               amenities={property.amenities}
+              latitude={property.latitude}
+              longitude={property.longitude}
             />
           </div>
 
@@ -64,4 +66,3 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
     </div>
   );
 };
-

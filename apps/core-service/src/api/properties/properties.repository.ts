@@ -67,7 +67,6 @@ export class PropertyRepository {
     return prisma.property.findUnique({
       where: {
         id: id,
-        status: PropertyStatus.APPROVED,
       },
       include: {
         listedBy: {

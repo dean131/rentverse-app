@@ -24,7 +24,10 @@ export class AdminService {
     id: number,
     status: PropertyStatus
   ): Promise<Property> {
+    console.log("===LOGGER===");
+    console.log(id);
     const property = await this.propertyRepository.findPropertyById(id);
+    console.log(property);
     if (!property) {
       throw new ApiError(404, "Property not found");
     }

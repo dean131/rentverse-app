@@ -19,6 +19,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossOrigin=""
+        />
+      </head>
       <body className={inter.className}>
         {/* The AuthProvider wraps the entire application. This is what makes
             the useAuth() hook available to all child components and layouts.
@@ -31,4 +39,3 @@ export default function RootLayout({
     </html>
   );
 }
-

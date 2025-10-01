@@ -1,5 +1,3 @@
-// File Path: apps/core-service/prisma/schema.prisma
-
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -111,6 +109,7 @@ model Property {
   status           PropertyStatus   @default(PENDING)
   listingType      ListingType
   propertyType     PropertyType
+  address          String?
   rentalPrice      Float?
   paymentPeriod    PaymentPeriod?
   sizeSqft         Int

@@ -17,12 +17,18 @@ export class PropertyService {
       amenityIds,
       ownershipDocumentUrl,
       projectId,
+      address,
       images,
       ...restOfData
     } = propertyData;
 
+    if (!projectId && !address) {
+      throw new ApiError(400, "Either a project or an address is required.");
+    }
+
     const dataToCreate = {
       ...restOfData,
+      address: address,
       listedBy: { connect: { id: userId } },
       ...(projectId && {
         project: { connect: { id: parseInt(projectId, 10) } },
@@ -85,6 +91,7 @@ export class PropertyService {
 
     const formattedProperty = {
       ...property,
+      address: property.address || property.project?.address,
       amenities: property.amenities.map((pa) => pa.amenity),
       views: property.views.map((pv) => pv.view),
     };

@@ -69,6 +69,9 @@ export const propertySubmissionSchema = z.object({
   ),
 
   projectId: z.coerce.number().int().optional().nullable(),
+  address: z.string().min(10, "Please enter a full address.").optional(),
+  latitude: z.coerce.number().optional().nullable(),
+  longitude: z.coerce.number().optional().nullable(),
   viewIds: z.array(z.coerce.number()).optional(),
   amenityIds: z.array(z.coerce.number()).optional(),
   ownershipDocumentUrl: z

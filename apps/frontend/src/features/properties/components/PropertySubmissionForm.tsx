@@ -35,7 +35,7 @@ export const PropertySubmissionForm = () => {
     
     const fieldsByStep: Record<number, Path<PropertySubmission>[]> = {
         1: ["title", "description", "listingType", "propertyType", "bedrooms", "bathrooms", "sizeSqft", "furnishingStatus", "rentalPrice", "paymentPeriod", "ownershipDocumentUrl"],
-        2: ["projectId"],
+        2: ["projectId", "address", "latitude", "longitude"],
         3: ["viewIds", "amenityIds"],
         4: ["images"],
     };
@@ -79,7 +79,7 @@ export const PropertySubmissionForm = () => {
             <div className="p-8 flex-grow">
                 <form onSubmit={handleSubmit(onSubmit)}>
                     {currentStep === 1 && <Step1Details register={register} errors={errors} watch={watch} setValue={setValue} />}
-                    {currentStep === 2 && <Step2Location register={register} errors={errors} />}
+                    {currentStep === 2 && <Step2Location register={register} errors={errors} watch={watch} setValue={setValue} />}
                     {currentStep === 3 && <Step3Features register={register} errors={errors} />}
                     {currentStep === 4 && <Step4UploadPhotos setValue={setValue} errors={errors} />}
 

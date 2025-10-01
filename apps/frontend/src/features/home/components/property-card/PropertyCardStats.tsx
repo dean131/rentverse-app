@@ -1,29 +1,35 @@
-// File Path: apps/frontend/src/components/home/property-card/PropertyCardStats.tsx
 import { PropertyPublic } from '@/lib/definitions';
 
 interface Props {
   property: Pick<PropertyPublic, 'bedrooms' | 'bathrooms' | 'sizeSqft'>;
 }
 
-const StatIcon = ({ d, value, label }: { d: string; value: string | number; label: string }) => (
-    <div className="flex items-center space-x-2">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d={d} />
-        </svg>
-        <div>
-            <p className="font-semibold text-sm text-gray-800">{value}</p>
-            <p className="text-xs text-gray-500">{label}</p>
-        </div>
+const StatIcon = ({ icon, value, label }: { icon: React.ReactNode; value: string | number; label: string }) => (
+    <div className="flex items-center space-x-2 text-sm text-gray-600">
+        {icon}
+        <span>{value} {label}</span>
     </div>
 );
 
 export const PropertyCardStats = ({ property }: Props) => {
   return (
-    <div className="px-5 pb-5">
-        <div className="flex justify-between items-center pt-3 border-t">
-            <StatIcon d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0v-4a2 2 0 012-2h6a2 2 0 012 2v4" value={property.bedrooms} label="Bedrooms" />
-            <StatIcon d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" value={property.bathrooms} label="Bathrooms" />
-            <StatIcon d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v4m0 0h-4m4 0l-5-5" value={`${property.sizeSqft} Sqft`} label="Total Area" />
+    <div className="px-5 pb-5 border-t border-gray-100 pt-4">
+        <div className="flex justify-between items-center text-sm">
+            <StatIcon 
+              icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" /></svg>}
+              value={property.bedrooms} 
+              label="Beds" 
+            />
+            <StatIcon 
+              icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>}
+              value={property.bathrooms} 
+              label="Baths" 
+            />
+            <StatIcon 
+              icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v4m0 0h-4m4 0l-5-5" /></svg>}
+              value={`${property.sizeSqft}`}
+              label="Sqft" 
+            />
         </div>
     </div>
   );

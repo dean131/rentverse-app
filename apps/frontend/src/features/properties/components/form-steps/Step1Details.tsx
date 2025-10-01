@@ -7,7 +7,6 @@ import { PropertySubmission } from '@/lib/definitions';
 import { getPricePrediction } from '@/features/prediction/predictionService';
 import { debounce } from 'lodash';
 
-// UPDATED: Import the new reusable components
 import { FormInput } from '@/ui/ui/FormInput';
 import { FormSelect } from '@/ui/ui/FormSelect';
 import { FormTextarea } from '@/ui/ui/FormTextarea';
@@ -52,7 +51,7 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                 area_sqft: sizeSqft,
                 listing_type: listingType.toLowerCase(),
                 property_type: propertyType,
-                location: 'Kuala Lumpur',
+                location: 'Kuala Lumpur', // This could be made dynamic in a future version
             });
         }
         return () => debouncedFetchPrediction.cancel();
@@ -65,48 +64,59 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
     };
 
     return (
-        <div className="space-y-6">
-            <h3 className="text-lg font-semibold">Property Details</h3>
-            <FormInput 
-                label="Property Title"
-                name="title"
-                register={register}
-                error={errors.title}
-                placeholder="e.g., Modern Apartment in Central Jakarta"
-            />
+        <div className="space-y-8">
+            <div>
+                <h3 className="text-xl font-bold text-gray-800">Property Details</h3>
+                <p className="text-gray-500 mt-1">Start with the basic information about your property.</p>
+            </div>
             
-            <FormTextarea
-                label="Description"
-                name="description"
-                register={register}
-                error={errors.description}
-                rows={4}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormSelect label="Listing Type" name="listingType" register={register} error={errors.listingType}>
-                    <option value="">Select Listing Type</option><option value="RENT">For Rent</option><option value="SALE">For Sale</option>
-                </FormSelect>
-                <FormSelect label="Property Type" name="propertyType" register={register} error={errors.propertyType}>
-                    <option value="">Select Property Type</option><option value="APARTMENT">Apartment</option><option value="HOUSE">House</option>
-                </FormSelect>
-                <FormSelect label="Furnishing Status" name="furnishingStatus" register={register} error={errors.furnishingStatus}>
-                    <option value="">Select Status</option><option value="UNFURNISHED">Unfurnished</option><option value="PARTIALLY_FURNISHED">Partially Furnished</option><option value="FULLY_FURNISHED">Fully Furnished</option>
-                </FormSelect>
-                <FormInput label="Bedrooms" name="bedrooms" register={register} error={errors.bedrooms} type="number" placeholder="e.g., 3" />
-                <FormInput label="Bathrooms" name="bathrooms" register={register} error={errors.bathrooms} type="number" placeholder="e.g., 2" />
-                <FormInput label="Area (Sqft)" name="sizeSqft" register={register} error={errors.sizeSqft} type="number" placeholder="e.g., 1200" />
+            <div className="space-y-6">
+                <FormInput 
+                    label="Property Title"
+                    name="title"
+                    register={register}
+                    error={errors.title}
+                    placeholder="e.g., Modern Apartment in Central Jakarta"
+                />
+                
+                <FormTextarea
+                    label="Description"
+                    name="description"
+                    register={register}
+                    error={errors.description}
+                    rows={5}
+                    placeholder="Describe what makes your property special..."
+                />
             </div>
             
             <div className="pt-6 border-t">
+                 <h4 className="text-lg font-semibold text-gray-700 mb-4">Specifications</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormSelect label="Listing Type" name="listingType" register={register} error={errors.listingType}>
+                        <option value="">Select Listing Type</option><option value="RENT">For Rent</option><option value="SALE">For Sale</option>
+                    </FormSelect>
+                    <FormSelect label="Property Type" name="propertyType" register={register} error={errors.propertyType}>
+                        <option value="">Select Property Type</option><option value="APARTMENT">Apartment</option><option value="HOUSE">House</option><option value="PENTHOUSE">Penthouse</option><option value="STUDIO">Studio</option><option value="COMMERCIAL">Commercial</option>
+                    </FormSelect>
+                    <FormSelect label="Furnishing Status" name="furnishingStatus" register={register} error={errors.furnishingStatus}>
+                        <option value="">Select Status</option><option value="UNFURNISHED">Unfurnished</option><option value="PARTIALLY_FURNISHED">Partially Furnished</option><option value="FULLY_FURNISHED">Fully Furnished</option>
+                    </FormSelect>
+                    <FormInput label="Bedrooms" name="bedrooms" register={register} error={errors.bedrooms} type="number" placeholder="e.g., 3" />
+                    <FormInput label="Bathrooms" name="bathrooms" register={register} error={errors.bathrooms} type="number" placeholder="e.g., 2" />
+                    <FormInput label="Area (Sqft)" name="sizeSqft" register={register} error={errors.sizeSqft} type="number" placeholder="e.g., 1200" />
+                </div>
+            </div>
+            
+            <div className="pt-6 border-t">
+                <h4 className="text-lg font-semibold text-gray-700 mb-4">Pricing</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                      <FormInput 
-                        label="Price (MYR)"
+                        label="Price (IDR)"
                         name="rentalPrice"
                         register={register}
                         error={errors.rentalPrice}
                         type="number"
-                        placeholder="e.g., 2500"
+                        placeholder="e.g., 25000000"
                     />
                     <FormSelect 
                         label="Payment Period" 
@@ -123,7 +133,7 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                 {suggestedPrice !== null && !isPredictionLoading && (
                     <div className="mt-4 p-3 bg-green-50 rounded-md flex items-center justify-between">
                         <p className="text-sm text-green-800">
-                            <strong>AI Suggestion:</strong> A competitive price is around <strong>RM {Math.round(suggestedPrice).toLocaleString()}</strong>.
+                            <strong>AI Suggestion:</strong> A competitive price is around <strong>Rp {Math.round(suggestedPrice).toLocaleString('id-ID')}</strong>.
                         </p>
                         <button 
                             type="button" 
@@ -136,14 +146,16 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                 )}
             </div>
             
-             <FormInput 
-                label="Ownership Document URL"
-                name="ownershipDocumentUrl"
-                register={register}
-                error={errors.ownershipDocumentUrl}
-                placeholder="https://example.com/document.pdf"
-            />
+             <div className="pt-6 border-t">
+                 <h4 className="text-lg font-semibold text-gray-700 mb-4">Documentation</h4>
+                <FormInput 
+                    label="Ownership Document URL"
+                    name="ownershipDocumentUrl"
+                    register={register}
+                    error={errors.ownershipDocumentUrl}
+                    placeholder="https://example.com/document.pdf"
+                />
+            </div>
         </div>
     );
 };
-

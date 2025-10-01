@@ -21,14 +21,18 @@ export const Step4UploadPhotos = ({ setValue, errors }: Step4Props) => {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold">Upload Photos</h3>
-      <p className="text-sm text-gray-500">
-        High-quality photos are crucial. Upload at least one photo. (Max 5MB per image)
-      </p>
-      <FileUpload onUploadComplete={handleUploadComplete} />
-      {errors.images && typeof errors.images.message === 'string' && (
-        <p className="mt-2 text-sm text-red-600">{errors.images.message}</p>
-      )}
+      <div>
+        <h3 className="text-xl font-bold text-gray-800">Upload Photos</h3>
+        <p className="text-gray-500 mt-1">
+            High-quality photos are crucial. Upload at least one photo. (Max 5MB per image)
+        </p>
+      </div>
+      <div className="pt-6 border-t">
+        <FileUpload onUploadComplete={handleUploadComplete} />
+        {errors.images && typeof errors.images.message === 'string' && (
+            <p className="mt-2 text-sm text-red-600">{errors.images.message}</p>
+        )}
+      </div>
     </div>
   );
 };

@@ -9,7 +9,10 @@ import { FormSelect } from '@/ui/ui/FormSelect';
 import { FormInput } from '@/ui/ui/FormInput';
 import dynamic from 'next/dynamic';
 
-const LocationMap = dynamic(() => import('./LocationMap').then(mod => mod.LocationMap), { ssr: false });
+const LocationMap = dynamic(() => import('./LocationMap').then(mod => mod.LocationMap), { 
+    ssr: false,
+    loading: () => <div className="h-96 w-full bg-gray-200 rounded-lg animate-pulse" />
+});
 
 interface Step2Props {
     register: UseFormRegister<PropertySubmission>;
@@ -44,11 +47,13 @@ export const Step2Location = ({ register, errors, watch, setValue }: Step2Props)
     };
 
     return (
-        <div className="space-y-6">
-            <h3 className="text-lg font-semibold">Property Location</h3>
-            <p className="text-sm text-gray-500">
-                You can either link this property to an existing project or enter a new address and select the location on the map.
-            </p>
+        <div className="space-y-8">
+            <div>
+                <h3 className="text-xl font-bold text-gray-800">Property Location</h3>
+                <p className="text-gray-500 mt-1">
+                    Link to an existing project or enter a new address and pin it on the map.
+                </p>
+            </div>
             
             <FormSelect
                 label="Select Project (Optional)"
@@ -65,9 +70,8 @@ export const Step2Location = ({ register, errors, watch, setValue }: Step2Props)
                 ))}
             </FormSelect>
 
-            {/* If a project is selected, the address is handled by the project */}
             {!selectedProjectId && (
-                <div className="space-y-6">
+                <div className="space-y-6 pt-6 border-t">
                     <FormInput
                         label="Full Property Address"
                         name="address"
@@ -78,7 +82,7 @@ export const Step2Location = ({ register, errors, watch, setValue }: Step2Props)
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Pin Location on Map</label>
                          <p className="text-sm text-gray-500 mb-2">
-                            Click on the map to set the exact coordinates of the property.
+                            Click on the map to set the exact coordinates for the property.
                         </p>
                         <LocationMap onLocationSelect={handleLocationSelect} />
                         <input type="hidden" {...register('latitude')} />

@@ -14,6 +14,7 @@ import { Button } from '@/ui/ui/Button';
 import { submitProperty } from '@/features/properties/propertyService';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { Card } from '@/ui/ui/Card';
 
 export const PropertySubmissionForm = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -73,38 +74,42 @@ export const PropertySubmissionForm = () => {
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-xl md:flex">
-            <FormStepper currentStep={currentStep} totalSteps={totalSteps} />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="md:col-span-1">
+                <FormStepper currentStep={currentStep} totalSteps={totalSteps} />
+            </div>
             
-            <div className="p-8 flex-grow">
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    {currentStep === 1 && <Step1Details register={register} errors={errors} watch={watch} setValue={setValue} />}
-                    {currentStep === 2 && <Step2Location register={register} errors={errors} watch={watch} setValue={setValue} />}
-                    {currentStep === 3 && <Step3Features register={register} errors={errors} />}
-                    {currentStep === 4 && <Step4UploadPhotos setValue={setValue} errors={errors} />}
+            <div className="md:col-span-3">
+                <Card>
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        {currentStep === 1 && <Step1Details register={register} errors={errors} watch={watch} setValue={setValue} />}
+                        {currentStep === 2 && <Step2Location register={register} errors={errors} watch={watch} setValue={setValue} />}
+                        {currentStep === 3 && <Step3Features register={register} errors={errors} />}
+                        {currentStep === 4 && <Step4UploadPhotos setValue={setValue} errors={errors} />}
 
-                    {serverError && <p className="text-sm text-red-600 mt-4 text-center">{serverError}</p>}
+                        {serverError && <p className="text-sm text-red-600 mt-4 text-center">{serverError}</p>}
 
-                    <div className="mt-8 pt-6 border-t flex justify-between">
-                        {currentStep > 1 ? (
-                            <Button type="button" variant="outline" onClick={handlePrevStep}>
-                                Previous Step
-                            </Button>
-                        ) : (
-                            <div />
-                        )}
+                        <div className="mt-8 pt-6 border-t flex justify-between">
+                            {currentStep > 1 ? (
+                                <Button type="button" variant="outline" onClick={handlePrevStep}>
+                                    Previous Step
+                                </Button>
+                            ) : (
+                                <div />
+                            )}
 
-                        {currentStep < totalSteps ? (
-                             <Button type="button" onClick={handleNextStep}>
-                                Next Step
-                            </Button>
-                        ) : (
-                            <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting ? 'Submitting...' : 'Submit Property'}
-                            </Button>
-                        )}
-                    </div>
-                </form>
+                            {currentStep < totalSteps ? (
+                                 <Button type="button" onClick={handleNextStep}>
+                                    Next Step
+                                </Button>
+                            ) : (
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Submitting...' : 'Submit Property'}
+                                </Button>
+                            )}
+                        </div>
+                    </form>
+                </Card>
             </div>
         </div>
     );

@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { PropertyPublic } from '@/lib/definitions';
 import { getPublicProperties } from '@/features/properties/propertyService';
-import { PropertyCard } from './PropertyCard'; // Corrected import path
+import { PropertyCard } from './PropertyCard';
 
 export const FeaturedProperties = () => {
     const [properties, setProperties] = useState<PropertyPublic[]>([]);
@@ -14,8 +14,10 @@ export const FeaturedProperties = () => {
     useEffect(() => {
         const fetchProperties = async () => {
             try {
-                const data = await getPublicProperties();
-                setProperties(data);
+                // Fetch the paginated data, but only the first page for the homepage feature
+                const paginatedData = await getPublicProperties({ page: 1 });
+                // Correctly set the state with the 'items' array from the response
+                setProperties(paginatedData.items);
             } catch (err) {
                 console.error("Failed to fetch public properties:", err);
                 setError("Could not load properties at this time.");
@@ -45,11 +47,8 @@ export const FeaturedProperties = () => {
                 </div>
 
                 <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {/* This component now directly passes the property object.
-                      The optional chaining logic is handled inside PropertyCard.tsx 
-                      which is the best practice for component design.
-                    */}
-                    {properties.map((property) => (
+                    {/* Display up to 6 properties on the homepage */}
+                    {properties.slice(0, 6).map((property) => (
                         <PropertyCard key={property.id} property={property} />
                     ))}
                 </div>
@@ -57,4 +56,3 @@ export const FeaturedProperties = () => {
         </section>
     );
 };
-

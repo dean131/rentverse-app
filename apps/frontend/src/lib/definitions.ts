@@ -26,9 +26,6 @@ export type RegisterCredentials = z.infer<typeof registerSchema>;
 export const propertySubmissionSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-
-  // CORRECTED: Added specific required_error messages for enum fields.
-  // This will show a user-friendly message if a dropdown is not selected.
   listingType: z.enum(["RENT", "SALE", "BOTH"], {
     required_error: "Please select a listing type.",
   }),
@@ -38,7 +35,6 @@ export const propertySubmissionSchema = z.object({
       required_error: "Please select a property type.",
     }
   ),
-
   rentalPrice: z.coerce
     .number({ invalid_type_error: "Price must be a number" })
     .positive()
@@ -67,7 +63,6 @@ export const propertySubmissionSchema = z.object({
       required_error: "Please select the furnishing status.",
     }
   ),
-
   projectId: z.coerce.number().int().optional().nullable(),
   address: z.string().min(10, "Please enter a full address.").optional(),
   latitude: z.coerce.number().optional().nullable(),
@@ -108,6 +103,12 @@ export type View = {
   name: string;
 };
 
+export type PaginatedResponse<T> = {
+  items: T[];
+  totalPages: number;
+  currentPage: number;
+};
+
 // For the admin list of pending properties
 export type PropertyWithLister = {
   id: number;
@@ -137,6 +138,7 @@ export type PropertyPublic = {
 
 // This type represents the raw data structure from the public properties API
 export type RawPropertyFromAPI = Omit<PropertyPublic, "address"> & {
+  address?: string | null; // The property might have its own address
   project: { address: string } | null;
 };
 
@@ -146,14 +148,14 @@ export type PropertyDetailed = {
   title: string;
   description: string;
   address: string;
-  latitude: number | null;
-  longitude: number | null;
   rentalPrice: number | null;
   paymentPeriod: string | null;
   bedrooms: number;
   bathrooms: number;
   sizeSqft: number;
   furnishingStatus: string;
+  latitude: number | null;
+  longitude: number | null;
   images: { imageUrl: string }[];
   amenities: Amenity[];
   views: View[];
@@ -172,6 +174,7 @@ export type PropertyFilters = {
   search?: string;
   type?: string;
   beds?: string;
+  page?: number;
 };
 
 export type OwnerDashboardStats = {

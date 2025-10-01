@@ -11,7 +11,6 @@ export class PropertyService {
   }
 
   async createProperty(propertyData: any, userId: number): Promise<Property> {
-    // UPDATED: Now expects an `images` array of objects with URLs
     const {
       viewIds,
       amenityIds,
@@ -55,7 +54,6 @@ export class PropertyService {
           documentType: "OWNERSHIP_CERTIFICATE",
         },
       },
-      // ADDED: Logic to create the property images from the provided URLs
       ...(images &&
         images.length > 0 && {
           images: {
@@ -71,12 +69,12 @@ export class PropertyService {
     return this.propertyRepository.createProperty(dataToCreate);
   }
 
-  // CORRECTED: The type definition for the filters object now includes the optional 'beds' property.
   async getPublicProperties(filters: {
     searchQuery?: string;
     propertyType?: string;
     beds?: string;
-  }): Promise<any[]> {
+    page?: number;
+  }): Promise<any> {
     return this.propertyRepository.findAllPublic(filters);
   }
 
@@ -87,6 +85,10 @@ export class PropertyService {
         404,
         "Property not found or is not approved for public viewing."
       );
+    }
+    // Make sure there's an address field to display
+    if (!property.address && !property.project?.address) {
+      throw new ApiError(404, "Property address details are incomplete.");
     }
 
     const formattedProperty = {

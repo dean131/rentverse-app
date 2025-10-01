@@ -2,6 +2,8 @@
 import { prisma } from "../../lib/prisma.js";
 import { Property, Prisma, PropertyStatus, PropertyType } from "@prisma/client";
 
+const ITEMS_PER_PAGE = 9;
+
 export class PropertyRepository {
   async createProperty(data: Prisma.PropertyCreateInput): Promise<Property> {
     return prisma.property.create({
@@ -13,7 +15,11 @@ export class PropertyRepository {
     searchQuery?: string;
     propertyType?: string;
     beds?: string;
-  }): Promise<any[]> {
+    page?: number;
+  }): Promise<{ items: any[]; totalPages: number; currentPage: number }> {
+    const page = filters.page || 1;
+    const skip = (page - 1) * ITEMS_PER_PAGE;
+
     const whereClause: Prisma.PropertyWhereInput = {
       status: PropertyStatus.APPROVED,
     };
@@ -22,6 +28,7 @@ export class PropertyRepository {
       whereClause.OR = [
         { title: { contains: filters.searchQuery, mode: "insensitive" } },
         { description: { contains: filters.searchQuery, mode: "insensitive" } },
+        { address: { contains: filters.searchQuery, mode: "insensitive" } },
         {
           project: {
             address: { contains: filters.searchQuery, mode: "insensitive" },
@@ -43,30 +50,42 @@ export class PropertyRepository {
       }
     }
 
-    return prisma.property.findMany({
-      where: whereClause,
-      select: {
-        id: true,
-        title: true,
-        listingType: true,
-        rentalPrice: true,
-        paymentPeriod: true,
-        bedrooms: true,
-        bathrooms: true,
-        sizeSqft: true,
-        project: { select: { address: true } },
-        images: {
-          select: { imageUrl: true },
-          orderBy: { displayOrder: "asc" },
+    const [items, totalCount] = await prisma.$transaction([
+      prisma.property.findMany({
+        where: whereClause,
+        select: {
+          id: true,
+          title: true,
+          listingType: true,
+          rentalPrice: true,
+          paymentPeriod: true,
+          bedrooms: true,
+          bathrooms: true,
+          sizeSqft: true,
+          address: true,
+          project: { select: { address: true } },
+          images: {
+            select: { imageUrl: true },
+            orderBy: { displayOrder: "asc" },
+          },
         },
-      },
-    });
+        skip: skip,
+        take: ITEMS_PER_PAGE,
+      }),
+      prisma.property.count({ where: whereClause }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+
+    return { items, totalPages, currentPage: page };
   }
 
   async findPropertyById(id: number) {
     return prisma.property.findUnique({
       where: {
         id: id,
+        // Allow viewing of non-approved properties by direct link
+        // status: PropertyStatus.APPROVED,
       },
       include: {
         listedBy: {

@@ -89,7 +89,7 @@ export const PropertySubmissionForm = () => {
 
                         {serverError && <p className="text-sm text-red-600 mt-4 text-center">{serverError}</p>}
 
-                        <div className="mt-8 pt-6 border-t flex justify-between">
+                        <div className="mt-8 pt-6 border-t border-gray-200 flex justify-between">
                             {currentStep > 1 ? (
                                 <Button type="button" variant="outline" onClick={handlePrevStep}>
                                     Previous Step

@@ -55,7 +55,7 @@ export const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
         {...getRootProps()}
         className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors
           ${isUploading ? 'cursor-not-allowed bg-gray-200' : 'cursor-pointer'}
-          ${isDragActive ? 'border-orange-600 bg-orange-50' : 'border-gray-300 bg-gray-50 hover:border-orange-500'}`}
+          ${isDragActive ? 'border-orange-400 bg-orange-50' : 'border-gray-300 bg-gray-50 hover:border-orange-500'}`}
       >
         <input {...getInputProps()} />
         {isUploading ? (

@@ -18,11 +18,11 @@ const Step = ({ stepNumber, title, isActive, isCompleted }: { stepNumber: number
     
     return (
         <div className="flex items-start">
-            <div className={`flex items-center justify-center h-8 w-8 rounded-full font-bold text-lg transition-colors flex-shrink-0 ${isActive ? 'bg-orange-600 text-white' : isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+            <div className={`flex items-center justify-center h-8 w-8 rounded-full font-bold text-lg transition-colors flex-shrink-0 ${isActive ? 'bg-orange-400 text-white' : isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
                 {getIcon()}
             </div>
             <div className="ml-4">
-                <h4 className={`font-semibold transition-colors ${isActive ? 'text-orange-600' : 'text-gray-800'}`}>
+                <h4 className={`font-semibold transition-colors ${isActive ? 'text-orange-400' : 'text-gray-800'}`}>
                     Step {stepNumber}
                 </h4>
                 <p className="text-sm text-gray-500">{title}</p>

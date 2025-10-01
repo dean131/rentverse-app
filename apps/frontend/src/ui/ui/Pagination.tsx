@@ -120,7 +120,7 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
                   onClick={() => onPageChange(pageNumber as number)}
                   className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
                     currentPage === pageNumber
-                      ? 'z-10 bg-orange-500 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600'
+                      ? 'z-10 bg-orange-500 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400'
                       : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50'
                   }`}
                 >

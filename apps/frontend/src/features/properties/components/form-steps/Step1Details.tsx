@@ -14,7 +14,7 @@ import { FormTextarea } from '@/ui/ui/FormTextarea';
 interface Step1Props {
     register: UseFormRegister<PropertySubmission>;
     errors: FieldErrors<PropertySubmission>;
-    watch: UseFormWatch<PropertySubmission>; 
+    watch: UseFormWatch<PropertySubmission>;
     setValue: UseFormSetValue<PropertySubmission>;
 }
 
@@ -56,7 +56,7 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
         }
         return () => debouncedFetchPrediction.cancel();
     }, [bedrooms, bathrooms, sizeSqft, listingType, propertyType, debouncedFetchPrediction]);
-    
+
     const applySuggestion = () => {
         if (suggestedPrice) {
             setValue('rentalPrice', Math.round(suggestedPrice), { shouldValidate: true, shouldDirty: true });
@@ -69,16 +69,16 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                 <h3 className="text-xl font-bold text-gray-800">Property Details</h3>
                 <p className="text-gray-500 mt-1">Start with the basic information about your property.</p>
             </div>
-            
+
             <div className="space-y-6">
-                <FormInput 
+                <FormInput
                     label="Property Title"
                     name="title"
                     register={register}
                     error={errors.title}
                     placeholder="e.g., Modern Apartment in Central Jakarta"
                 />
-                
+
                 <FormTextarea
                     label="Description"
                     name="description"
@@ -88,8 +88,8 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                     placeholder="Describe what makes your property special..."
                 />
             </div>
-            
-            <div className="pt-6 border-t">
+
+            <div className="py-8 border-t border-gray-200">
                  <h4 className="text-lg font-semibold text-gray-700 mb-4">Specifications</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormSelect label="Listing Type" name="listingType" register={register} error={errors.listingType}>
@@ -106,11 +106,11 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                     <FormInput label="Area (Sqft)" name="sizeSqft" register={register} error={errors.sizeSqft} type="number" placeholder="e.g., 1200" />
                 </div>
             </div>
-            
-            <div className="pt-6 border-t">
+
+            <div className="py-8 border-t border-gray-200">
                 <h4 className="text-lg font-semibold text-gray-700 mb-4">Pricing</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     <FormInput 
+                     <FormInput
                         label="Price (IDR)"
                         name="rentalPrice"
                         register={register}
@@ -118,10 +118,10 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                         type="number"
                         placeholder="e.g., 25000000"
                     />
-                    <FormSelect 
-                        label="Payment Period" 
-                        name="paymentPeriod" 
-                        register={register} 
+                    <FormSelect
+                        label="Payment Period"
+                        name="paymentPeriod"
+                        register={register}
                         error={errors.paymentPeriod}
                     >
                         <option value="">Select Period</option>
@@ -135,20 +135,20 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                         <p className="text-sm text-green-800">
                             <strong>AI Suggestion:</strong> A competitive price is around <strong>Rp {Math.round(suggestedPrice).toLocaleString('id-ID')}</strong>.
                         </p>
-                        <button 
-                            type="button" 
-                            onClick={applySuggestion} 
-                            className="text-sm font-semibold text-orange-600 hover:text-orange-800 transition-colors"
+                        <button
+                            type="button"
+                            onClick={applySuggestion}
+                            className="text-sm font-semibold text-orange-400 hover:text-orange-800 transition-colors"
                         >
                             Apply
                         </button>
                     </div>
                 )}
             </div>
-            
-             <div className="pt-6 border-t">
+
+             <div className="py-8 border-t border-gray-200">
                  <h4 className="text-lg font-semibold text-gray-700 mb-4">Documentation</h4>
-                <FormInput 
+                <FormInput
                     label="Ownership Document URL"
                     name="ownershipDocumentUrl"
                     register={register}
@@ -159,3 +159,4 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
         </div>
     );
 };
+

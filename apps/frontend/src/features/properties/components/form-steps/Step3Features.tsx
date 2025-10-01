@@ -23,7 +23,7 @@ const FormCheckbox = ({ name, value, label, register }: FormCheckboxProps) => (
             type="checkbox"
             {...register(name)}
             value={value}
-            className="h-5 w-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+            className="h-5 w-5 rounded border-gray-300 text-orange-400 focus:ring-orange-500"
         />
         <span className="text-sm font-medium text-gray-800">{label}</span>
     </label>
@@ -58,7 +58,7 @@ export const Step3Features = ({ register, errors }: Step3Props) => {
                 <p className="text-gray-500 mt-1">Select all the features that apply to your property.</p>
             </div>
 
-            <div className="pt-6 border-t">
+            <div className="py-8 border-t border-gray-200">
                 <h4 className="text-lg font-semibold text-gray-700 mb-4">Available Views</h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {views.map(view => (
@@ -68,7 +68,7 @@ export const Step3Features = ({ register, errors }: Step3Props) => {
                  {errors.viewIds && <p className="mt-2 text-sm text-red-600">{errors.viewIds.message}</p>}
             </div>
 
-            <div className="pt-6 border-t">
+            <div className="py-8 border-t border-gray-200">
                 <h4 className="text-lg font-semibold text-gray-700 mb-4">Included Amenities</h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {amenities.map(amenity => (
@@ -80,3 +80,4 @@ export const Step3Features = ({ register, errors }: Step3Props) => {
         </div>
     );
 };
+

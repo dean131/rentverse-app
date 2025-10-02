@@ -1,4 +1,4 @@
-// File Path: apps/frontend/src/components/properties/form-steps/Step1Details.tsx
+// File Path: frontend/src/features/properties/components/form-steps/Step1Details.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -10,6 +10,7 @@ import { debounce } from 'lodash';
 import { FormInput } from '@/ui/ui/FormInput';
 import { FormSelect } from '@/ui/ui/FormSelect';
 import { FormTextarea } from '@/ui/ui/FormTextarea';
+import { DocumentUpload } from '@/ui/ui/DocumentUpload'; // <-- Import the new component
 
 interface Step1Props {
     register: UseFormRegister<PropertySubmission>;
@@ -21,6 +22,8 @@ interface Step1Props {
 export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) => {
     const [suggestedPrice, setSuggestedPrice] = useState<number | null>(null);
     const [isPredictionLoading, setIsPredictionLoading] = useState(false);
+    const [uploadMode, setUploadMode] = useState<'url' | 'upload'>('url');
+    const [docUploadError, setDocUploadError] = useState<string | null>(null);
 
     const bedrooms = watch('bedrooms');
     const bathrooms = watch('bathrooms');
@@ -51,11 +54,19 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                 area_sqft: sizeSqft,
                 listing_type: listingType.toLowerCase(),
                 property_type: propertyType,
-                location: 'Kuala Lumpur', // This could be made dynamic in a future version
+                location: 'Kuala Lumpur',
             });
         }
         return () => debouncedFetchPrediction.cancel();
     }, [bedrooms, bathrooms, sizeSqft, listingType, propertyType, debouncedFetchPrediction]);
+    
+    const handleUploadComplete = (key: string) => {
+        const bucketName = 'rentverse';
+        const baseUrl = process.env.NEXT_PUBLIC_MINIO_URL || process.env.NEXT_PUBLIC_STORAGE_SERVICE_URL || '';
+        const fileUrl = `${baseUrl}/${bucketName}/${key}`;
+        setValue('ownershipDocumentUrl', fileUrl, { shouldValidate: true, shouldDirty: true });
+        setDocUploadError(null);
+    };
 
     const applySuggestion = () => {
         if (suggestedPrice) {
@@ -71,22 +82,8 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
             </div>
 
             <div className="space-y-6">
-                <FormInput
-                    label="Property Title"
-                    name="title"
-                    register={register}
-                    error={errors.title}
-                    placeholder="e.g., Modern Apartment in Central Jakarta"
-                />
-
-                <FormTextarea
-                    label="Description"
-                    name="description"
-                    register={register}
-                    error={errors.description}
-                    rows={5}
-                    placeholder="Describe what makes your property special..."
-                />
+                <FormInput label="Property Title" name="title" register={register} error={errors.title} placeholder="e.g., Modern Apartment in Central Jakarta" />
+                <FormTextarea label="Description" name="description" register={register} error={errors.description} rows={5} placeholder="Describe what makes your property special..." />
             </div>
 
             <div className="py-8 border-t border-gray-200">
@@ -110,53 +107,46 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
             <div className="py-8 border-t border-gray-200">
                 <h4 className="text-lg font-semibold text-gray-700 mb-4">Pricing</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     <FormInput
-                        label="Price (IDR)"
-                        name="rentalPrice"
-                        register={register}
-                        error={errors.rentalPrice}
-                        type="number"
-                        placeholder="e.g., 25000000"
-                    />
-                    <FormSelect
-                        label="Payment Period"
-                        name="paymentPeriod"
-                        register={register}
-                        error={errors.paymentPeriod}
-                    >
-                        <option value="">Select Period</option>
-                        <option value="MONTHLY">Monthly</option>
-                        <option value="YEARLY">Yearly</option>
+                     <FormInput label="Price (IDR)" name="rentalPrice" register={register} error={errors.rentalPrice} type="number" placeholder="e.g., 25000000" />
+                    <FormSelect label="Payment Period" name="paymentPeriod" register={register} error={errors.paymentPeriod}>
+                        <option value="">Select Period</option><option value="MONTHLY">Monthly</option><option value="YEARLY">Yearly</option>
                     </FormSelect>
                 </div>
                 {isPredictionLoading && <div className="mt-4 text-sm text-gray-500 p-3 bg-gray-50 rounded-md animate-pulse"><p>✨ Generating AI price suggestion...</p></div>}
                 {suggestedPrice !== null && !isPredictionLoading && (
                     <div className="mt-4 p-3 bg-green-50 rounded-md flex items-center justify-between">
-                        <p className="text-sm text-green-800">
-                            <strong>AI Suggestion:</strong> A competitive price is around <strong>Rp {Math.round(suggestedPrice).toLocaleString('id-ID')}</strong>.
-                        </p>
-                        <button
-                            type="button"
-                            onClick={applySuggestion}
-                            className="text-sm font-semibold text-orange-400 hover:text-orange-800 transition-colors"
-                        >
-                            Apply
-                        </button>
+                        <p className="text-sm text-green-800"><strong>AI Suggestion:</strong> A competitive price is around <strong>Rp {Math.round(suggestedPrice).toLocaleString('id-ID')}</strong>.</p>
+                        <button type="button" onClick={applySuggestion} className="text-sm font-semibold text-orange-400 hover:text-orange-800 transition-colors">Apply</button>
                     </div>
                 )}
             </div>
 
              <div className="py-8 border-t border-gray-200">
-                 <h4 className="text-lg font-semibold text-gray-700 mb-4">Documentation</h4>
-                <FormInput
-                    label="Ownership Document URL"
-                    name="ownershipDocumentUrl"
-                    register={register}
-                    error={errors.ownershipDocumentUrl}
-                    placeholder="https://example.com/document.pdf"
-                />
+                 <h4 className="text-lg font-semibold text-gray-700 mb-2">Ownership Document</h4>
+                 <div className="flex items-center space-x-4 mb-4">
+                    <button type="button" onClick={() => setUploadMode('url')} className={`px-4 py-2 text-sm rounded-md ${uploadMode === 'url' ? 'bg-orange-400 text-white' : 'bg-gray-200 text-gray-700'}`}>Use a Link</button>
+                    <button type="button" onClick={() => setUploadMode('upload')} className={`px-4 py-2 text-sm rounded-md ${uploadMode === 'upload' ? 'bg-orange-400 text-white' : 'bg-gray-200 text-gray-700'}`}>Upload a File</button>
+                 </div>
+
+                {uploadMode === 'url' ? (
+                    <FormInput
+                        label="Document URL"
+                        name="ownershipDocumentUrl"
+                        register={register}
+                        error={errors.ownershipDocumentUrl}
+                        placeholder="https://example.com/document.pdf"
+                    />
+                ) : (
+                    <div>
+                        <DocumentUpload 
+                            onUploadComplete={handleUploadComplete}
+                            onUploadStart={() => setDocUploadError(null)}
+                            onUploadError={setDocUploadError}
+                        />
+                         {(errors.ownershipDocumentUrl || docUploadError) && <p className="mt-2 text-sm text-red-600">{errors.ownershipDocumentUrl?.message || docUploadError}</p>}
+                    </div>
+                )}
             </div>
         </div>
     );
 };
-

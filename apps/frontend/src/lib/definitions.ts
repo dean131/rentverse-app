@@ -31,9 +31,7 @@ export const propertySubmissionSchema = z.object({
   }),
   propertyType: z.enum(
     ["APARTMENT", "HOUSE", "PENTHOUSE", "STUDIO", "COMMERCIAL"],
-    {
-      required_error: "Please select a property type.",
-    }
+    { required_error: "Please select a property type." }
   ),
   rentalPrice: z.coerce
     .number({ invalid_type_error: "Price must be a number" })
@@ -56,12 +54,9 @@ export const propertySubmissionSchema = z.object({
     .number({ required_error: "Bathrooms count is required" })
     .int()
     .min(0, "Cannot be negative"),
-
   furnishingStatus: z.enum(
     ["UNFURNISHED", "PARTIALLY_FURNISHED", "FULLY_FURNISHED"],
-    {
-      required_error: "Please select the furnishing status.",
-    }
+    { required_error: "Please select the furnishing status." }
   ),
   projectId: z.coerce.number().int().optional().nullable(),
   address: z.string().min(10, "Please enter a full address.").optional(),
@@ -71,8 +66,8 @@ export const propertySubmissionSchema = z.object({
   amenityIds: z.array(z.coerce.number()).optional(),
   ownershipDocumentUrl: z
     .string()
-    .url("A valid document URL is required.")
-    .min(1, "Document URL is required."),
+    .url("A valid document URL or uploaded file is required.")
+    .min(1, "A document URL or uploaded file is required."),
   images: z
     .array(z.string().url("Each image must be a valid URL."))
     .min(1, "At least one image is required."),

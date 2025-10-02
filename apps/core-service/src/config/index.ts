@@ -44,6 +44,14 @@ export const config = {
     secretKey: validateEnv("MINIO_SECRET_KEY"),
   },
 
+  email: {
+    smtpHost: validateEnv("SMTP_HOST"),
+    smtpPort: parseInt(validateEnv("SMTP_PORT"), 10),
+    smtpUser: validateEnv("SMTP_USER"),
+    smtpPass: validateEnv("SMTP_PASS"),
+    from: validateEnv("SMTP_FROM_EMAIL"),
+  },
+
   cors: {
     allowedOrigins: validateEnv("CORS_ALLOWED_ORIGINS"),
   },

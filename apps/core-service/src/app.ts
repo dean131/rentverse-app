@@ -56,6 +56,10 @@ import { createUploadRouter } from "./api/uploads/uploads.routes.js";
 
 import { DocusignService } from "./services/docusign.service.js";
 
+import { InquiryService } from "./api/inquiries/inquiries.service.js";
+import { InquiryController } from "./api/inquiries/inquiries.controller.js";
+import { createInquiryRouter } from "./api/inquiries/inquiries.routes.js";
+
 const app = express();
 
 // --- CORS Configuration ---
@@ -136,6 +140,9 @@ const webhookController = new WebhookController(webhookService);
 const storageService = new StorageService();
 const uploadController = new UploadController(storageService);
 
+const inquiryService = new InquiryService(propertyRepository);
+const inquiryController = new InquiryController(inquiryService);
+
 // --- API Routes ---
 app.use("/api/auth", createAuthRouter(authController));
 app.use("/api/properties", createPropertyRouter(propertyController));
@@ -147,6 +154,7 @@ app.use("/api/amenities", createAmenityRouter(amenityController));
 app.use("/api/agreements", createAgreementRouter(agreementController));
 app.use("/api/webhooks", createWebhookRouter(webhookController));
 app.use("/api/uploads", createUploadRouter(uploadController));
+app.use("/api/inquiries", createInquiryRouter(inquiryController));
 
 // --- Error Handler ---
 app.use(errorHandler);

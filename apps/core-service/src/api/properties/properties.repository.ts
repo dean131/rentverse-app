@@ -92,8 +92,6 @@ export class PropertyRepository {
     return prisma.property.findUnique({
       where: {
         id: id,
-        // Allow viewing of non-approved properties by direct link
-        // status: PropertyStatus.APPROVED,
       },
       include: {
         listedBy: {
@@ -112,7 +110,7 @@ export class PropertyRepository {
         images: {
           orderBy: { displayOrder: "asc" },
         },
-        documents: true, // <-- Add this line
+        documents: true,
         amenities: {
           include: { amenity: true },
         },

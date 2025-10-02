@@ -137,11 +137,12 @@ export type RawPropertyFromAPI = Omit<PropertyPublic, "address"> & {
   project: { address: string } | null;
 };
 
-// For the detailed property view page
 export type PropertyDetailed = {
   id: number;
   title: string;
   description: string;
+  listingType: "RENT" | "SALE" | "BOTH";
+  propertyType: "APARTMENT" | "HOUSE" | "PENTHOUSE" | "STUDIO" | "COMMERCIAL";
   status: "PENDING" | "APPROVED" | "REJECTED" | "SOLD" | "RENTED";
   address: string;
   rentalPrice: number | null;
@@ -153,9 +154,9 @@ export type PropertyDetailed = {
   latitude: number | null;
   longitude: number | null;
   images: { imageUrl: string }[];
+  documents: { fileUrl: string; documentType: string }[];
   amenities: Amenity[];
   views: View[];
-  documents: { fileUrl: string; documentType: string }[]; // <-- Add this line
   listedBy: {
     fullName: string;
     email: string;

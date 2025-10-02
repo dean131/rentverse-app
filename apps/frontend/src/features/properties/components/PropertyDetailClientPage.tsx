@@ -1,6 +1,7 @@
+// File Path: frontend/src/features/properties/components/PropertyDetailClientPage.tsx
 'use client'; 
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { PropertyDetailed } from '@/lib/definitions';
 import { PropertyImageGallery } from './detail-page/PropertyImageGallery';
@@ -8,7 +9,8 @@ import { PropertyHeader } from './detail-page/PropertyHeader';
 import { PropertyHighlights } from './detail-page/PropertyHighlights';
 import { BookingModal } from './detail-page/BookingModal';
 import { useAuth } from '@/features/auth/useAuth';
-import { AgentCard } from './detail-page/AgentCard';
+// import { AgentCard } from './detail-page/AgentCard'; // <-- Remove this import
+import { ContactFormCard } from './detail-page/ContactFormCard'; // <-- Add this import
 import { AdminActionButtons } from '@/features/admin/components/AdminActionButtons';
 
 
@@ -30,15 +32,23 @@ const DetailSection = ({ title, children }: { title: string, children: React.Rea
 export const PropertyDetailClientPage = ({ property }: { property: PropertyDetailed }) => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const { user } = useAuth();
-
-  const ownershipDocument = property.documents?.find(
-    doc => doc.documentType === 'OWNERSHIP_CERTIFICATE'
-  );
+  const agentCardRef = useRef<HTMLDivElement>(null); // Keep the ref for scrolling
+  const [highlightAgentCard, setHighlightAgentCard] = useState(false); // Keep for highlighting the form
 
   const handleBookingSuccess = () => {
     setIsBookingModalOpen(false);
     alert("Success! Your booking request has been sent to the property owner for approval.");
   };
+
+  const handleMakeInquiry = () => {
+    agentCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setHighlightAgentCard(true);
+    setTimeout(() => setHighlightAgentCard(false), 100);
+  };
+
+  const ownershipDocument = property.documents?.find(
+    doc => doc.documentType === 'OWNERSHIP_CERTIFICATE'
+  );
 
   return (
     <main className="bg-white">
@@ -46,7 +56,7 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
         {user?.role === 'ADMIN' && property.status === 'PENDING' && (
           <AdminActionButtons 
             propertyId={property.id}
-            documentUrl={ownershipDocument?.fileUrl} // Pass the URL as a prop
+            documentUrl={ownershipDocument?.fileUrl}
           />
         )}
         
@@ -60,7 +70,9 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
               address={property.address}
               price={property.rentalPrice}
               period={property.paymentPeriod}
+              listingType={property.listingType}
               onRequestBooking={() => user && user.role === 'TENANT' ? setIsBookingModalOpen(true) : alert("Please log in as a tenant to book a property.")}
+              onMakeInquiry={handleMakeInquiry}
             />
             <PropertyHighlights 
               bedrooms={property.bedrooms}
@@ -95,9 +107,12 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
             </DetailSection>
           </div>
 
-          {/* Sidebar */}
-          <aside className="lg:col-span-1">
-            {property.listedBy && <AgentCard agent={property.listedBy} />}
+          {/* Sidebar - Now uses ContactFormCard */}
+          <aside className="lg:col-span-1" ref={agentCardRef}>
+            <ContactFormCard 
+              property={property} // Pass the entire property object
+              isHighlighted={highlightAgentCard} 
+            />
           </aside>
         </div>
       </div>

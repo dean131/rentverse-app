@@ -1,4 +1,6 @@
-// File Path: apps/frontend/src/components/properties/detail-page/PropertyHeader.tsx
+// File Path: frontend/src/features/properties/components/detail-page/PropertyHeader.tsx
+'use client';
+
 import { Button } from '@/ui/ui/Button';
 
 interface HeaderProps {
@@ -6,10 +8,12 @@ interface HeaderProps {
     address: string;
     price: number | null;
     period: string | null;
-    onRequestBooking: () => void; // Add prop for the click handler
+    listingType: "RENT" | "SALE" | "BOTH";
+    onRequestBooking: () => void;
+    onMakeInquiry: () => void;
 }
 
-export const PropertyHeader = ({ title, address, price, period, onRequestBooking }: HeaderProps) => {
+export const PropertyHeader = ({ title, address, price, period, listingType, onRequestBooking, onMakeInquiry }: HeaderProps) => {
     const formatPrice = (priceVal: number | null) => {
         if (!priceVal) return 'Price on request';
         return new Intl.NumberFormat('id-ID', {
@@ -19,22 +23,24 @@ export const PropertyHeader = ({ title, address, price, period, onRequestBooking
         }).format(priceVal);
     };
 
+    const isForRent = listingType === 'RENT' || listingType === 'BOTH';
+    const isForSale = listingType === 'SALE' || listingType === 'BOTH';
+
     return (
         <div>
             <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
             <p className="text-md text-gray-500 mt-1">{address}</p>
-            <div className="flex justify-between items-center mt-4">
+            <div className="flex flex-wrap justify-between items-center mt-4 gap-4">
                 <p className="text-2xl font-bold text-orange-400">
                     {formatPrice(price)}
-                    {period && <span className="text-sm font-normal text-gray-500">/{period.toLowerCase()}</span>}
+                    {isForRent && period && <span className="text-sm font-normal text-gray-500">/{period.toLowerCase()}</span>}
                 </p>
                 <div className="flex space-x-2">
-                    <Button variant="outline">Save</Button>
-                    {/* UPDATED: Button text changed and onClick handler added */}
-                    <Button onClick={onRequestBooking}>Request to Book</Button>
+                    {/* Conditionally render buttons based on listing type */}
+                    {isForSale && <Button onClick={onMakeInquiry}>Make an Inquiry</Button>}
+                    {isForRent && <Button onClick={onRequestBooking}>Request to Book</Button>}
                 </div>
             </div>
         </div>
     );
 };
-

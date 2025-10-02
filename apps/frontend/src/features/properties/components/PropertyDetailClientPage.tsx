@@ -29,7 +29,7 @@ const DetailSection = ({ title, children }: { title: string, children: React.Rea
     </div>
 );
 
-export const PropertyDetailClientPage = ({ property }: { property: PropertyDetailed }) => {
+export const PropertyDetailClientPage = ({ property, onUpdate }: { property: PropertyDetailed, onUpdate?: () => void }) => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const { user } = useAuth();
   const agentCardRef = useRef<HTMLDivElement>(null); // Keep the ref for scrolling
@@ -57,6 +57,7 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
           <AdminActionButtons 
             propertyId={property.id}
             documentUrl={ownershipDocument?.fileUrl}
+            onActionComplete={onUpdate}
           />
         )}
         

@@ -1,10 +1,11 @@
+// File Path: frontend/src/features/admin/components/PendingPropertiesList.tsx
 'use client';
 
 import { useState, useMemo } from 'react';
 import { PropertyWithLister } from '@/lib/definitions';
 import { Button } from '@/ui/ui/Button';
 import { Pagination } from '@/ui/ui/Pagination';
-import Link from 'next/link';
+import { PropertyReviewModal } from './PropertyReviewModal'; // Import the new modal
 
 interface PendingPropertiesListProps {
   initialProperties: PropertyWithLister[];
@@ -15,6 +16,7 @@ const ITEMS_PER_PAGE = 5;
 
 export const PendingPropertiesList = ({ initialProperties, onUpdate }: PendingPropertiesListProps) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<number | null>(null);
 
   const paginatedProperties = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -23,48 +25,71 @@ export const PendingPropertiesList = ({ initialProperties, onUpdate }: PendingPr
 
   const totalPages = Math.ceil(initialProperties.length / ITEMS_PER_PAGE);
   
+  const handleReviewClick = (propertyId: number) => {
+    setSelectedPropertyId(propertyId);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedPropertyId(null);
+  };
+
+  const handleActionInModal = () => {
+    if (selectedPropertyId) {
+      onUpdate(selectedPropertyId); // Refresh the list in the parent dashboard
+    }
+    handleCloseModal(); // Close the modal
+  };
+
   if (initialProperties.length === 0) {
       return <p className="text-gray-500 text-center py-8">No pending properties found.</p>
   }
 
   return (
-    <div>
-        <div className="overflow-x-auto">
+    <>
+      <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-            <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Listed By</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-            </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-            {paginatedProperties.map((property) => (
-                <tr key={property.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{property.title}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{property.listedBy?.fullName}</div>
-                    <div className="text-sm text-gray-500">{property.listedBy?.email}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{property.propertyType}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                    {property.rentalPrice ? `Rp ${property.rentalPrice.toLocaleString()}` : 'N/A'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link href={`/properties/${property.id}`}>
-                      <Button variant="outline" size="sm">Review</Button>
-                    </Link>
-                </td>
-                </tr>
-            ))}
-            </tbody>
+          <thead className="bg-gray-50">
+          <tr>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Listed By</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+          </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+          {paginatedProperties.map((property) => (
+              <tr key={property.id}>
+              <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{property.title}</div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{property.listedBy?.fullName}</div>
+                  <div className="text-sm text-gray-500">{property.listedBy?.email}</div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{property.propertyType}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                  {property.rentalPrice ? `Rp ${property.rentalPrice.toLocaleString()}` : 'N/A'}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <Button variant="outline" size="sm" onClick={() => handleReviewClick(property.id)}>
+                    Review
+                  </Button>
+              </td>
+              </tr>
+          ))}
+          </tbody>
         </table>
-        </div>
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-    </div>
+      </div>
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+      
+      {selectedPropertyId && (
+        <PropertyReviewModal 
+          propertyId={selectedPropertyId} 
+          onClose={handleCloseModal}
+          onActionComplete={handleActionInModal}
+        />
+      )}
+    </>
   );
 };

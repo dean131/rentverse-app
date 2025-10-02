@@ -8,9 +8,10 @@ import { Button } from '@/ui/ui/Button';
 interface AdminActionButtonsProps {
   propertyId: number;
   documentUrl?: string;
+  onActionComplete?: () => void; // Add optional callback
 }
 
-export const AdminActionButtons = ({ propertyId, documentUrl }: AdminActionButtonsProps) => {
+export const AdminActionButtons = ({ propertyId, documentUrl, onActionComplete }: AdminActionButtonsProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState< 'approve' | 'reject' | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -21,15 +22,20 @@ export const AdminActionButtons = ({ propertyId, documentUrl }: AdminActionButto
     try {
       await updatePropertyStatus(propertyId, status);
       alert(`Property has been ${status.toLowerCase()}.`);
-      router.push('/admin/dashboard');
-      router.refresh(); // Ensures the dashboard data is fresh
+      
+      // If the callback exists (we're in a modal), call it. Otherwise, use the router.
+      if (onActionComplete) {
+        onActionComplete();
+      } else {
+        router.push('/admin/dashboard');
+        router.refresh();
+      }
     } catch (err) {
       console.error('Failed to update property status', err);
       setError('Could not update the property status. Please try again.');
       setIsLoading(null);
     }
   };
-
   return (
     <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r-lg">
       <div className="flex items-center justify-between flex-wrap gap-4">

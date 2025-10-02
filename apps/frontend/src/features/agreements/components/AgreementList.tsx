@@ -1,10 +1,10 @@
-// File Path: apps/frontend/src/components/agreements/AgreementList.tsx
+// File Path: frontend/src/features/agreements/components/AgreementList.tsx
 'use client';
 
 import { useState, useMemo } from 'react';
 import { AgreementDetails } from '@/lib/definitions';
 import { useAuth } from '@/features/auth/useAuth';
-import { approveAgreement, getSigningUrl } from '@/features/agreements/agreementService';
+import { approveAgreement, getSigningUrl, downloadAgreementPdf } from '@/features/agreements/agreementService';
 import { Button } from '@/ui/ui/Button';
 import Image from 'next/image';
 import axios from 'axios';
@@ -22,6 +22,7 @@ const renderStatusBadge = (status: string) => {
         PENDING_OWNER_APPROVAL: 'bg-yellow-100 text-yellow-800',
         PENDING_SIGNATURES: 'bg-blue-100 text-blue-800',
         ACTIVE: 'bg-green-100 text-green-800',
+        COMPLETED: 'bg-gray-100 text-gray-800',
         OWNER_REJECTED: 'bg-red-100 text-red-800',
     };
     return (
@@ -34,6 +35,7 @@ const renderStatusBadge = (status: string) => {
 export const AgreementList = ({ agreements, onUpdate }: AgreementListProps) => {
     const { user } = useAuth();
     const [loadingStates, setLoadingStates] = useState<Record<number, boolean>>({});
+    const [downloadingId, setDownloadingId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -65,6 +67,28 @@ export const AgreementList = ({ agreements, onUpdate }: AgreementListProps) => {
             }
         } finally {
             setLoadingStates(prev => ({ ...prev, [agreementId]: false }));
+        }
+    };
+
+    const handleDownload = async (agreementId: number) => {
+        setDownloadingId(agreementId);
+        setError(null);
+        try {
+            const pdfBlob = await downloadAgreementPdf(agreementId);
+            // Create a temporary link to trigger the browser download
+            const url = window.URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tenancy-agreement-${agreementId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error(`Failed to download agreement:`, err);
+            setError("Could not download the document at this time.");
+        } finally {
+            setDownloadingId(null);
         }
     };
 
@@ -109,7 +133,7 @@ export const AgreementList = ({ agreements, onUpdate }: AgreementListProps) => {
                                         {new Date(agreement.startDate).toLocaleDateString()} - {new Date(agreement.endDate).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">{renderStatusBadge(agreement.status)}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                         {isOwner && agreement.status === 'PENDING_OWNER_APPROVAL' && (
                                             <Button onClick={() => handleAction('approve', agreement.id)} disabled={isLoading} size="sm">
                                                 {isLoading ? '...' : 'Approve'}
@@ -118,6 +142,11 @@ export const AgreementList = ({ agreements, onUpdate }: AgreementListProps) => {
                                         {agreement.status === 'PENDING_SIGNATURES' && (
                                             <Button onClick={() => handleAction('sign', agreement.id)} disabled={isLoading} size="sm">
                                                 {isLoading ? '...' : 'Sign Document'}
+                                            </Button>
+                                        )}
+                                        {(agreement.status === 'ACTIVE' || agreement.status === 'COMPLETED') && (
+                                            <Button variant="outline" onClick={() => handleDownload(agreement.id)} disabled={downloadingId === agreement.id} size="sm">
+                                                {downloadingId === agreement.id ? 'Downloading...' : 'Download PDF'}
                                             </Button>
                                         )}
                                     </td>
@@ -131,4 +160,3 @@ export const AgreementList = ({ agreements, onUpdate }: AgreementListProps) => {
         </div>
     );
 };
-

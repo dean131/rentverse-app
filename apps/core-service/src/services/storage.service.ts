@@ -29,7 +29,6 @@ export class StorageService {
     });
 
     // Use a separate client for presigning that points to the browser-accessible URL
-    // so that the generated presigned URL host is reachable from the client.
     this.signerClient = new S3Client({
       endpoint: config.minio.publicUrl,
       region: "us-east-1",
@@ -40,30 +39,58 @@ export class StorageService {
       forcePathStyle: true,
     });
 
-    // Best-effort: ensure bucket exists and CORS is configured for browser uploads
-    this.ensureBucketAndCors().catch((err) => {
-      console.warn("StorageService: Failed to ensure bucket/CORS:", err);
+    // Initialize the bucket and CORS settings.
+    this.initializeBucket().catch((err) => {
+      console.error(
+        "StorageService: Failed to initialize bucket and CORS:",
+        err
+      );
     });
   }
 
-  private async ensureBucketAndCors() {
-    // Check if bucket exists
+  private async initializeBucket() {
+    // Step 1: Check if the bucket exists.
     try {
       await this.s3Client.send(
         new HeadBucketCommand({ Bucket: this.bucketName })
       );
-    } catch (e) {
-      // Create if missing
-      await this.s3Client.send(
-        new CreateBucketCommand({ Bucket: this.bucketName })
+      console.log(
+        `StorageService: Bucket "${this.bucketName}" already exists.`
       );
+    } catch (e: any) {
+      // Step 2: If the bucket does not exist, create it.
+      if (e.name === "NotFound" || e.$metadata?.httpStatusCode === 404) {
+        console.log(
+          `StorageService: Bucket "${this.bucketName}" not found. Creating...`
+        );
+        try {
+          await this.s3Client.send(
+            new CreateBucketCommand({ Bucket: this.bucketName })
+          );
+          console.log(
+            `StorageService: Bucket "${this.bucketName}" created successfully.`
+          );
+        } catch (createErr) {
+          console.error(
+            `StorageService: FATAL - Failed to create bucket:`,
+            createErr
+          );
+          throw createErr; // Stop if we can't create the bucket
+        }
+      } else {
+        // Re-throw other unexpected errors
+        console.error(
+          `StorageService: Error checking for bucket existence:`,
+          e
+        );
+        throw e;
+      }
     }
 
-    // Configure CORS to allow browser direct PUTs
-    const allowedOrigins =
-      config.env === "production"
-        ? [config.frontendUrl]
-        : ["http://127.0.0.1:3000", "http://localhost:3000", config.frontendUrl];
+    // Step 3: Now that the bucket is guaranteed to exist, apply CORS configuration.
+    const allowedOrigins = config.cors.allowedOrigins
+      .split(",")
+      .map((origin) => origin.trim());
     const corsConfig: CORSConfiguration = {
       CORSRules: [
         {
@@ -75,16 +102,23 @@ export class StorageService {
         },
       ],
     };
+
     try {
+      console.log(
+        `StorageService: Applying CORS configuration to bucket "${this.bucketName}".`
+      );
       await this.s3Client.send(
         new PutBucketCorsCommand({
           Bucket: this.bucketName,
           CORSConfiguration: corsConfig,
         })
       );
+      console.log("StorageService: CORS configuration applied successfully.");
     } catch (err) {
-      // Non-fatal if we lack permission; uploads may still work if CORS was set manually
-      console.info("StorageService: Skipping CORS setup:", (err as Error).message);
+      console.warn(
+        "StorageService: Could not apply CORS configuration. This may be okay if it's already set. Error:",
+        (err as Error).message
+      );
     }
   }
 

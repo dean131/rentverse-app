@@ -43,3 +43,12 @@ export const getSigningUrl = async (agreementId: number): Promise<string> => {
   );
   return response.data.data.url;
 };
+
+export const downloadAgreementPdf = async (
+  agreementId: number
+): Promise<Blob> => {
+  const response = await apiClient.get(`/agreements/${agreementId}/download`, {
+    responseType: "blob",
+  });
+  return response.data;
+};

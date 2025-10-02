@@ -1,7 +1,9 @@
 // File Path: apps/core-service/src/services/docusign.service.ts
 import docusign from "docusign-esign";
+import { promises as fs } from "fs";
 import { config } from "../config/index.js";
 import { User, Property, TenancyAgreement, Project } from "@prisma/client";
+import { ApiError } from "../utils/ApiError.js";
 
 // Define a more specific type for the property object that includes its relations
 type PropertyWithProject = Property & { project: Project | null };
@@ -279,5 +281,44 @@ export class DocusignService {
     );
 
     return results.url;
+  }
+
+  async downloadDocument(envelopeId: string): Promise<Buffer> {
+    await this.initializeApiClient();
+
+    const envelopesApi = new docusign.EnvelopesApi(this.apiClient);
+
+    try {
+      // The getDocument method returns the PDF content directly as a Buffer,
+      // but its TypeScript definition is incorrect, so we must cast it.
+      const pdfResult = await envelopesApi.getDocument(
+        this.accountId,
+        envelopeId,
+        "combined",
+        {}
+      );
+
+      // Cast to 'unknown' first, then to 'Buffer' to satisfy TypeScript.
+      return pdfResult as unknown as Buffer;
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.status >= 400 &&
+        error.response.status < 500
+      ) {
+        console.warn(
+          `DocuSign API client error (4xx): Could not download document for envelope ID ${envelopeId}. This is expected for seeded demo data.`
+        );
+        throw new ApiError(
+          404,
+          "The signed document could not be found on DocuSign. This may be because it is demo data."
+        );
+      }
+      console.error(
+        "An unexpected error occurred while downloading the DocuSign document:",
+        error
+      );
+      throw new Error("Failed to download document from DocuSign.");
+    }
   }
 }

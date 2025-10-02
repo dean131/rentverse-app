@@ -105,4 +105,31 @@ export class AgreementService {
       returnUrl
     );
   }
+
+  async getAgreementDocument(
+    agreementId: number,
+    userId: number
+  ): Promise<Buffer> {
+    const agreement = await this.agreementRepository.findById(agreementId);
+    if (!agreement) {
+      throw new ApiError(404, "Agreement not found.");
+    }
+    if (agreement.ownerId !== userId && agreement.tenantId !== userId) {
+      throw new ApiError(403, "You are not a party to this agreement.");
+    }
+    if (agreement.status !== "ACTIVE" && agreement.status !== "COMPLETED") {
+      throw new ApiError(
+        400,
+        "Document is not available for download until it is completed."
+      );
+    }
+    if (!agreement.docusignEnvelopeId) {
+      throw new ApiError(
+        400,
+        "DocuSign document not found for this agreement."
+      );
+    }
+
+    return this.docusignService.downloadDocument(agreement.docusignEnvelopeId);
+  }
 }

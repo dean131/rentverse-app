@@ -1,4 +1,3 @@
-// File Path: apps/frontend/src/components/ui/InputField.tsx
 import { FieldError, UseFormRegisterReturn } from 'react-hook-form';
 
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -19,11 +18,10 @@ export const InputField = ({ label, id, registration, error, ...rest }: InputFie
           id={id}
           {...registration}
           {...rest}
-          className="w-full px-4 py-3 bg-gray-100 border-2 border-transparent rounded-lg focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition"
+          className="w-full px-4 py-3 bg-gray-100 border-2 border-transparent rounded-lg focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition text-gray-900 placeholder-gray-500"
         />
       </div>
       {error && <p className="mt-2 text-sm text-red-500">{error.message}</p>}
     </div>
   );
 };
-

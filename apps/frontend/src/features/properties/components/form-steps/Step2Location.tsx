@@ -1,4 +1,3 @@
-// File Path: apps/frontend/src/components/properties/form-steps/Step2Location.tsx
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -33,7 +32,6 @@ export const Step2Location = ({ register, errors, watch, setValue }: Step2Props)
     const [isLoading, setIsLoading] = useState(true);
     const selectedProjectId = watch('projectId');
 
-    // State for address search
     const [address, setAddress] = useState(watch('address') || "");
     const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -60,7 +58,6 @@ export const Step2Location = ({ register, errors, watch, setValue }: Step2Props)
         setValue('longitude', lng, { shouldValidate: true, shouldDirty: true });
     };
 
-    // Debounced search function
     const searchAddress = useCallback(
         debounce(async (query: string) => {
             if (query.length < 3) {
@@ -69,7 +66,6 @@ export const Step2Location = ({ register, errors, watch, setValue }: Step2Props)
             }
             setIsSearching(true);
             try {
-                // Fetch from OpenStreetMap's Nominatim API, biased towards Indonesia
                 const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=id&limit=5`);
                 const data: NominatimResult[] = await response.json();
                 setSuggestions(data);
@@ -135,19 +131,19 @@ export const Step2Location = ({ register, errors, watch, setValue }: Step2Props)
                                 value={address}
                                 onChange={handleAddressChange}
                                 placeholder="Start typing an address..."
-                                className="block w-full appearance-none rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-orange-500 sm:text-sm"
+                                className="block w-full appearance-none rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-orange-500 sm:text-sm"
                                 autoComplete="off"
                             />
                             { (isSearching || suggestions.length > 0) &&
                                 <div className="absolute z-10 w-full bg-white rounded-md shadow-lg mt-1 border">
-                                    {isSearching && <div className="p-2 text-gray-500">Searching...</div>}
+                                    {isSearching && <div className="p-2 text-gray-600">Searching...</div>}
                                     {suggestions.map(suggestion => (
                                         <div
                                             key={suggestion.place_id}
                                             className="p-2 hover:bg-gray-100 cursor-pointer"
                                             onClick={() => handleSuggestionClick(suggestion)}
                                         >
-                                            <span>{suggestion.display_name}</span>
+                                            <span className="text-gray-800">{suggestion.display_name}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -173,4 +169,3 @@ export const Step2Location = ({ register, errors, watch, setValue }: Step2Props)
         </div>
     );
 };
-

@@ -13,6 +13,7 @@ export class PropertyRepository {
 
   async findAllPublic(filters: {
     searchQuery?: string;
+    listingType?: string;
     propertyType?: string;
     beds?: string;
     page?: number;
@@ -37,6 +38,15 @@ export class PropertyRepository {
       ];
     }
 
+    // New logic for listingType
+    if (filters.listingType) {
+      if (filters.listingType === "RENT") {
+        whereClause.listingType = { in: ["RENT", "BOTH"] };
+      } else if (filters.listingType === "SALE") {
+        whereClause.listingType = { in: ["SALE", "BOTH"] };
+      }
+    }
+
     if (filters.propertyType && filters.propertyType !== "ALL") {
       whereClause.propertyType = filters.propertyType as PropertyType;
     }
@@ -44,9 +54,7 @@ export class PropertyRepository {
     if (filters.beds) {
       const minBeds = parseInt(filters.beds, 10);
       if (!isNaN(minBeds)) {
-        whereClause.bedrooms = {
-          gte: minBeds,
-        };
+        whereClause.bedrooms = { gte: minBeds };
       }
     }
 

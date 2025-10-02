@@ -22,7 +22,7 @@ const SearchResults = () => {
     const [totalPages, setTotalPages] = useState(0);
 
     const currentPage = Number(searchParams.get('page')) || 1;
-    const initialType = searchParams.get('type') || 'ALL';
+    const initialPropertyType = searchParams.get('propertyType') || 'ALL';
     const initialBeds = searchParams.get('beds') || 'ALL';
 
     const fetchProperties = useCallback(async (filters: PropertyFilters) => {
@@ -43,20 +43,21 @@ const SearchResults = () => {
     useEffect(() => {
         const currentFilters: PropertyFilters = {
             search: searchParams.get('search') || undefined,
-            type: searchParams.get('type') || undefined,
+            listingType: searchParams.get('listingType') || undefined,
+            propertyType: searchParams.get('propertyType') || undefined,
             beds: searchParams.get('beds') || undefined,
             page: Number(searchParams.get('page')) || 1,
         };
         fetchProperties(currentFilters);
     }, [searchParams, fetchProperties]);
-
-    const handleFilterChange = (filters: Omit<PropertyFilters, 'search' | 'page'>) => {
+    
+    const handleFilterChange = (filters: { propertyType?: string, beds?: string }) => {
         const params = new URLSearchParams(searchParams.toString());
 
-        if (filters.type && filters.type !== 'ALL') {
-            params.set('type', filters.type);
+        if (filters.propertyType && filters.propertyType !== 'ALL') {
+            params.set('propertyType', filters.propertyType);
         } else {
-            params.delete('type');
+            params.delete('propertyType');
         }
 
         if (filters.beds && filters.beds !== 'ALL') {
@@ -84,18 +85,17 @@ const SearchResults = () => {
                 </p>
             </div>
 
-            {/* Filters are now at the top */}
             <div className="mb-8">
                 <PropertySearchFilters 
                     onFilterChange={handleFilterChange} 
-                    initialFilters={{ type: initialType, beds: initialBeds }} 
+                    initialFilters={{ propertyType: initialPropertyType, beds: initialBeds }} 
                 />
             </div>
             
             <main>
                 <div className="flex flex-col sm:flex-row justify-between items-center mb-6 pb-4 border-b border-gray-200 gap-4">
                     <h1 className="text-xl font-semibold text-gray-800">
-                        {isLoading ? 'Searching...' : `Showing ${properties.length} Results`}
+                       {isLoading ? 'Searching...' : `Showing ${properties.length} Results`}
                     </h1>
                     <div className="flex items-center gap-2">
                         <label htmlFor="sort-by" className="text-sm font-medium text-gray-600">Sort by:</label>
@@ -114,7 +114,7 @@ const SearchResults = () => {
                         ))}
                     </div>
                 ) : error ? (
-                        <div className="text-center py-20 text-red-500">{error}</div>
+                     <div className="text-center py-20 text-red-500">{error}</div>
                 ) : properties.length > 0 ? (
                     <>
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

@@ -2,17 +2,16 @@
 'use client';
 
 import { useState } from 'react';
-import { PropertyFilters } from '@/lib/definitions';
 import { FilterDropdown } from './FilterDropdown';
 import { Button } from '@/ui/ui/Button';
 
 interface PropertySearchFiltersProps {
-    onFilterChange: (filters: Omit<PropertyFilters, 'search' | 'page'>) => void;
-    initialFilters: Omit<PropertyFilters, 'search' | 'page'>;
+    onFilterChange: (filters: { propertyType?: string; beds?: string; }) => void;
+    initialFilters: { propertyType?: string; beds?: string; };
 }
 
 export const PropertySearchFilters = ({ onFilterChange, initialFilters }: PropertySearchFiltersProps) => {
-    const [propertyType, setPropertyType] = useState(initialFilters.type || 'ALL');
+    const [propertyType, setPropertyType] = useState(initialFilters.propertyType || 'ALL');
     const [bedrooms, setBedrooms] = useState(initialFilters.beds || 'ALL');
 
     const propertyTypes = [
@@ -33,13 +32,13 @@ export const PropertySearchFilters = ({ onFilterChange, initialFilters }: Proper
 
     const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onFilterChange({ type: propertyType, beds: bedrooms });
+        onFilterChange({ propertyType: propertyType, beds: bedrooms });
     };
     
     const handleReset = () => {
         setPropertyType('ALL');
         setBedrooms('ALL');
-        onFilterChange({ type: 'ALL', beds: 'ALL'});
+        onFilterChange({ propertyType: 'ALL', beds: 'ALL'});
     };
 
     return (

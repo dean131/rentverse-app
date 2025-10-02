@@ -1,28 +1,27 @@
 // File Path: apps/frontend/src/ui/layout/Navbar.tsx
 'use client';
 
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, ReactNode, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/features/auth/useAuth';
 import { Button } from '@/ui/ui/Button';
 import { Logo } from '@/ui/ui/Logo';
 
-// A dedicated NavLink component for cleaner active and hover states
+// This component uses client-side hooks, so it needs to be loaded dynamically.
 const NavLink = ({ href, children }: { href: string; children: ReactNode }) => {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     
     let isActive = false;
 
-    // Logic to handle active state for filtered property links
     if (href.startsWith('/properties?')) {
         const hrefParams = new URLSearchParams(href.split('?')[1]);
-        const typeInHref = hrefParams.get('type');
-        const typeInUrl = searchParams.get('type');
+        const typeInHref = hrefParams.get('listingType');
+        const typeInUrl = searchParams.get('listingType');
+        // The link is active if we are on the properties page and the listingType matches
         isActive = pathname === '/properties' && typeInHref === typeInUrl;
     } else {
-        // Standard check for other links like the homepage
         isActive = pathname === href;
     }
 
@@ -47,7 +46,23 @@ const NavLink = ({ href, children }: { href: string; children: ReactNode }) => {
     );
 };
 
-// A reusable search bar component for the navbar
+// We isolate the part of the navbar that uses the hooks.
+const DesktopNavLinks = () => {
+    const navLinks = [
+        { href: '/', label: 'Home' },
+        { href: '/properties?listingType=RENT', label: 'Rent' },
+        { href: '/properties?listingType=SALE', label: 'Buy' },
+    ];
+
+    return (
+        <div className="flex items-center space-x-8">
+            {navLinks.map((link) => (
+                <NavLink key={link.href} href={link.href}>{link.label}</NavLink>
+            ))}
+        </div>
+    );
+}
+
 const SearchBar = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
@@ -55,11 +70,7 @@ const SearchBar = () => {
     const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const trimmedQuery = searchQuery.trim();
-        if (trimmedQuery) {
-            router.push(`/properties?search=${encodeURIComponent(trimmedQuery)}`);
-        } else {
-            router.push('/properties');
-        }
+        router.push(trimmedQuery ? `/properties?search=${encodeURIComponent(trimmedQuery)}` : '/properties');
     };
 
     return (
@@ -86,12 +97,11 @@ export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
+    if (isMobileMenuOpen) setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  const navLinks = [
+  // Use a separate array for the mobile menu links to avoid Suspense issues there.
+  const mobileNavLinks = [
     { href: '/', label: 'Home' },
     { href: '/properties?type=RENT', label: 'Rent' },
     { href: '/properties?type=SALE', label: 'Buy' },
@@ -103,20 +113,14 @@ export const Navbar = () => {
         <div className="relative flex items-center justify-between h-20">
           
           <div className="flex items-center space-x-6">
-            <div className="flex-shrink-0">
-              <Logo />
-            </div>
-            <div className="hidden md:block">
-              <SearchBar />
-            </div>
+            <div className="flex-shrink-0"><Logo /></div>
+            <div className="hidden md:block"><SearchBar /></div>
           </div>
 
           <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="flex items-center space-x-8">
-              {navLinks.map((link) => (
-                <NavLink key={link.href} href={link.href}>{link.label}</NavLink>
-              ))}
-            </div>
+            <Suspense fallback={<div className="w-56 h-5 bg-gray-200 rounded-md" />}>
+              <DesktopNavLinks />
+            </Suspense>
           </div>
 
           <div className="flex items-center">
@@ -153,19 +157,16 @@ export const Navbar = () => {
 
       <div className={`lg:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-lg transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-y-0' : '-translate-y-full opacity-0'}`} id="mobile-menu">
         <div className="px-4 pt-3 pb-4 space-y-3">
-          <div className="md:hidden">
-            <SearchBar />
-          </div>
+          <div className="md:hidden"><SearchBar /></div>
           <div className="space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`block px-3 py-2 rounded-md text-base font-medium ${pathname === link.href ? 'bg-orange-50 text-orange-700' : 'text-gray-700 hover:bg-gray-50'}`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {mobileNavLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link key={link.href} href={link.href} className={`block px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-orange-50 text-orange-700' : 'text-gray-700 hover:bg-gray-50'}`}>
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
           <div className="pt-4 border-t border-gray-200 flex items-center space-x-2 md:hidden">
             {user ? (

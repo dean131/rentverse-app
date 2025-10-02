@@ -71,8 +71,13 @@ export const getPublicProperties = async (
   if (filters.search) {
     params.append("search", filters.search);
   }
-  if (filters.type && filters.type !== "ALL") {
-    params.append("propertyType", filters.type);
+  // Add listingType to the params if it exists
+  if (filters.listingType) {
+    params.append("listingType", filters.listingType);
+  }
+  // The existing filter for property type (Apartment, House, etc.)
+  if (filters.propertyType && filters.propertyType !== "ALL") {
+    params.append("propertyType", filters.propertyType);
   }
   if (filters.beds) {
     params.append("beds", filters.beds);

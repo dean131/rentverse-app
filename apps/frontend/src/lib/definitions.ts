@@ -173,7 +173,8 @@ export type StatusUpdatePayload = {
 
 export type PropertyFilters = {
   search?: string;
-  type?: string;
+  listingType?: string;
+  propertyType?: string;
   beds?: string;
   page?: number;
 };

@@ -29,12 +29,14 @@ export class PropertyController {
 
   getPublicProperties = asyncHandler(async (req: Request, res: Response) => {
     const searchQuery = req.query.search as string | undefined;
+    const listingType = req.query.listingType as string | undefined;
     const propertyType = req.query.propertyType as string | undefined;
     const beds = req.query.beds as string | undefined;
     const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
 
     const properties = await this.propertyService.getPublicProperties({
       searchQuery,
+      listingType,
       propertyType,
       beds,
       page,

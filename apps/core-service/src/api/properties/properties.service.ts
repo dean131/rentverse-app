@@ -74,6 +74,7 @@ export class PropertyService {
     propertyType?: string;
     beds?: string;
     page?: number;
+    listingType?: string;
   }): Promise<any> {
     return this.propertyRepository.findAllPublic(filters);
   }

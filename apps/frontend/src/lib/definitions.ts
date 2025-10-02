@@ -155,6 +155,7 @@ export type PropertyDetailed = {
   images: { imageUrl: string }[];
   amenities: Amenity[];
   views: View[];
+  documents: { fileUrl: string; documentType: string }[]; // <-- Add this line
   listedBy: {
     fullName: string;
     email: string;

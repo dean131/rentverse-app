@@ -112,6 +112,7 @@ export class PropertyRepository {
         images: {
           orderBy: { displayOrder: "asc" },
         },
+        documents: true, // <-- Add this line
         amenities: {
           include: { amenity: true },
         },

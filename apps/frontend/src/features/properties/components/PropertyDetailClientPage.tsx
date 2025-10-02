@@ -31,6 +31,10 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const { user } = useAuth();
 
+  const ownershipDocument = property.documents?.find(
+    doc => doc.documentType === 'OWNERSHIP_CERTIFICATE'
+  );
+
   const handleBookingSuccess = () => {
     setIsBookingModalOpen(false);
     alert("Success! Your booking request has been sent to the property owner for approval.");
@@ -40,7 +44,10 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
     <main className="bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {user?.role === 'ADMIN' && property.status === 'PENDING' && (
-          <AdminActionButtons propertyId={property.id} />
+          <AdminActionButtons 
+            propertyId={property.id}
+            documentUrl={ownershipDocument?.fileUrl} // Pass the URL as a prop
+          />
         )}
         
         <PropertyImageGallery images={property.images} title={property.title} />

@@ -7,9 +7,10 @@ import { Button } from '@/ui/ui/Button';
 
 interface AdminActionButtonsProps {
   propertyId: number;
+  documentUrl?: string;
 }
 
-export const AdminActionButtons = ({ propertyId }: AdminActionButtonsProps) => {
+export const AdminActionButtons = ({ propertyId, documentUrl }: AdminActionButtonsProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState< 'approve' | 'reject' | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,12 +32,19 @@ export const AdminActionButtons = ({ propertyId }: AdminActionButtonsProps) => {
 
   return (
     <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r-lg">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <p className="font-bold text-yellow-800">Admin Review</p>
           <p className="text-sm text-yellow-700">This property is pending your approval.</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex items-center space-x-2">
+          {documentUrl && (
+            <a href={documentUrl} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="!px-4 !py-2">
+                View Document
+              </Button>
+            </a>
+          )}
           <Button
             variant="outline"
             onClick={() => handleStatusUpdate('REJECTED')}

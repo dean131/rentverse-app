@@ -1,9 +1,6 @@
-// File Path: apps/frontend/src/components/layout/DashboardLayout.tsx
-// RENAMED from AdminLayout.tsx and moved to a more general location
-
+// File Path: apps/frontend/src/ui/layout/DashboardLayout.tsx
 import { ReactNode } from 'react';
-import { Sidebar } from '@/features/admin/components/layout/Sidebar'; // Sidebar can be made dynamic later
-import { Header } from '@/features/admin/components/layout/Header';
+import { Sidebar } from '@/features/admin/components/layout/Sidebar';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -14,7 +11,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     <div className="flex h-screen bg-gray-100">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-8">
           {children}
         </main>

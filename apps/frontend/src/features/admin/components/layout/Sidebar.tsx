@@ -1,4 +1,4 @@
-// File Path: apps/frontend/src/components/admin/layout/Sidebar.tsx
+// File Path: apps/frontend/src/features/admin/components/layout/Sidebar.tsx
 'use client';
 
 import Link from 'next/link';
@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/features/auth/useAuth';
 import { Icon } from './Icon';
 import { Logo } from '@/ui/ui/Logo';
+import Image from 'next/image';
 
 export const Sidebar = () => {
   const pathname = usePathname();
@@ -26,14 +27,12 @@ export const Sidebar = () => {
                  : tenantLinks;
 
   return (
-    // REMOVED: 'border-r' class from the main aside element
-    <aside className="w-64 flex-shrink-0 bg-white hidden md:block">
+    <aside className="w-64 flex-shrink-0 bg-white hidden md:block border-r border-gray-200">
       <div className="flex flex-col h-full">
-        {/* REMOVED: 'border-b' class from the logo container */}
-        <div className="h-20 flex items-center justify-center mb-10">
-          {/* Logo component already renders a Link to "/", so don't wrap it again */}
-          <Logo className="h-8 w-auto text-orange-400" />
+        <div className="h-20 flex items-center justify-center border-b border-gray-200">
+          <Logo />
         </div>
+
         <nav className="flex-1 px-4 py-6 space-y-2">
           {navItems.map((item) => (
             <Link
@@ -50,18 +49,31 @@ export const Sidebar = () => {
             </Link>
           ))}
         </nav>
-        {/* REMOVED: 'border-t' class from the logout button container */}
-        <div className="px-4 py-6">
-          <button
-            onClick={logout}
-            className="w-full flex items-center px-4 py-2 text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
-          >
-            <Icon d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            <span className="ml-3 font-medium">Logout</span>
-          </button>
+        
+        <div className="px-4 py-6 border-t border-gray-200">
+            <div className="flex items-center space-x-3">
+                <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-200">
+                    <Image 
+                        src={'https://placehold.co/100x100/CCCCCC/FFFFFF/png?text=User'}
+                        alt="User Profile"
+                        layout="fill"
+                        objectFit="cover"
+                    />
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-gray-800 truncate">{user?.email}</p>
+                    <p className="text-xs text-gray-500">{user?.role?.replace('_', ' ')}</p>
+                </div>
+                <button
+                    onClick={logout}
+                    className="p-2 text-gray-500 rounded-md hover:bg-gray-100 hover:text-gray-700 transition-colors duration-200"
+                    aria-label="Logout"
+                >
+                    <Icon d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" className="h-5 w-5" />
+                </button>
+            </div>
         </div>
       </div>
     </aside>
   );
 };
-

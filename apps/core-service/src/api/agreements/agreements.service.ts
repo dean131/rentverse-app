@@ -96,7 +96,7 @@ export class AgreementService {
     const signer = isOwner ? agreement.owner : agreement.tenant;
     const recipientId = isOwner ? "1" : "2";
 
-    const returnUrl = `${config.frontendUrl}/agreements?signing=complete`;
+    const returnUrl = `${config.frontendUrl}/admin/agreements?signing=complete`;
 
     return this.docusignService.getRecipientViewUrl(
       agreement.docusignEnvelopeId,

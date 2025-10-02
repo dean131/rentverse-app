@@ -53,33 +53,137 @@ export class DocusignService {
     }
   }
 
+  // File Path: apps/core-service/src/services/docusign.service.ts
+
   private createDocument(
     agreement: TenancyAgreement,
     owner: User,
     tenant: User,
     property: PropertyWithProject
   ): string {
-    let docHtml = `
-            <!DOCTYPE html><html><body style="font-family: sans-serif; line-height: 1.6;">
-                <h1 style="text-align: center;">Tenancy Agreement</h1>
-                <p>This agreement is made on <strong>${new Date().toLocaleDateString("en-GB")}</strong>.</p>
-                <h3>Parties Involved</h3>
-                <p><strong>Landlord/Owner:</strong> ${owner.fullName} (${owner.email})</p>
-                <p><strong>Tenant:</strong> ${tenant.fullName} (${tenant.email})</p>
-                <h3>Property Details</h3>
-                <p><strong>Property:</strong> ${property.title}</p>
-                <p><strong>Address:</strong> ${property.project?.address || "N/A"}</p>
-                <h3>Agreement Terms</h3>
-                <p><strong>Term:</strong> From ${new Date(agreement.startDate).toLocaleDateString("en-GB")} to ${new Date(agreement.endDate).toLocaleDateString("en-GB")}.</p>
-                <p><strong>Rent:</strong> MYR ${agreement.rentAmount.toLocaleString()} per ${property.paymentPeriod?.toLowerCase() || "period"}.</p>
-                <br/><br/>
-                <p><strong>Landlord Signature:</strong></p>
-                <div id="ownerSign" style="width: 200px; height: 50px;"></div>
-                <br/><br/>
-                <p><strong>Tenant Signature:</strong></p>
-                <div id="tenantSign" style="width: 200px; height: 50px;"></div>
-            </body></html>
-        `;
+    // A more professional and styled HTML template for the agreement
+    const docHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+              color: #333;
+              line-height: 1.6;
+            }
+            .container {
+              width: 80%;
+              margin: 0 auto;
+              padding: 30px;
+              border: 1px solid #eee;
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            }
+            .header {
+              text-align: center;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+            }
+            .header img {
+              max-width: 150px;
+              margin-bottom: 10px;
+            }
+            h1 {
+              font-size: 24px;
+              color: #111;
+              margin: 0;
+            }
+            h3 {
+              font-size: 18px;
+              color: #222;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 10px;
+              margin-top: 30px;
+            }
+            p {
+              font-size: 14px;
+              margin: 0 0 10px;
+            }
+            strong {
+              color: #000;
+            }
+            .section {
+              margin-bottom: 20px;
+            }
+            .signature-box {
+              margin-top: 50px;
+              padding-top: 20px;
+              border-top: 1px solid #eee;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 40px;
+              font-size: 12px;
+              color: #777;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <img src="https://placehold.co/150x50/F99933/FFFFFF/png?text=Rentverse" alt="Company Logo" />
+              <h1>Tenancy Agreement</h1>
+            </div>
+
+            <div class="section">
+              <p>This Tenancy Agreement is made on <strong>${new Date().toLocaleDateString(
+                "en-GB"
+              )}</strong>.</p>
+            </div>
+
+            <div class="section">
+              <h3>Parties Involved</h3>
+              <p><strong>Landlord / Owner:</strong> ${owner.fullName} (${
+                owner.email
+              })</p>
+              <p><strong>Tenant:</strong> ${tenant.fullName} (${
+                tenant.email
+              })</p>
+            </div>
+
+            <div class="section">
+              <h3>Property Details</h3>
+              <p><strong>Property:</strong> ${property.title}</p>
+              <p><strong>Address:</strong> ${
+                property.project?.address || "N/A"
+              }</p>
+            </div>
+
+            <div class="section">
+              <h3>Agreement Terms</h3>
+              <p><strong>Term:</strong> From <strong>${new Date(
+                agreement.startDate
+              ).toLocaleDateString("en-GB")}</strong> to <strong>${new Date(
+                agreement.endDate
+              ).toLocaleDateString("en-GB")}</strong>.</p>
+              <p><strong>Rent Amount:</strong> MYR ${agreement.rentAmount.toLocaleString()} per ${
+                property.paymentPeriod?.toLowerCase() || "period"
+              }.</p>
+            </div>
+
+            <div class="signature-box">
+              <p><strong>Landlord Signature:</strong></p>
+              <div id="ownerSign" style="width: 200px; height: 50px;"></div>
+            </div>
+
+            <div class="signature-box">
+              <p><strong>Tenant Signature:</strong></p>
+              <div id="tenantSign" style="width: 200px; height: 50px;"></div>
+            </div>
+            
+            <div class="footer">
+              <p>Thank you for using Rentverse.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
     return Buffer.from(docHtml).toString("base64");
   }
 

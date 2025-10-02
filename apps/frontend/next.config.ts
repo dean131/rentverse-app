@@ -15,6 +15,24 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "rvfe.ilhamdean.cloud",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "minio.ilhamdean.cloud",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "rentverse.ilhamdean.cloud",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };

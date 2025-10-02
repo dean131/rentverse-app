@@ -1,12 +1,10 @@
-// File Path: apps/frontend/src/components/properties/PropertySearchFilters.tsx
 'use client';
 
 import { useState } from 'react';
 import { PropertyFilters } from '@/lib/definitions';
-import { FilterButton } from './FilterButton';
+import { FilterDropdown } from './FilterDropdown';
 import { Button } from '@/ui/ui/Button';
 
-// The props now only handle filter changes, search is separate.
 interface PropertySearchFiltersProps {
     onFilterChange: (filters: Omit<PropertyFilters, 'search' | 'page'>) => void;
     initialFilters: Omit<PropertyFilters, 'search' | 'page'>;
@@ -26,10 +24,10 @@ export const PropertySearchFilters = ({ onFilterChange, initialFilters }: Proper
     
     const bedOptions = [
         { value: 'ALL', label: 'Any Beds' },
-        { value: '1', label: '1+' },
-        { value: '2', label: '2+' },
-        { value: '3', label: '3+' },
-        { value: '4', label: '4+' },
+        { value: '1', label: '1+ Beds' },
+        { value: '2', label: '2+ Beds' },
+        { value: '3', label: '3+ Beds' },
+        { value: '4', label: '4+ Beds' },
     ];
 
     const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -47,27 +45,19 @@ export const PropertySearchFilters = ({ onFilterChange, initialFilters }: Proper
         <form onSubmit={handleFormSubmit} className="bg-white p-6 rounded-lg border border-gray-200 sticky top-24">
             <h3 className="text-lg font-bold text-gray-900 mb-6 border-b pb-4">Filter Properties</h3>
             <div className="space-y-6">
-                {/* Filter Dropdowns */}
-                <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Property Type</label>
-                    <FilterButton 
-                        label="Property Type" 
-                        options={propertyTypes} 
-                        selectedValue={propertyType}
-                        onValueChange={setPropertyType}
-                    />
-                </div>
-                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Bedrooms</label>
-                    <FilterButton 
-                        label="Beds" 
-                        options={bedOptions} 
-                        selectedValue={bedrooms}
-                        onValueChange={setBedrooms}
-                    />
-                </div>
+                <FilterDropdown 
+                    label="Property Type" 
+                    options={propertyTypes} 
+                    selectedValue={propertyType}
+                    onValueChange={setPropertyType}
+                />
+                 <FilterDropdown 
+                    label="Bedrooms" 
+                    options={bedOptions} 
+                    selectedValue={bedrooms}
+                    onValueChange={setBedrooms}
+                />
                 
-                {/* Action Buttons */}
                 <div className="pt-6 border-t border-gray-200 space-y-3">
                      <Button type="submit" className="w-full flex items-center justify-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -83,4 +73,3 @@ export const PropertySearchFilters = ({ onFilterChange, initialFilters }: Proper
         </form>
     );
 };
-

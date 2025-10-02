@@ -1,4 +1,3 @@
-// File Path: apps/frontend/src/app/properties/page.tsx
 'use client';
 
 import { useEffect, useState, Suspense, useCallback } from 'react';
@@ -9,6 +8,8 @@ import { PropertyCard } from '@/features/home/components/PropertyCard';
 import { PropertySearchFilters } from '@/features/properties/components/PropertySearchFilters';
 import { Pagination } from '@/ui/ui/Pagination';
 import { Button } from '@/ui/ui/Button';
+import { PropertyCardSkeleton } from '@/features/properties/components/PropertyCardSkeleton';
+import { NoResultsFound } from '@/features/properties/components/NoResultsFound';
 
 const SearchResults = () => {
     const router = useRouter();
@@ -76,7 +77,7 @@ const SearchResults = () => {
         } else {
             params.delete('beds');
         }
-        params.set('page', '1'); // Reset to first page on new search
+        params.set('page', '1');
         router.push(`${pathname}?${params.toString()}`);
     };
 
@@ -116,7 +117,7 @@ const SearchResults = () => {
                 <main className="lg:col-span-3">
                     <div className="flex flex-col sm:flex-row justify-between items-center mb-6 pb-4 border-b border-gray-200 gap-4">
                         <h1 className="text-xl font-semibold text-gray-800">
-                           {isLoading ? 'Searching...' : `${properties.length} Properties Found`}
+                           {isLoading ? 'Searching...' : `Showing ${properties.length} Results`}
                         </h1>
                         <div className="flex items-center gap-2">
                             <label htmlFor="sort-by" className="text-sm font-medium text-gray-600">Sort by:</label>
@@ -129,7 +130,11 @@ const SearchResults = () => {
                     </div>
                     
                     {isLoading ? (
-                         <div className="text-center py-20">Loading search results...</div>
+                        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                            {Array.from({ length: 6 }).map((_, index) => (
+                                <PropertyCardSkeleton key={index} />
+                            ))}
+                        </div>
                     ) : error ? (
                          <div className="text-center py-20 text-red-500">{error}</div>
                     ) : properties.length > 0 ? (
@@ -142,10 +147,7 @@ const SearchResults = () => {
                             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
                         </>
                     ) : (
-                        <div className="text-center py-20 bg-white rounded-lg border border-gray-200">
-                            <h3 className="text-lg font-semibold text-gray-700">No Properties Found</h3>
-                            <p className="text-gray-500 mt-1">Try adjusting your search filters to find what youre looking for.</p>
-                        </div>
+                        <NoResultsFound />
                     )}
                 </main>
             </div>
@@ -155,11 +157,10 @@ const SearchResults = () => {
 
 export default function PropertyListPage() {
     return (
-        <div className="bg-white min-h-screen">
+        <div className="min-h-screen">
             <Suspense fallback={<div className="text-center py-20">Loading page...</div>}>
                 <SearchResults />
             </Suspense>
         </div>
     );
 }
-

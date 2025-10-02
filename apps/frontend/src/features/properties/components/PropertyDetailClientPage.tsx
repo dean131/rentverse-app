@@ -1,4 +1,3 @@
-// File Path: apps/frontend/src/components/properties/PropertyDetailClientPage.tsx
 'use client'; 
 
 import { useState } from 'react';
@@ -9,8 +8,7 @@ import { PropertyHeader } from './detail-page/PropertyHeader';
 import { PropertyHighlights } from './detail-page/PropertyHighlights';
 import { BookingModal } from './detail-page/BookingModal';
 import { useAuth } from '@/features/auth/useAuth';
-import Image from 'next/image';
-import { Button } from '@/ui/ui/Button';
+import { AgentCard } from './detail-page/AgentCard';
 
 // Dynamically import the map component to avoid SSR issues with Leaflet
 const PropertyLocationMap = dynamic(
@@ -39,12 +37,13 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
   };
 
   return (
-    <div className="bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main className="bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <PropertyImageGallery images={property.images} title={property.title} />
 
-        {/* All content is now in a single, centered, vertical column */}
-        <div className="mt-8 max-w-4xl mx-auto">
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+          {/* Main Content */}
+          <div className="lg:col-span-2">
             <PropertyHeader 
               title={property.title}
               address={property.address}
@@ -75,29 +74,6 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
                 </DetailSection>
             )}
 
-            {property.listedBy && (
-              <DetailSection title="Listed By">
-                <div className="bg-gray-50 p-6 rounded-lg flex flex-col items-center text-center space-y-4">
-                    <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                      <Image
-                        src={property.listedBy.profilePictureUrl || 'https://placehold.co/100x100/CCCCCC/FFFFFF/png?text=User'}
-                        alt={`Profile picture of ${property.listedBy.fullName}`}
-                        layout="fill"
-                        objectFit="cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-xl font-bold text-gray-900">{property.listedBy.fullName}</p>
-                      <p className="text-md text-gray-500">Property Owner</p>
-                      <p className="text-md text-gray-500">{property.listedBy.email}</p>
-                    </div>
-                    <div className="w-full sm:w-auto">
-                        <Button className="w-full">Contact Agent</Button>
-                    </div>
-                </div>
-              </DetailSection>
-            )}
-
             <DetailSection title="Location">
                 <p className="text-gray-600 mb-4">{property.address}</p>
                 {property.latitude && property.longitude ? (
@@ -106,6 +82,12 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
                     <p className="text-gray-500">Map location is not available for this property.</p>
                 )}
             </DetailSection>
+          </div>
+
+          {/* Sidebar */}
+          <aside className="lg:col-span-1">
+            {property.listedBy && <AgentCard agent={property.listedBy} />}
+          </aside>
         </div>
       </div>
 
@@ -116,7 +98,6 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
           onSuccess={handleBookingSuccess}
         />
       )}
-    </div>
+    </main>
   );
 };
-

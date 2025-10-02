@@ -1,4 +1,3 @@
-// File Path: apps/frontend/src/components/properties/detail-page/AgentCard.tsx
 import { PropertyDetailed } from '@/lib/definitions';
 import Image from 'next/image';
 import { Button } from '@/ui/ui/Button';
@@ -29,4 +28,3 @@ export const AgentCard = ({ agent }: AgentCardProps) => {
     </div>
   );
 };
-

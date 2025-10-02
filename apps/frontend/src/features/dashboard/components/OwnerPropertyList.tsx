@@ -1,11 +1,11 @@
-// File Path: apps/frontend/src/components/dashboard/OwnerPropertyList.tsx
 'use client';
 
 import { useState, useMemo } from 'react';
 import { OwnerProperty } from '@/lib/definitions';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Pagination } from '@/ui/ui/Pagination';
+import { Button } from '@/ui/ui/Button'; // Import Button
+import { OwnerPropertyViewModal } from './OwnerPropertyViewModal'; // Import the new modal
 
 interface OwnerPropertyListProps {
   properties: OwnerProperty[];
@@ -28,6 +28,7 @@ const renderStatusBadge = (status: string) => {
 
 export const OwnerPropertyList = ({ properties }: OwnerPropertyListProps) => {
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedPropertyId, setSelectedPropertyId] = useState<number | null>(null);
 
     const paginatedProperties = useMemo(() => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -41,7 +42,7 @@ export const OwnerPropertyList = ({ properties }: OwnerPropertyListProps) => {
     }
 
     return (
-        <div>
+        <>
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -69,9 +70,9 @@ export const OwnerPropertyList = ({ properties }: OwnerPropertyListProps) => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(property.createdAt).toLocaleDateString()}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{renderStatusBadge(property.status)}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <Link href={`/properties/${property.id}`} className="text-orange-400 hover:text-orange-900">
+                                    <Button variant="outline" size="sm" onClick={() => setSelectedPropertyId(property.id)}>
                                         View
-                                    </Link>
+                                    </Button>
                                 </td>
                             </tr>
                         ))}
@@ -79,7 +80,13 @@ export const OwnerPropertyList = ({ properties }: OwnerPropertyListProps) => {
                 </table>
             </div>
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-        </div>
+
+            {selectedPropertyId && (
+                <OwnerPropertyViewModal
+                    propertyId={selectedPropertyId}
+                    onClose={() => setSelectedPropertyId(null)}
+                />
+            )}
+        </>
     );
 };
-

@@ -1,0 +1,60 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { updatePropertyStatus } from '@/features/admin/adminService';
+import { Button } from '@/ui/ui/Button';
+
+interface AdminActionButtonsProps {
+  propertyId: number;
+}
+
+export const AdminActionButtons = ({ propertyId }: AdminActionButtonsProps) => {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState< 'approve' | 'reject' | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleStatusUpdate = async (status: 'APPROVED' | 'REJECTED') => {
+    setIsLoading(status === 'APPROVED' ? 'approve' : 'reject');
+    setError(null);
+    try {
+      await updatePropertyStatus(propertyId, status);
+      alert(`Property has been ${status.toLowerCase()}.`);
+      router.push('/admin/dashboard');
+      router.refresh(); // Ensures the dashboard data is fresh
+    } catch (err) {
+      console.error('Failed to update property status', err);
+      setError('Could not update the property status. Please try again.');
+      setIsLoading(null);
+    }
+  };
+
+  return (
+    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r-lg">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="font-bold text-yellow-800">Admin Review</p>
+          <p className="text-sm text-yellow-700">This property is pending your approval.</p>
+        </div>
+        <div className="flex space-x-2">
+          <Button
+            variant="outline"
+            onClick={() => handleStatusUpdate('REJECTED')}
+            disabled={!!isLoading}
+            className="!px-4 !py-2 text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+          >
+            {isLoading === 'reject' ? 'Rejecting...' : 'Reject'}
+          </Button>
+          <Button
+            onClick={() => handleStatusUpdate('APPROVED')}
+            disabled={!!isLoading}
+            className="!px-4 !py-2"
+          >
+            {isLoading === 'approve' ? 'Approving...' : 'Approve'}
+          </Button>
+        </div>
+      </div>
+      {error && <p className="text-sm text-red-600 mt-2 text-center">{error}</p>}
+    </div>
+  );
+};

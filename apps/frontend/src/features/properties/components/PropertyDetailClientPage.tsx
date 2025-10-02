@@ -9,8 +9,9 @@ import { PropertyHighlights } from './detail-page/PropertyHighlights';
 import { BookingModal } from './detail-page/BookingModal';
 import { useAuth } from '@/features/auth/useAuth';
 import { AgentCard } from './detail-page/AgentCard';
+import { AdminActionButtons } from '@/features/admin/components/AdminActionButtons';
 
-// Dynamically import the map component to avoid SSR issues with Leaflet
+
 const PropertyLocationMap = dynamic(
   () => import('./detail-page/PropertyLocationMap').then(mod => mod.PropertyLocationMap),
   { 
@@ -19,7 +20,6 @@ const PropertyLocationMap = dynamic(
   }
 );
 
-// A reusable component for rendering a section with a title
 const DetailSection = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <div className="py-8 border-t border-gray-200">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">{title}</h2>
@@ -39,6 +39,10 @@ export const PropertyDetailClientPage = ({ property }: { property: PropertyDetai
   return (
     <main className="bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {user?.role === 'ADMIN' && property.status === 'PENDING' && (
+          <AdminActionButtons propertyId={property.id} />
+        )}
+        
         <PropertyImageGallery images={property.images} title={property.title} />
 
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">

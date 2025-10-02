@@ -147,6 +147,7 @@ export type PropertyDetailed = {
   id: number;
   title: string;
   description: string;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "SOLD" | "RENTED";
   address: string;
   rentalPrice: number | null;
   paymentPeriod: string | null;

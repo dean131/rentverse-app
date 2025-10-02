@@ -43,7 +43,7 @@ export const PropertySearchFilters = ({ onFilterChange, initialFilters }: Proper
 
     return (
         <form onSubmit={handleFormSubmit} className="bg-white p-6 rounded-lg border border-gray-200 sticky top-24">
-            <h3 className="text-lg font-bold text-gray-900 mb-6 border-b pb-4">Filter Properties</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-6 border-b border-gray-200 pb-4">Filter Properties</h3>
             <div className="space-y-6">
                 <FilterDropdown 
                     label="Property Type" 

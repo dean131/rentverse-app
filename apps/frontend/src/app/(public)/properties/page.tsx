@@ -1,3 +1,4 @@
+// File Path: apps/frontend/src/app/(public)/properties/page.tsx
 'use client';
 
 import { useEffect, useState, Suspense, useCallback } from 'react';
@@ -77,7 +78,7 @@ const SearchResults = () => {
         } else {
             params.delete('beds');
         }
-        params.set('page', '1');
+        params.set('page', '1'); // Reset to first page on new search
         router.push(`${pathname}?${params.toString()}`);
     };
 
@@ -102,7 +103,7 @@ const SearchResults = () => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Search by location, project, or title..."
-                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 placeholder-gray-500"
                         />
                     </div>
                     <Button type="submit" className="w-full sm:w-auto px-8 py-3">Search</Button>
@@ -121,7 +122,7 @@ const SearchResults = () => {
                         </h1>
                         <div className="flex items-center gap-2">
                             <label htmlFor="sort-by" className="text-sm font-medium text-gray-600">Sort by:</label>
-                            <select id="sort-by" className="w-full sm:w-auto border border-gray-300 rounded-md py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <select id="sort-by" className="w-full sm:w-auto border border-gray-300 rounded-md py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900">
                                 <option>Newest</option>
                                 <option>Price: Low to High</option>
                                 <option>Price: High to Low</option>
@@ -157,7 +158,7 @@ const SearchResults = () => {
 
 export default function PropertyListPage() {
     return (
-        <div className="min-h-screen">
+        <div className="bg-gray-50 min-h-screen">
             <Suspense fallback={<div className="text-center py-20">Loading page...</div>}>
                 <SearchResults />
             </Suspense>

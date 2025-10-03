@@ -1,6 +1,8 @@
 import { prisma } from "../../lib/prisma.js";
 import { Property, PropertyStatus } from "@prisma/client";
 
+const USER_PAGE_SIZE = 10;
+
 export class AdminRepository {
   async findPendingProperties(): Promise<any[]> {
     return prisma.property.findMany({
@@ -62,5 +64,41 @@ export class AdminRepository {
       pendingProperties,
       documentsThisMonth,
     };
+  }
+
+  async findAllUsers(page: number) {
+    const skip = (page - 1) * USER_PAGE_SIZE;
+    const [users, totalCount] = await prisma.$transaction([
+      prisma.user.findMany({
+        where: {
+          role: {
+            not: "ADMIN",
+          },
+        },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          profilePictureUrl: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: USER_PAGE_SIZE,
+        skip: skip,
+      }),
+      prisma.user.count({
+        where: {
+          role: {
+            not: "ADMIN",
+          },
+        },
+      }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / USER_PAGE_SIZE);
+    return { items: users, totalPages, currentPage: page };
   }
 }

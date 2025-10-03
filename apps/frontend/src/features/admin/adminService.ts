@@ -1,4 +1,5 @@
 // File Path: apps/frontend/src/services/adminService.ts
+import { PaginatedUsersResponse } from "@/lib/definitions";
 import apiClient from "@/lib/apiClient";
 import {
   PropertyWithLister,
@@ -25,3 +26,10 @@ export const getAdminDashboardStats =
     const response = await apiClient.get("/admin/dashboard/stats");
     return response.data.data;
   };
+
+export const getUsers = async (
+  page: number
+): Promise<PaginatedUsersResponse> => {
+  const response = await apiClient.get(`/admin/users?page=${page}`);
+  return response.data.data;
+};

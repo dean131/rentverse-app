@@ -243,3 +243,14 @@ export interface AdminDashboardStats {
   pendingProperties: number;
   documentsThisMonth: number;
 }
+
+export interface AdminUserEntry {
+  id: number;
+  fullName: string;
+  email: string;
+  role: "PROPERTY_OWNER" | "TENANT";
+  createdAt: string;
+  profilePictureUrl: string | null;
+}
+
+export type PaginatedUsersResponse = PaginatedResponse<AdminUserEntry>;

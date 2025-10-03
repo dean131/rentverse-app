@@ -21,6 +21,7 @@ export const createAdminRouter = (controller: AdminController): Router => {
   );
 
   router.get("/dashboard/stats", controller.getDashboardStats);
+  router.get("/users", controller.getUsers);
 
   return router;
 };

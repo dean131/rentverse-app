@@ -37,4 +37,8 @@ export class AdminService {
   async getDashboardStats() {
     return this.adminRepository.getAdminDashboardStats();
   }
+
+  async getUsers(page: number) {
+    return this.adminRepository.findAllUsers(page);
+  }
 }

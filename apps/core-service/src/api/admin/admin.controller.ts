@@ -30,4 +30,10 @@ export class AdminController {
     const stats = await this.adminService.getDashboardStats();
     ApiResponse.success(res, stats);
   });
+
+  getUsers = asyncHandler(async (req: Request, res: Response) => {
+    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+    const users = await this.adminService.getUsers(page);
+    ApiResponse.success(res, users);
+  });
 }

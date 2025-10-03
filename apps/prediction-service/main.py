@@ -1,4 +1,5 @@
-# File Path: apps/prediction-service/main.py
+# File Path: prediction-service/main.py
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -58,6 +59,7 @@ class PropertyFeatures(BaseModel):
 
 class PredictionResponse(BaseModel):
     predicted_price_myr: float
+    confidence_score: float
 
 
 # --- API Endpoint ---
@@ -71,10 +73,37 @@ async def predict_price(features: PropertyFeatures):
         input_encoded = pd.get_dummies(input_df)
         final_df = input_encoded.reindex(columns=model_columns, fill_value=0)
 
+        # --- Main Prediction ---
         log_prediction = model.predict(final_df)[0]
         prediction = np.expm1(log_prediction)
 
-        return {"predicted_price_myr": round(prediction, 2)}
+        # --- Confidence Score Calculation ---
+        confidence = 0.75  # Default confidence
+        try:
+            # The loaded model is the regressor itself, not a pipeline.
+            regressor = model
+
+            # Get predictions from each tree
+            tree_predictions = [
+                np.expm1(tree.predict(final_df)[0]) for tree in regressor.estimators_
+            ]
+
+            # Calculate standard deviation
+            std_dev = np.std(tree_predictions)
+
+            # Normalize to get a score (lower std dev = higher confidence)
+            if prediction > 0:
+                normalized_std_dev = std_dev / prediction
+                confidence = max(0.0, 1.0 - normalized_std_dev)
+
+        except (IndexError, AttributeError) as e:
+            print(f"Could not calculate confidence score, using default. Error: {e}")
+
+        return {
+            "predicted_price_myr": round(prediction, 2),
+            "confidence_score": confidence,
+        }
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing input: {e}")
 

@@ -1,4 +1,3 @@
-// File Path: frontend/src/features/properties/components/form-steps/Step1Details.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -6,11 +5,10 @@ import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from 'rea
 import { PropertySubmission } from '@/lib/definitions';
 import { getPricePrediction } from '@/features/prediction/predictionService';
 import { debounce } from 'lodash';
-
 import { FormInput } from '@/ui/ui/FormInput';
 import { FormSelect } from '@/ui/ui/FormSelect';
 import { FormTextarea } from '@/ui/ui/FormTextarea';
-import { DocumentUpload } from '@/ui/ui/DocumentUpload'; // <-- Import the new component
+import { DocumentUpload } from '@/ui/ui/DocumentUpload';
 
 interface Step1Props {
     register: UseFormRegister<PropertySubmission>;
@@ -20,7 +18,8 @@ interface Step1Props {
 }
 
 export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) => {
-    const [suggestedPrice, setSuggestedPrice] = useState<number | null>(null);
+    // Update state to hold the price and confidence object
+    const [priceSuggestion, setPriceSuggestion] = useState<{ price: number; confidence: number } | null>(null);
     const [isPredictionLoading, setIsPredictionLoading] = useState(false);
     const [uploadMode, setUploadMode] = useState<'url' | 'upload'>('url');
     const [docUploadError, setDocUploadError] = useState<string | null>(null);
@@ -34,12 +33,13 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
     const debouncedFetchPrediction = useCallback(
         debounce(async (features) => {
             setIsPredictionLoading(true);
+            setPriceSuggestion(null); // Clear previous suggestion
             try {
                 const prediction = await getPricePrediction(features);
-                setSuggestedPrice(prediction);
+                setPriceSuggestion(prediction); // Set new suggestion object
             } catch (error) {
                 console.error("Prediction failed:", error);
-                setSuggestedPrice(null);
+                setPriceSuggestion(null);
             } finally {
                 setIsPredictionLoading(false);
             }
@@ -60,18 +60,55 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
         return () => debouncedFetchPrediction.cancel();
     }, [bedrooms, bathrooms, sizeSqft, listingType, propertyType, debouncedFetchPrediction]);
     
+    const applySuggestion = () => {
+        if (priceSuggestion) {
+            setValue('rentalPrice', Math.round(priceSuggestion.price), { shouldValidate: true, shouldDirty: true });
+        }
+    };
+    
+    // New function to render the color-coded suggestion
+    const renderSuggestion = () => {
+        if (!priceSuggestion) return null;
+
+        const confidencePercent = (priceSuggestion.confidence * 100).toFixed(0);
+        let confidenceText = 'Medium';
+        let confidenceColor = 'text-yellow-800 bg-yellow-50 border-yellow-200';
+
+        if (priceSuggestion.confidence > 0.8) {
+            confidenceText = 'High';
+            confidenceColor = 'text-green-800 bg-green-50 border-green-200';
+        } else if (priceSuggestion.confidence < 0.6) {
+            confidenceText = 'Low';
+            confidenceColor = 'text-red-800 bg-red-50 border-red-200';
+        }
+
+        return (
+            <div className={`mt-4 p-3 rounded-md border flex items-center justify-between ${confidenceColor}`}>
+                <div>
+                    <p className="font-semibold">
+                        AI Suggestion ({confidenceText} Confidence: {confidencePercent}%)
+                    </p>
+                    <p className="text-sm">
+                        A competitive price is around <strong>Rp {Math.round(priceSuggestion.price).toLocaleString('id-ID')}</strong>.
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    onClick={applySuggestion}
+                    className="text-sm font-semibold text-orange-600 hover:text-orange-800 transition-colors flex-shrink-0 ml-4"
+                >
+                    Apply
+                </button>
+            </div>
+        );
+    };
+
     const handleUploadComplete = (key: string) => {
         const bucketName = 'rentverse';
         const baseUrl = process.env.NEXT_PUBLIC_MINIO_URL || process.env.NEXT_PUBLIC_STORAGE_SERVICE_URL || '';
         const fileUrl = `${baseUrl}/${bucketName}/${key}`;
         setValue('ownershipDocumentUrl', fileUrl, { shouldValidate: true, shouldDirty: true });
         setDocUploadError(null);
-    };
-
-    const applySuggestion = () => {
-        if (suggestedPrice) {
-            setValue('rentalPrice', Math.round(suggestedPrice), { shouldValidate: true, shouldDirty: true });
-        }
     };
 
     return (
@@ -107,18 +144,27 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
             <div className="py-8 border-t border-gray-200">
                 <h4 className="text-lg font-semibold text-gray-700 mb-4">Pricing</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     <FormInput label="Price (IDR)" name="rentalPrice" register={register} error={errors.rentalPrice} type="number" placeholder="e.g., 25000000" />
-                    <FormSelect label="Payment Period" name="paymentPeriod" register={register} error={errors.paymentPeriod}>
-                        <option value="">Select Period</option><option value="MONTHLY">Monthly</option><option value="YEARLY">Yearly</option>
+                     <FormInput
+                        label="Price (IDR)"
+                        name="rentalPrice"
+                        register={register}
+                        error={errors.rentalPrice}
+                        type="number"
+                        placeholder="e.g., 25000000"
+                    />
+                    <FormSelect
+                        label="Payment Period"
+                        name="paymentPeriod"
+                        register={register}
+                        error={errors.paymentPeriod}
+                    >
+                        <option value="">Select Period</option>
+                        <option value="MONTHLY">Monthly</option>
+                        <option value="YEARLY">Yearly</option>
                     </FormSelect>
                 </div>
                 {isPredictionLoading && <div className="mt-4 text-sm text-gray-500 p-3 bg-gray-50 rounded-md animate-pulse"><p>✨ Generating AI price suggestion...</p></div>}
-                {suggestedPrice !== null && !isPredictionLoading && (
-                    <div className="mt-4 p-3 bg-green-50 rounded-md flex items-center justify-between">
-                        <p className="text-sm text-green-800"><strong>AI Suggestion:</strong> A competitive price is around <strong>Rp {Math.round(suggestedPrice).toLocaleString('id-ID')}</strong>.</p>
-                        <button type="button" onClick={applySuggestion} className="text-sm font-semibold text-orange-400 hover:text-orange-800 transition-colors">Apply</button>
-                    </div>
-                )}
+                {!isPredictionLoading && renderSuggestion()} {/* Render the new suggestion component */}
             </div>
 
              <div className="py-8 border-t border-gray-200">

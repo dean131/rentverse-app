@@ -1,4 +1,4 @@
-// File Path: apps/frontend/src/app/(public)/properties/page.tsx
+// File Path: frontend/src/app/(public)/properties/page.tsx
 'use client';
 
 import { useEffect, useState, Suspense, useCallback } from 'react';
@@ -22,8 +22,6 @@ const SearchResults = () => {
     const [totalPages, setTotalPages] = useState(0);
 
     const currentPage = Number(searchParams.get('page')) || 1;
-    const initialPropertyType = searchParams.get('propertyType') || 'ALL';
-    const initialBeds = searchParams.get('beds') || 'ALL';
 
     const fetchProperties = useCallback(async (filters: PropertyFilters) => {
         setIsLoading(true);
@@ -47,26 +45,27 @@ const SearchResults = () => {
             propertyType: searchParams.get('propertyType') || undefined,
             beds: searchParams.get('beds') || undefined,
             page: Number(searchParams.get('page')) || 1,
+            minPrice: searchParams.get('minPrice') || undefined,
+            maxPrice: searchParams.get('maxPrice') || undefined,
+            amenities: searchParams.get('amenities')?.split(',') || undefined,
+            furnishing: searchParams.get('furnishing')?.split(',') || undefined,
         };
         fetchProperties(currentFilters);
     }, [searchParams, fetchProperties]);
     
-    const handleFilterChange = (filters: { propertyType?: string, beds?: string }) => {
+    const handleFilterChange = (filters: Partial<PropertyFilters>) => {
         const params = new URLSearchParams(searchParams.toString());
 
-        if (filters.propertyType && filters.propertyType !== 'ALL') {
-            params.set('propertyType', filters.propertyType);
-        } else {
-            params.delete('propertyType');
-        }
+        // Set or delete each filter from the URL
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value && (Array.isArray(value) ? value.length > 0 : value !== 'ALL' && value !== '')) {
+                params.set(key, Array.isArray(value) ? value.join(',') : String(value));
+            } else {
+                params.delete(key);
+            }
+        });
 
-        if (filters.beds && filters.beds !== 'ALL') {
-            params.set('beds', filters.beds);
-        } else {
-            params.delete('beds');
-        }
-
-        params.set('page', '1');
+        params.set('page', '1'); // Reset to the first page whenever filters change
         router.push(`${pathname}?${params.toString()}`);
     };
 
@@ -75,6 +74,16 @@ const SearchResults = () => {
         params.set('page', page.toString());
         router.push(`${pathname}?${params.toString()}`);
     }
+
+    // This object ensures the filter controls are in sync with the URL parameters on page load
+    const initialFilters = {
+        propertyType: searchParams.get('propertyType') || 'ALL',
+        beds: searchParams.get('beds') || 'ALL',
+        minPrice: searchParams.get('minPrice') || '',
+        maxPrice: searchParams.get('maxPrice') || '',
+        amenities: searchParams.get('amenities')?.split(',') || [],
+        furnishing: searchParams.get('furnishing')?.split(',') || [],
+    };
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -88,7 +97,7 @@ const SearchResults = () => {
             <div className="mb-8">
                 <PropertySearchFilters 
                     onFilterChange={handleFilterChange} 
-                    initialFilters={{ propertyType: initialPropertyType, beds: initialBeds }} 
+                    initialFilters={initialFilters} 
                 />
             </div>
             

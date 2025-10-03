@@ -1,6 +1,12 @@
 // File Path: apps/core-service/src/api/properties/properties.repository.ts
 import { prisma } from "../../lib/prisma.js";
-import { Property, Prisma, PropertyStatus, PropertyType } from "@prisma/client";
+import {
+  Property,
+  Prisma,
+  PropertyStatus,
+  PropertyType,
+  FurnishingStatus,
+} from "@prisma/client";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -17,6 +23,10 @@ export class PropertyRepository {
     propertyType?: string;
     beds?: string;
     page?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    amenities?: string[];
+    furnishing?: string[];
   }): Promise<{ items: any[]; totalPages: number; currentPage: number }> {
     const page = filters.page || 1;
     const skip = (page - 1) * ITEMS_PER_PAGE;
@@ -56,6 +66,31 @@ export class PropertyRepository {
       if (!isNaN(minBeds)) {
         whereClause.bedrooms = { gte: minBeds };
       }
+    }
+
+    // 1. Price Range Filter
+    if (filters.minPrice || filters.maxPrice) {
+      whereClause.rentalPrice = {};
+      if (filters.minPrice) {
+        whereClause.rentalPrice.gte = filters.minPrice;
+      }
+      if (filters.maxPrice) {
+        whereClause.rentalPrice.lte = filters.maxPrice;
+      }
+    }
+
+    // 2. Furnishing Status Filter
+    if (filters.furnishing && filters.furnishing.length > 0) {
+      whereClause.furnishingStatus = {
+        in: filters.furnishing as FurnishingStatus[],
+      };
+    }
+
+    // 3. Amenities Filter (Many-to-Many)
+    if (filters.amenities && filters.amenities.length > 0) {
+      whereClause.AND = filters.amenities.map((id) => ({
+        amenities: { some: { amenityId: parseInt(id, 10) } },
+      }));
     }
 
     const [items, totalCount] = await prisma.$transaction([

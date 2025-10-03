@@ -174,6 +174,10 @@ export type PropertyFilters = {
   propertyType?: string;
   beds?: string;
   page?: number;
+  minPrice?: string;
+  maxPrice?: string;
+  amenities?: string[];
+  furnishing?: string[];
 };
 
 export type OwnerDashboardStats = {

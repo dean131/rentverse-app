@@ -22,7 +22,7 @@ jobs:
                   port: ${{ secrets.SSH_PORT }}
 
                   script: |
-                      cd /path/to/your/rentverse-app
+                      cd /home/geekdev/rentverse-app
                       echo "🚚 Pulling latest changes from the stable branch..."
                       git pull origin stable
                       echo "🚀 Rebuilding and restarting Docker Compose services..."

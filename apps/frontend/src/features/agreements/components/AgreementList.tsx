@@ -9,6 +9,7 @@ import { Button } from '@/ui/ui/Button';
 import Image from 'next/image';
 import axios from 'axios';
 import { Pagination } from '@/ui/ui/Pagination';
+import toast from 'react-hot-toast'; 
 
 interface AgreementListProps {
   agreements: AgreementDetails[];
@@ -52,7 +53,7 @@ export const AgreementList = ({ agreements, onUpdate }: AgreementListProps) => {
         try {
             if (action === 'approve') {
                 await approveAgreement(agreementId);
-                alert("Agreement approved! A signing request has been sent via DocuSign.");
+                toast.success("Agreement approved! A signing request has been sent."); 
             } else if (action === 'sign') {
                 const signingUrl = await getSigningUrl(agreementId);
                 window.location.href = signingUrl;

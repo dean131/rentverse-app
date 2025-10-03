@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updatePropertyStatus } from '@/features/admin/adminService';
 import { Button } from '@/ui/ui/Button';
+import toast from 'react-hot-toast';
 
 interface AdminActionButtonsProps {
   propertyId: number;
@@ -21,7 +22,7 @@ export const AdminActionButtons = ({ propertyId, documentUrl, onActionComplete }
     setError(null);
     try {
       await updatePropertyStatus(propertyId, status);
-      alert(`Property has been ${status.toLowerCase()}.`);
+      toast.success(`Property has been ${status.toLowerCase()}.`); 
       
       // If the callback exists (we're in a modal), call it. Otherwise, use the router.
       if (onActionComplete) {

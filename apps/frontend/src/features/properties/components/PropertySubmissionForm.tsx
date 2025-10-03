@@ -15,6 +15,7 @@ import { submitProperty } from '@/features/properties/propertyService';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Card } from '@/ui/ui/Card';
+import toast from 'react-hot-toast'; 
 
 export const PropertySubmissionForm = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -45,7 +46,7 @@ export const PropertySubmissionForm = () => {
         setServerError(null);
         try {
             await submitProperty(data);
-            alert("Property submitted successfully! It is now pending admin approval.");
+            toast.success("Property submitted successfully! It is now pending admin approval.");
             router.push('/admin/dashboard');
         } catch (error) {
             console.error("Failed to submit property:", error);

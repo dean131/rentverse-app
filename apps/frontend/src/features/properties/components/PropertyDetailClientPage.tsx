@@ -9,8 +9,8 @@ import { PropertyHeader } from './detail-page/PropertyHeader';
 import { PropertyHighlights } from './detail-page/PropertyHighlights';
 import { BookingModal } from './detail-page/BookingModal';
 import { useAuth } from '@/features/auth/useAuth';
-// import { AgentCard } from './detail-page/AgentCard'; // <-- Remove this import
-import { ContactFormCard } from './detail-page/ContactFormCard'; // <-- Add this import
+import toast from 'react-hot-toast';
+import { ContactFormCard } from './detail-page/ContactFormCard'; 
 import { AdminActionButtons } from '@/features/admin/components/AdminActionButtons';
 
 
@@ -72,7 +72,7 @@ export const PropertyDetailClientPage = ({ property, onUpdate }: { property: Pro
               price={property.rentalPrice}
               period={property.paymentPeriod}
               listingType={property.listingType}
-              onRequestBooking={() => user && user.role === 'TENANT' ? setIsBookingModalOpen(true) : alert("Please log in as a tenant to book a property.")}
+              onRequestBooking={() => user && user.role === 'TENANT' ? setIsBookingModalOpen(true) : toast.error("Please log in as a tenant to book a property.")}
               onMakeInquiry={handleMakeInquiry}
             />
             <PropertyHighlights 

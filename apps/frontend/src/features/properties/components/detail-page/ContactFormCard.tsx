@@ -9,8 +9,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/ui/ui/Button';
 import { FormInput } from '@/ui/ui/FormInput';
 import { FormTextarea } from '@/ui/ui/FormTextarea';
-import { PropertyDetailed } from '@/lib/definitions'; // Assuming PropertyDetailed is accessible
+import { PropertyDetailed } from '@/lib/definitions'; 
 import { submitInquiry } from '@/features/inquiries/inquiryService';
+import toast from 'react-hot-toast'; 
 
 // Define the schema for the contact form
 const contactFormSchema = z.object({
@@ -71,11 +72,11 @@ export const ContactFormCard = ({ property, isHighlighted }: ContactFormCardProp
 
       setSubmissionStatus('success');
       reset(); 
-      alert("Your inquiry has been sent to the agent!");
+      toast.success("Your inquiry has been sent to the agent!");
     } catch (error) {
       console.error('Failed to send inquiry:', error);
       setSubmissionStatus('error');
-      alert("Failed to send inquiry. Please try again.");
+      toast.error("Failed to send inquiry. Please try again.");
     }
   };
 

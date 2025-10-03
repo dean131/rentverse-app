@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Button } from '@/ui/ui/Button';
 import { createAgreement } from '@/features/agreements/agreementService';
 import axios from 'axios';
+import toast from 'react-hot-toast'; 
 
 interface BookingModalProps {
   propertyId: number;
@@ -12,7 +13,6 @@ interface BookingModalProps {
   onSuccess: () => void;
 }
 
-// A reusable input component for this modal to match the site's styling
 const DateInput = ({ label, id, value, onChange }: { label: string, id: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
     <div>
         <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -36,25 +36,24 @@ export const BookingModal = ({ propertyId, onClose, onSuccess }: BookingModalPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setIsSubmitting(true);
 
     if (!startDate || !endDate) {
       setError('Please select both a start and end date.');
-      setIsSubmitting(false);
       return;
     }
     if (new Date(endDate) <= new Date(startDate)) {
         setError('End date must be after the start date.');
-        setIsSubmitting(false);
         return;
     }
-
+    
+    setIsSubmitting(true);
     try {
       await createAgreement({
         propertyId,
         startDate: new Date(startDate).toISOString(),
         endDate: new Date(endDate).toISOString(),
       });
+      toast.success("Success! Your booking request has been sent for approval.");
       onSuccess();
     } catch (err) {
       console.error("Booking failed:", err);

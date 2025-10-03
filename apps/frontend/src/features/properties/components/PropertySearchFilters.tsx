@@ -88,11 +88,23 @@ export const PropertySearchFilters = ({ onFilterChange, initialFilters }: Proper
                 <FilterDropdown label="Property Type" options={[{ value: 'ALL', label: 'Any Type' }, { value: 'APARTMENT', label: 'Apartment' }, { value: 'HOUSE', label: 'House' }]} selectedValue={propertyType} onValueChange={setPropertyType} />
                 <FilterDropdown label="Bedrooms" options={[{ value: 'ALL', label: 'Any Beds' }, { value: '1', label: '1+' }, { value: '2', label: '2+' }]} selectedValue={bedrooms} onValueChange={setBedrooms} />
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Price Range (IDR)</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Price Range (MYR)</label>
                     <div className="flex items-center gap-2">
-                        <input type="number" placeholder="Min" value={minPrice} onChange={e => setMinPrice(e.target.value)} className="w-full border-gray-300 rounded-md py-2 px-3 text-sm" />
-                        <span>-</span>
-                        <input type="number" placeholder="Max" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} className="w-full border-gray-300 rounded-md py-2 px-3 text-sm" />
+                        <input 
+                            type="number" 
+                            placeholder="Min" 
+                            value={minPrice} 
+                            onChange={e => setMinPrice(e.target.value)} 
+                            className="block w-full appearance-none rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-orange-500 sm:text-sm"
+                        />
+                        <span className="text-gray-500">-</span>
+                        <input 
+                            type="number" 
+                            placeholder="Max" 
+                            value={maxPrice} 
+                            onChange={e => setMaxPrice(e.target.value)} 
+                            className="block w-full appearance-none rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-orange-500 sm:text-sm"
+                        />
                     </div>
                 </div>
                 <div className="flex items-end">

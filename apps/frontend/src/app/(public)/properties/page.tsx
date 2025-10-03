@@ -1,7 +1,8 @@
 // File Path: frontend/src/app/(public)/properties/page.tsx
 'use client';
 
-import { useEffect, useState, Suspense, useCallback } from 'react';
+import { useEffect, useState, Suspense, useCallback, ReactNode } from 'react';
+import Image from 'next/image';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { PropertyPublic, PropertyFilters } from '@/lib/definitions';
 import { getPublicProperties } from '@/features/properties/propertyService';
@@ -10,6 +11,34 @@ import { PropertySearchFilters } from '@/features/properties/components/Property
 import { Pagination } from '@/ui/ui/Pagination';
 import { PropertyCardSkeleton } from '@/features/properties/components/PropertyCardSkeleton';
 import { NoResultsFound } from '@/features/properties/components/NoResultsFound';
+
+// New Hero Section Component for this page
+const PropertiesHero = ({ children }: { children: ReactNode }) => (
+    <section className="relative bg-gray-800 pt-20 pb-12">
+        <div className="absolute inset-0">
+            <Image
+                src="/hero-bg.jpg" // Reusing the existing hero background
+                alt="Modern building exterior"
+                layout="fill"
+                objectFit="cover"
+                quality={80}
+                priority
+            />
+            <div className="absolute inset-0 bg-black/60" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8">
+                <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+                    Find Your Perfect Space
+                </h1>
+                <p className="mt-4 text-lg text-gray-200 max-w-3xl mx-auto">
+                    Explore thousands of listings to find the property thats right for you. Use our advanced filters to narrow down your options.
+                </p>
+            </div>
+            {children}
+        </div>
+    </section>
+);
 
 const SearchResults = () => {
     const router = useRouter();
@@ -44,19 +73,17 @@ const SearchResults = () => {
             listingType: searchParams.get('listingType') || undefined,
             propertyType: searchParams.get('propertyType') || undefined,
             beds: searchParams.get('beds') || undefined,
-            page: Number(searchParams.get('page')) || 1,
+            page: currentPage,
             minPrice: searchParams.get('minPrice') || undefined,
             maxPrice: searchParams.get('maxPrice') || undefined,
             amenities: searchParams.get('amenities')?.split(',') || undefined,
             furnishing: searchParams.get('furnishing')?.split(',') || undefined,
         };
         fetchProperties(currentFilters);
-    }, [searchParams, fetchProperties]);
+    }, [searchParams, fetchProperties, currentPage]);
     
     const handleFilterChange = (filters: Partial<PropertyFilters>) => {
         const params = new URLSearchParams(searchParams.toString());
-
-        // Set or delete each filter from the URL
         Object.entries(filters).forEach(([key, value]) => {
             if (value && (Array.isArray(value) ? value.length > 0 : value !== 'ALL' && value !== '')) {
                 params.set(key, Array.isArray(value) ? value.join(',') : String(value));
@@ -64,8 +91,7 @@ const SearchResults = () => {
                 params.delete(key);
             }
         });
-
-        params.set('page', '1'); // Reset to the first page whenever filters change
+        params.set('page', '1');
         router.push(`${pathname}?${params.toString()}`);
     };
 
@@ -75,7 +101,6 @@ const SearchResults = () => {
         router.push(`${pathname}?${params.toString()}`);
     }
 
-    // This object ensures the filter controls are in sync with the URL parameters on page load
     const initialFilters = {
         propertyType: searchParams.get('propertyType') || 'ALL',
         beds: searchParams.get('beds') || 'ALL',
@@ -86,26 +111,19 @@ const SearchResults = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="text-center mb-8">
-                <h1 className="text-4xl font-bold tracking-tight text-gray-900">Find Your Next Property</h1>
-                <p className="mt-4 text-lg text-gray-600">
-                    Search through our curated list of properties. Use the filters to narrow down your options.
-                </p>
-            </div>
-
-            <div className="mb-8">
+        <>
+            <PropertiesHero>
                 <PropertySearchFilters 
                     onFilterChange={handleFilterChange} 
                     initialFilters={initialFilters} 
                 />
-            </div>
+            </PropertiesHero>
             
-            <main>
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="flex flex-col sm:flex-row justify-between items-center mb-6 pb-4 border-b border-gray-200 gap-4">
-                    <h1 className="text-xl font-semibold text-gray-800">
+                    <h2 className="text-xl font-semibold text-gray-800">
                        {isLoading ? 'Searching...' : `Showing ${properties.length} Results`}
-                    </h1>
+                    </h2>
                     <div className="flex items-center gap-2">
                         <label htmlFor="sort-by" className="text-sm font-medium text-gray-600">Sort by:</label>
                         <select id="sort-by" className="w-full sm:w-auto border border-gray-300 rounded-md py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900">
@@ -137,7 +155,7 @@ const SearchResults = () => {
                     <NoResultsFound />
                 )}
             </main>
-        </div>
+        </>
     );
 };
 

@@ -32,66 +32,73 @@ export class PropertyRepository {
     const page = filters.page || 1;
     const skip = (page - 1) * ITEMS_PER_PAGE;
 
-    const whereClause: Prisma.PropertyWhereInput = {
-      status: PropertyStatus.APPROVED,
-    };
+    // We build an array of conditions that will all be joined with AND
+    const whereConditions: Prisma.PropertyWhereInput[] = [
+      { status: PropertyStatus.APPROVED },
+    ];
 
     if (filters.searchQuery) {
-      whereClause.OR = [
-        { title: { contains: filters.searchQuery, mode: "insensitive" } },
-        { description: { contains: filters.searchQuery, mode: "insensitive" } },
-        { address: { contains: filters.searchQuery, mode: "insensitive" } },
-        {
-          project: {
-            address: { contains: filters.searchQuery, mode: "insensitive" },
+      whereConditions.push({
+        OR: [
+          { title: { contains: filters.searchQuery, mode: "insensitive" } },
+          {
+            description: { contains: filters.searchQuery, mode: "insensitive" },
           },
-        },
-      ];
+          { address: { contains: filters.searchQuery, mode: "insensitive" } },
+          {
+            project: {
+              address: { contains: filters.searchQuery, mode: "insensitive" },
+            },
+          },
+        ],
+      });
     }
 
     if (filters.listingType) {
       if (filters.listingType === "RENT") {
-        whereClause.listingType = { in: ["RENT", "BOTH"] };
+        whereConditions.push({ listingType: { in: ["RENT", "BOTH"] } });
       } else if (filters.listingType === "SALE") {
-        whereClause.listingType = { in: ["SALE", "BOTH"] };
+        whereConditions.push({ listingType: { in: ["SALE", "BOTH"] } });
       }
     }
 
     if (filters.propertyType && filters.propertyType !== "ALL") {
-      whereClause.propertyType = filters.propertyType as PropertyType;
+      whereConditions.push({
+        propertyType: filters.propertyType as PropertyType,
+      });
     }
 
     if (filters.beds) {
       const minBeds = parseInt(filters.beds, 10);
       if (!isNaN(minBeds)) {
-        whereClause.bedrooms = { gte: minBeds };
+        whereConditions.push({ bedrooms: { gte: minBeds } });
       }
     }
 
-    // Price Range Filter
-    if (filters.minPrice || filters.maxPrice) {
-      whereClause.rentalPrice = {};
-      if (filters.minPrice) {
-        whereClause.rentalPrice.gte = filters.minPrice;
-      }
-      if (filters.maxPrice) {
-        whereClause.rentalPrice.lte = filters.maxPrice;
-      }
+    if (filters.minPrice) {
+      whereConditions.push({ rentalPrice: { gte: filters.minPrice } });
+    }
+    if (filters.maxPrice) {
+      whereConditions.push({ rentalPrice: { lte: filters.maxPrice } });
     }
 
-    // Furnishing Status Filter
     if (filters.furnishing && filters.furnishing.length > 0) {
-      whereClause.furnishingStatus = {
-        in: filters.furnishing as FurnishingStatus[],
-      };
+      whereConditions.push({
+        furnishingStatus: { in: filters.furnishing as FurnishingStatus[] },
+      });
     }
 
-    // Amenities Filter (Many-to-Many)
+    // For amenities, we add a condition for each selected amenity
     if (filters.amenities && filters.amenities.length > 0) {
-      whereClause.AND = filters.amenities.map((id) => ({
-        amenities: { some: { amenityId: parseInt(id, 10) } },
-      }));
+      filters.amenities.forEach((id) => {
+        whereConditions.push({
+          amenities: { some: { amenityId: parseInt(id, 10) } },
+        });
+      });
     }
+
+    // The final where clause combines all conditions with AND
+    const whereClause: Prisma.PropertyWhereInput = { AND: whereConditions };
 
     const [items, totalCount] = await prisma.$transaction([
       prisma.property.findMany({

@@ -1,4 +1,4 @@
-// File Path: apps/frontend/src/services/propertyService.ts
+// File Path: frontend/src/features/properties/propertyService.ts
 import apiClient from "@/lib/apiClient";
 import {
   PropertySubmission,
@@ -39,7 +39,6 @@ export const getAmenities = async (): Promise<Amenity[]> => {
 
 /**
  * Submits a new property listing to the backend.
- * This simulates a file upload process by creating placeholder URLs.
  */
 export const submitProperty = async (
   data: PropertySubmission
@@ -68,22 +67,36 @@ export const getPublicProperties = async (
   filters: PropertyFilters = {}
 ): Promise<PaginatedResponse<PropertyPublic>> => {
   const params = new URLSearchParams();
+
+  // --- Existing Filters ---
   if (filters.search) {
     params.append("search", filters.search);
   }
-  // Add listingType to the params if it exists
   if (filters.listingType) {
     params.append("listingType", filters.listingType);
   }
-  // The existing filter for property type (Apartment, House, etc.)
   if (filters.propertyType && filters.propertyType !== "ALL") {
     params.append("propertyType", filters.propertyType);
   }
-  if (filters.beds) {
+  if (filters.beds && filters.beds !== "ALL") {
     params.append("beds", filters.beds);
   }
   if (filters.page) {
     params.append("page", filters.page.toString());
+  }
+
+  // --- NEW: Add Advanced Filters to the request ---
+  if (filters.minPrice) {
+    params.append("minPrice", filters.minPrice);
+  }
+  if (filters.maxPrice) {
+    params.append("maxPrice", filters.maxPrice);
+  }
+  if (filters.furnishing && filters.furnishing.length > 0) {
+    params.append("furnishing", filters.furnishing.join(","));
+  }
+  if (filters.amenities && filters.amenities.length > 0) {
+    params.append("amenities", filters.amenities.join(","));
   }
 
   const response = await apiClient.get(`/properties?${params.toString()}`);

@@ -1,3 +1,4 @@
+// File Path: frontend/src/features/home/components/property-card/PropertyCardInfo.tsx
 'use client';
 
 import { PropertyPublic } from '@/lib/definitions';
@@ -14,9 +15,9 @@ export const PropertyCardInfo = ({ property }: Props) => {
     useEffect(() => {
         setIsClient(true);
         if (property.rentalPrice) {
-            const price = new Intl.NumberFormat('id-ID', {
+            const price = new Intl.NumberFormat('en-MY', {
                 style: 'currency',
-                currency: 'IDR',
+                currency: 'MYR',
                 minimumFractionDigits: 0,
             }).format(property.rentalPrice);
             setFormattedPrice(price);

@@ -66,7 +66,6 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
         }
     };
     
-    // New function to render the color-coded suggestion
     const renderSuggestion = () => {
         if (!priceSuggestion) return null;
 
@@ -82,6 +81,12 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
             confidenceColor = 'text-red-800 bg-red-50 border-red-200';
         }
 
+        const formattedSuggestedPrice = new Intl.NumberFormat('en-MY', {
+            style: 'currency',
+            currency: 'MYR',
+            minimumFractionDigits: 0,
+        }).format(Math.round(priceSuggestion.price));
+
         return (
             <div className={`mt-4 p-3 rounded-md border flex items-center justify-between ${confidenceColor}`}>
                 <div>
@@ -89,7 +94,7 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                         AI Suggestion ({confidenceText} Confidence: {confidencePercent}%)
                     </p>
                     <p className="text-sm">
-                        A competitive price is around <strong>Rp {Math.round(priceSuggestion.price).toLocaleString('id-ID')}</strong>.
+                        A competitive price is around <strong>{formattedSuggestedPrice}</strong>.
                     </p>
                 </div>
                 <button
@@ -145,12 +150,12 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                 <h4 className="text-lg font-semibold text-gray-700 mb-4">Pricing</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                      <FormInput
-                        label="Price (IDR)"
+                        label="Price (MYR)" 
                         name="rentalPrice"
                         register={register}
                         error={errors.rentalPrice}
                         type="number"
-                        placeholder="e.g., 25000000"
+                        placeholder="e.g., 2500"
                     />
                     <FormSelect
                         label="Payment Period"
@@ -164,7 +169,7 @@ export const Step1Details = ({ register, errors, watch, setValue }: Step1Props) 
                     </FormSelect>
                 </div>
                 {isPredictionLoading && <div className="mt-4 text-sm text-gray-500 p-3 bg-gray-50 rounded-md animate-pulse"><p>✨ Generating AI price suggestion...</p></div>}
-                {!isPredictionLoading && renderSuggestion()} {/* Render the new suggestion component */}
+                {!isPredictionLoading && renderSuggestion()}
             </div>
 
              <div className="py-8 border-t border-gray-200">

@@ -69,7 +69,7 @@ export const PendingPropertiesList = ({ initialProperties, onUpdate }: PendingPr
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{property.propertyType}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                    {property.rentalPrice ? `Rp ${property.rentalPrice.toLocaleString()}` : 'N/A'}
+                    {property.rentalPrice ? new Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR', minimumFractionDigits: 0 }).format(property.rentalPrice) : 'N/A'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Button variant="outline" size="sm" onClick={() => handleReviewClick(property.id)}>

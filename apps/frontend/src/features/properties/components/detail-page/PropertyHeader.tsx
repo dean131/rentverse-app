@@ -16,9 +16,9 @@ interface HeaderProps {
 export const PropertyHeader = ({ title, address, price, period, listingType, onRequestBooking, onMakeInquiry }: HeaderProps) => {
     const formatPrice = (priceVal: number | null) => {
         if (!priceVal) return 'Price on request';
-        return new Intl.NumberFormat('id-ID', {
+        return new Intl.NumberFormat('en-MY', {
             style: 'currency',
-            currency: 'IDR',
+            currency: 'MYR',
             minimumFractionDigits: 0,
         }).format(priceVal);
     };
@@ -36,7 +36,6 @@ export const PropertyHeader = ({ title, address, price, period, listingType, onR
                     {isForRent && period && <span className="text-sm font-normal text-gray-500">/{period.toLowerCase()}</span>}
                 </p>
                 <div className="flex space-x-2">
-                    {/* Conditionally render buttons based on listing type */}
                     {isForSale && <Button onClick={onMakeInquiry}>Make an Inquiry</Button>}
                     {isForRent && <Button onClick={onRequestBooking}>Request to Book</Button>}
                 </div>

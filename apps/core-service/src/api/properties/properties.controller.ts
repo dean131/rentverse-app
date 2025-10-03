@@ -1,4 +1,5 @@
-// File Path: apps/core-service/src/api/properties/properties.controller.ts
+// File Path: core-service/src/api/properties/properties.controller.ts
+
 import { Request, Response } from "express";
 import { PropertyService } from "./properties.service.js";
 import { ApiResponse } from "../../utils/response.helper.js";
@@ -15,7 +16,6 @@ export class PropertyController {
 
   createProperty = asyncHandler(
     async (req: AuthenticatedRequest, res: Response) => {
-      // CORRECTED: The user object from the middleware has an 'id' property, not 'userId'.
       const userId = req.user?.id;
       if (!userId) {
         throw new ApiError(401, "User not authenticated");
@@ -29,15 +29,28 @@ export class PropertyController {
   );
 
   getPublicProperties = asyncHandler(async (req: Request, res: Response) => {
-    const searchQuery = req.query.search as string | undefined;
-    const propertyType = req.query.propertyType as string | undefined;
-    const beds = req.query.beds as string | undefined;
+    // Parse all potential query parameters from the request
+    const filters = {
+      searchQuery: req.query.search as string | undefined,
+      listingType: req.query.listingType as string | undefined,
+      propertyType: req.query.propertyType as string | undefined,
+      beds: req.query.beds as string | undefined,
+      page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
+      minPrice: req.query.minPrice
+        ? parseInt(req.query.minPrice as string, 10)
+        : undefined,
+      maxPrice: req.query.maxPrice
+        ? parseInt(req.query.maxPrice as string, 10)
+        : undefined,
+      amenities: req.query.amenities
+        ? (req.query.amenities as string).split(",")
+        : undefined,
+      furnishing: req.query.furnishing
+        ? (req.query.furnishing as string).split(",")
+        : undefined,
+    };
 
-    const properties = await this.propertyService.getPublicProperties({
-      searchQuery,
-      propertyType,
-      beds,
-    });
+    const properties = await this.propertyService.getPublicProperties(filters);
     ApiResponse.success(res, properties);
   });
 

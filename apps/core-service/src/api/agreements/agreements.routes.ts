@@ -19,6 +19,7 @@ export function createAgreementRouter(controller: AgreementController): Router {
   router.get("/my-agreements", controller.getMyAgreements);
   router.patch("/:id/approve", controller.approveAgreement);
   router.get("/:id/signing-url", controller.getSigningUrl);
+  router.get("/:id/download", controller.downloadAgreementDocument);
 
   return router;
 }

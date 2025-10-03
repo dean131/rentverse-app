@@ -1,4 +1,5 @@
-// File Path: apps/core-service/src/api/properties/properties.service.ts
+// File Path: core-service/src/api/properties/properties.service.ts
+
 import { Property } from "@prisma/client";
 import { PropertyRepository } from "./properties.repository.js";
 import { ApiError } from "../../utils/ApiError.js";
@@ -11,18 +12,23 @@ export class PropertyService {
   }
 
   async createProperty(propertyData: any, userId: number): Promise<Property> {
-    // UPDATED: Now expects an `images` array of objects with URLs
     const {
       viewIds,
       amenityIds,
       ownershipDocumentUrl,
       projectId,
+      address,
       images,
       ...restOfData
     } = propertyData;
 
+    if (!projectId && !address) {
+      throw new ApiError(400, "Either a project or an address is required.");
+    }
+
     const dataToCreate = {
       ...restOfData,
+      address: address,
       listedBy: { connect: { id: userId } },
       ...(projectId && {
         project: { connect: { id: parseInt(projectId, 10) } },
@@ -49,7 +55,6 @@ export class PropertyService {
           documentType: "OWNERSHIP_CERTIFICATE",
         },
       },
-      // ADDED: Logic to create the property images from the provided URLs
       ...(images &&
         images.length > 0 && {
           images: {
@@ -65,12 +70,17 @@ export class PropertyService {
     return this.propertyRepository.createProperty(dataToCreate);
   }
 
-  // CORRECTED: The type definition for the filters object now includes the optional 'beds' property.
   async getPublicProperties(filters: {
     searchQuery?: string;
+    listingType?: string;
     propertyType?: string;
     beds?: string;
-  }): Promise<any[]> {
+    page?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    amenities?: string[];
+    furnishing?: string[];
+  }): Promise<any> {
     return this.propertyRepository.findAllPublic(filters);
   }
 
@@ -82,9 +92,13 @@ export class PropertyService {
         "Property not found or is not approved for public viewing."
       );
     }
+    if (!property.address && !property.project?.address) {
+      throw new ApiError(404, "Property address details are incomplete.");
+    }
 
     const formattedProperty = {
       ...property,
+      address: property.address || property.project?.address,
       amenities: property.amenities.map((pa) => pa.amenity),
       views: property.views.map((pv) => pv.view),
     };

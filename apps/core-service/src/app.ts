@@ -6,6 +6,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./middleware/errorHandler.middleware.js";
+import { config } from "./config/index.js";
 
 // Import modules
 import { AuthRepository } from "./api/auth/auth.repository.js";
@@ -52,17 +53,22 @@ import { WebhookService } from "./api/webhooks/webhooks.service.js";
 import { WebhookController } from "./api/webhooks/webhooks.controller.js";
 import { createWebhookRouter } from "./api/webhooks/webhooks.routes.js";
 
+import { StorageService } from "./services/storage.service.js";
+import { UploadController } from "./api/uploads/uploads.controller.js";
+import { createUploadRouter } from "./api/uploads/uploads.routes.js";
+
 import { DocusignService } from "./services/docusign.service.js";
+
+import { InquiryService } from "./api/inquiries/inquiries.service.js";
+import { InquiryController } from "./api/inquiries/inquiries.controller.js";
+import { createInquiryRouter } from "./api/inquiries/inquiries.routes.js";
 
 const app = express();
 
 // --- CORS Configuration ---
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-  "https://rentverse_frontend.ilhamdean.cloud",
-  "https://rentverse.ilhamdean.cloud",
-];
+const allowedOrigins = config.cors.allowedOrigins
+  .split(",")
+  .map((origin) => origin.trim());
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
@@ -105,7 +111,8 @@ const projectRepository = new ProjectRepository();
 const projectService = new ProjectService(projectRepository);
 const projectController = new ProjectController(projectService);
 
-const adminService = new AdminService(adminRepository);
+const adminRepository = new AdminRepository();
+const adminService = new AdminService(adminRepository, propertyRepository);
 const adminController = new AdminController(adminService);
 
 const userService = new UserService(
@@ -135,6 +142,12 @@ const agreementController = new AgreementController(agreementService);
 const webhookService = new WebhookService(agreementRepository);
 const webhookController = new WebhookController(webhookService);
 
+const storageService = new StorageService();
+const uploadController = new UploadController(storageService);
+
+const inquiryService = new InquiryService(propertyRepository);
+const inquiryController = new InquiryController(inquiryService);
+
 // --- API Routes ---
 app.use("/api/auth", createAuthRouter(authController));
 app.use("/api/properties", createPropertyRouter(propertyController));
@@ -146,6 +159,8 @@ app.use("/api/amenities", createAmenityRouter(amenityController));
 // NEW: Add new routes
 app.use("/api/agreements", createAgreementRouter(agreementController));
 app.use("/api/webhooks", createWebhookRouter(webhookController));
+app.use("/api/uploads", createUploadRouter(uploadController));
+app.use("/api/inquiries", createInquiryRouter(inquiryController));
 
 // --- Error Handler ---
 app.use(errorHandler);

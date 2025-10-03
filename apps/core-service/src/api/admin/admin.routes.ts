@@ -2,31 +2,28 @@
 
 import { Router } from "express";
 import { AdminController } from "./admin.controller.js";
-// Corrected middleware name from 'protect' to 'authenticate'
-import { authenticate } from "../../middleware/auth.middleware.js";
+import { validate } from "../../middleware/validate.middleware.js";
+import { updateStatusSchema } from "./admin.validation.js";
+import { protect } from "../../middleware/auth.middleware.js";
 import { authorize } from "../../middleware/authorize.middleware.js";
 import { Role } from "@prisma/client";
 
 export function createAdminRouter(controller: AdminController): Router {
   const router = Router();
 
-  // Get all pending properties (admin only)
-  // Corrected the argument for the authorize middleware to be an array of Role enums
-  router.get(
-    "/properties/pending",
-    authenticate,
-    authorize([Role.ADMIN]),
-    controller.getPendingProperties
-  );
+  router.use(protect, authorize(Role.ADMIN));
 
-  // Update a property's status (admin only)
-  // Corrected the argument for the authorize middleware to be an array of Role enums
+  router.get("/properties/pending", controller.getPendingProperties);
+
   router.patch(
     "/properties/:id/status",
     authenticate,
     authorize([Role.ADMIN]),
     controller.updatePropertyStatus
   );
+
+  router.get("/dashboard/stats", controller.getDashboardStats);
+  router.get("/users", controller.getUsers);
 
   return router;
 }

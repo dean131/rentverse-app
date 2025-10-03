@@ -111,4 +111,27 @@ export class AgreementController {
       ApiResponse.success(res, { url: signingUrl });
     }
   );
+
+  downloadAgreementDocument = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response) => {
+      const userId = req.user?.id;
+      if (!userId) throw new ApiError(401, "User not authenticated");
+
+      const agreementId = parseInt(req.params.id, 10);
+      if (isNaN(agreementId)) throw new ApiError(400, "Invalid agreement ID.");
+
+      const pdfBuffer = await this.agreementService.getAgreementDocument(
+        agreementId,
+        userId
+      );
+
+      // Set headers to trigger browser download
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="tenancy-agreement-${agreementId}.pdf"`
+      );
+      res.send(pdfBuffer);
+    }
+  );
 }

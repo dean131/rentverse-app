@@ -1,8 +1,8 @@
-// File Path: apps/frontend/src/app/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider } from "@/providers/AuthContext";
+import { Toaster } from "react-hot-toast"; // <-- Import Toaster
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -11,7 +11,6 @@ export const metadata: Metadata = {
   description: "An integrated property listing platform",
 };
 
-// This RootLayout is the top-level component for your entire application.
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -19,12 +18,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossOrigin=""
+        />
+      </head>
       <body className={inter.className}>
-        {/* The AuthProvider wraps the entire application. This is what makes
-            the useAuth() hook available to all child components and layouts.
-            By placing it here at the root, we ensure that every page,
-            including error pages, is within the context. */}
         <AuthProvider>
+          <Toaster position="bottom-center" />
           {children}
         </AuthProvider>
       </body>

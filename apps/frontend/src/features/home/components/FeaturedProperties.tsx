@@ -1,0 +1,58 @@
+// File Path: apps/frontend/src/components/home/FeaturedProperties.tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { PropertyPublic } from '@/lib/definitions';
+import { getPublicProperties } from '@/features/properties/propertyService';
+import { PropertyCard } from './PropertyCard';
+
+export const FeaturedProperties = () => {
+    const [properties, setProperties] = useState<PropertyPublic[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchProperties = async () => {
+            try {
+                // Fetch the paginated data, but only the first page for the homepage feature
+                const paginatedData = await getPublicProperties({ page: 1 });
+                // Correctly set the state with the 'items' array from the response
+                setProperties(paginatedData.items);
+            } catch (err) {
+                console.error("Failed to fetch public properties:", err);
+                setError("Could not load properties at this time.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProperties();
+    }, []);
+
+    if (isLoading) {
+        return <div className="text-center py-12">Loading properties...</div>;
+    }
+
+    if (error) {
+        return <div className="text-center py-12 text-red-500">{error}</div>;
+    }
+
+    return (
+        <section className="bg-gray-50 py-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center">
+                    <h2 className="text-3xl font-bold text-gray-900">
+                        Find the property that defines your lifestyle
+                    </h2>
+                </div>
+
+                <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    {/* Display up to 6 properties on the homepage */}
+                    {properties.slice(0, 6).map((property) => (
+                        <PropertyCard key={property.id} property={property} />
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};

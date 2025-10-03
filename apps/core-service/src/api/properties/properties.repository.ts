@@ -1,6 +1,15 @@
-// File Path: apps/core-service/src/api/properties/properties.repository.ts
+// File Path: core-service/src/api/properties/properties.repository.ts
+
 import { prisma } from "../../lib/prisma.js";
-import { Property, Prisma, PropertyStatus, PropertyType } from "@prisma/client";
+import {
+  Property,
+  Prisma,
+  PropertyStatus,
+  PropertyType,
+  FurnishingStatus,
+} from "@prisma/client";
+
+const ITEMS_PER_PAGE = 9;
 
 export class PropertyRepository {
   async createProperty(data: Prisma.PropertyCreateInput): Promise<Property> {
@@ -11,63 +20,120 @@ export class PropertyRepository {
 
   async findAllPublic(filters: {
     searchQuery?: string;
+    listingType?: string;
     propertyType?: string;
     beds?: string;
-  }): Promise<any[]> {
-    const whereClause: Prisma.PropertyWhereInput = {
-      status: PropertyStatus.APPROVED,
-    };
+    page?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    amenities?: string[];
+    furnishing?: string[];
+  }): Promise<{ items: any[]; totalPages: number; currentPage: number }> {
+    const page = filters.page || 1;
+    const skip = (page - 1) * ITEMS_PER_PAGE;
+
+    // We build an array of conditions that will all be joined with AND
+    const whereConditions: Prisma.PropertyWhereInput[] = [
+      { status: PropertyStatus.APPROVED },
+    ];
 
     if (filters.searchQuery) {
-      whereClause.OR = [
-        { title: { contains: filters.searchQuery, mode: "insensitive" } },
-        { description: { contains: filters.searchQuery, mode: "insensitive" } },
-        {
-          project: {
-            address: { contains: filters.searchQuery, mode: "insensitive" },
+      whereConditions.push({
+        OR: [
+          { title: { contains: filters.searchQuery, mode: "insensitive" } },
+          {
+            description: { contains: filters.searchQuery, mode: "insensitive" },
           },
-        },
-      ];
+          { address: { contains: filters.searchQuery, mode: "insensitive" } },
+          {
+            project: {
+              address: { contains: filters.searchQuery, mode: "insensitive" },
+            },
+          },
+        ],
+      });
+    }
+
+    if (filters.listingType) {
+      if (filters.listingType === "RENT") {
+        whereConditions.push({ listingType: { in: ["RENT", "BOTH"] } });
+      } else if (filters.listingType === "SALE") {
+        whereConditions.push({ listingType: { in: ["SALE", "BOTH"] } });
+      }
     }
 
     if (filters.propertyType && filters.propertyType !== "ALL") {
-      whereClause.propertyType = filters.propertyType as PropertyType;
+      whereConditions.push({
+        propertyType: filters.propertyType as PropertyType,
+      });
     }
 
     if (filters.beds) {
       const minBeds = parseInt(filters.beds, 10);
       if (!isNaN(minBeds)) {
-        whereClause.bedrooms = {
-          gte: minBeds,
-        };
+        whereConditions.push({ bedrooms: { gte: minBeds } });
       }
     }
 
-    return prisma.property.findMany({
-      where: whereClause,
-      select: {
-        id: true,
-        title: true,
-        listingType: true,
-        rentalPrice: true,
-        paymentPeriod: true,
-        bedrooms: true,
-        bathrooms: true,
-        sizeSqft: true,
-        project: { select: { address: true } },
-        images: {
-          select: { imageUrl: true },
-          orderBy: { displayOrder: "asc" },
+    if (filters.minPrice) {
+      whereConditions.push({ rentalPrice: { gte: filters.minPrice } });
+    }
+    if (filters.maxPrice) {
+      whereConditions.push({ rentalPrice: { lte: filters.maxPrice } });
+    }
+
+    if (filters.furnishing && filters.furnishing.length > 0) {
+      whereConditions.push({
+        furnishingStatus: { in: filters.furnishing as FurnishingStatus[] },
+      });
+    }
+
+    // For amenities, we add a condition for each selected amenity
+    if (filters.amenities && filters.amenities.length > 0) {
+      filters.amenities.forEach((id) => {
+        whereConditions.push({
+          amenities: { some: { amenityId: parseInt(id, 10) } },
+        });
+      });
+    }
+
+    // The final where clause combines all conditions with AND
+    const whereClause: Prisma.PropertyWhereInput = { AND: whereConditions };
+
+    const [items, totalCount] = await prisma.$transaction([
+      prisma.property.findMany({
+        where: whereClause,
+        select: {
+          id: true,
+          title: true,
+          listingType: true,
+          rentalPrice: true,
+          paymentPeriod: true,
+          bedrooms: true,
+          bathrooms: true,
+          sizeSqft: true,
+          address: true,
+          project: { select: { address: true } },
+          images: {
+            select: { imageUrl: true },
+            orderBy: { displayOrder: "asc" },
+          },
         },
-      },
-    });
+        skip: skip,
+        take: ITEMS_PER_PAGE,
+      }),
+      prisma.property.count({ where: whereClause }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+
+    return { items, totalPages, currentPage: page };
   }
 
   async findPropertyById(id: number) {
     return prisma.property.findUnique({
       where: {
         id: id,
-        status: PropertyStatus.APPROVED,
       },
       include: {
         listedBy: {
@@ -86,6 +152,7 @@ export class PropertyRepository {
         images: {
           orderBy: { displayOrder: "asc" },
         },
+        documents: true,
         amenities: {
           include: { amenity: true },
         },
@@ -125,7 +192,7 @@ export class PropertyRepository {
         listedById: userId,
       },
       _count: {
-        id: true, // Count the number of properties in each group
+        id: true,
       },
     });
 

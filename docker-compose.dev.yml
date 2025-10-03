@@ -3,6 +3,15 @@ services:
     ports:
       - "5432:5432"
     networks:
+      - rentverse_network
+      - tunnel
+
+  minio:
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - rentverse_network
       - tunnel
 
   core-service:
@@ -12,7 +21,9 @@ services:
       - /app/node_modules
     ports:
       - "8080:8080"
+    env_file: ./apps/core-service/.env
     networks:
+      - rentverse_network
       - tunnel
 
   frontend:
@@ -23,8 +34,9 @@ services:
       - /app/.next
     ports:
       - "3000:3000"
-    env_file: ./apps/frontend/.env.dev
+    env_file: ./apps/frontend/.env.local
     networks:
+      - rentverse_network
       - tunnel
 
   prediction-service:
@@ -33,7 +45,9 @@ services:
       - ./apps/prediction-service:/app
     ports:
       - "8000:8000"
+    env_file: ./apps/prediction-service/.env
     networks:
+      - rentverse_network
       - tunnel
 
 networks:

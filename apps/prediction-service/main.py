@@ -1,34 +1,31 @@
-# File Path: apps/prediction-service/main.py
+# File Path: prediction-service/main.py
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 import joblib
 import pandas as pd
 import numpy as np
 import os
 
-# NEW: Import the CORSMiddleware
-from fastapi.middleware.cors import CORSMiddleware
-
 app = FastAPI(title="Rentverse Price Prediction API")
 
-# --- NEW: CORS Configuration ---
-# This is the crucial part that will fix the "Method Not Allowed" error.
-
-# Define the list of origins that are allowed to make requests to this API.
-# For development, this is our frontend's address.
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://rentverse_frontend.ilhamdean.cloud",
-    "https://rentverse.ilhamdean.cloud",
-]
+# --- CORS Configuration ---
+origins_string = os.getenv("CORS_ALLOWED_ORIGINS")
+if origins_string:
+    origins = [origin.strip() for origin in origins_string.split(",")]
+else:
+    origins = []
+    print(
+        "Warning: CORS_ALLOWED_ORIGINS environment variable not found. CORS is disabled for non-listed origins."
+    )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allow the origins listed above
-    allow_credentials=True,  # Allow cookies to be sent
-    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # --- Model Loading ---
@@ -62,6 +59,7 @@ class PropertyFeatures(BaseModel):
 
 class PredictionResponse(BaseModel):
     predicted_price_myr: float
+    confidence_score: float
 
 
 # --- API Endpoint ---
@@ -75,10 +73,37 @@ async def predict_price(features: PropertyFeatures):
         input_encoded = pd.get_dummies(input_df)
         final_df = input_encoded.reindex(columns=model_columns, fill_value=0)
 
+        # --- Main Prediction ---
         log_prediction = model.predict(final_df)[0]
         prediction = np.expm1(log_prediction)
 
-        return {"predicted_price_myr": round(prediction, 2)}
+        # --- Confidence Score Calculation ---
+        confidence = 0.75  # Default confidence
+        try:
+            # The loaded model is the regressor itself, not a pipeline.
+            regressor = model
+
+            # Get predictions from each tree
+            tree_predictions = [
+                np.expm1(tree.predict(final_df)[0]) for tree in regressor.estimators_
+            ]
+
+            # Calculate standard deviation
+            std_dev = np.std(tree_predictions)
+
+            # Normalize to get a score (lower std dev = higher confidence)
+            if prediction > 0:
+                normalized_std_dev = std_dev / prediction
+                confidence = max(0.0, 1.0 - normalized_std_dev)
+
+        except (IndexError, AttributeError) as e:
+            print(f"Could not calculate confidence score, using default. Error: {e}")
+
+        return {
+            "predicted_price_myr": round(prediction, 2),
+            "confidence_score": confidence,
+        }
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing input: {e}")
 

@@ -4,19 +4,19 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { Role } from "@prisma/client";
 
-// Extending the Express Request interface to include user information
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: number;
-    role: Role;
-  };
+export interface JwtPayload {
+  userId: number;
+  role: string;
 }
 
-interface AuthTokenPayload {
+export type AuthenticatedUser = {
   id: number;
-  role: Role;
+  role: string;
+};
+
+export interface AuthenticatedRequest extends Request {
+  user?: AuthenticatedUser;
 }
 
 export const authenticate = asyncHandler(
@@ -29,11 +29,8 @@ export const authenticate = asyncHandler(
     }
 
     try {
-      const decoded = jwt.verify(
-        token,
-        process.env.ACCESS_TOKEN_SECRET!
-      ) as AuthTokenPayload;
-      req.user = decoded; // Attach user payload to the request object
+      const decoded = jwt.verify(token, config.jwt.accessSecret) as JwtPayload;
+      req.user = { id: decoded.userId, role: decoded.role };
       next();
     } catch (error) {
       throw new ApiError(401, "Invalid or expired authentication token.");

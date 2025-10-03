@@ -1,21 +1,36 @@
 // File Path: apps/frontend/src/app/(main)/properties/[id]/page.tsx
-import { getPropertyById } from '@/services/propertyService';
-import { PropertyDetailClientPage } from '@/components/properties/PropertyDetailClientPage';
+import { getPropertyById } from '@/features/properties/propertyService';
+import { PropertyDetailClientPage } from '@/features/properties/components/PropertyDetailClientPage';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
+import { AxiosError } from "axios";
 
 export default async function PropertyDetailPage(
   props: PageProps<'/properties/[id]'>
 ) {
-  const { params } = props;
-  const { id } = await params;  // params sekarang Promise<{ id: string }>
+  const { id } = await props.params;
 
   const propertyId = parseInt(id, 10);
   if (isNaN(propertyId)) {
     notFound();
   }
 
-  const property = await getPropertyById(propertyId);
+  let property = null;
+  try {
+    property = await getPropertyById(propertyId);
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 404) {
+        return (
+          <div className="text-center py-20">
+            The property is not yet available or is still under approval.
+          </div>
+        );
+      }
+    }
+    throw error;
+  }
+
   if (!property) {
     notFound();
   }

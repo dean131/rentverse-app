@@ -1,4 +1,5 @@
-// File Path: apps/core-service/src/api/properties/properties.controller.ts
+// File Path: core-service/src/api/properties/properties.controller.ts
+
 import { Request, Response } from "express";
 import { PropertyService } from "./properties.service.js";
 import { ApiResponse } from "../../utils/response.helper.js";
@@ -28,6 +29,7 @@ export class PropertyController {
   );
 
   getPublicProperties = asyncHandler(async (req: Request, res: Response) => {
+    // Parse all potential query parameters from the request
     const filters = {
       searchQuery: req.query.search as string | undefined,
       listingType: req.query.listingType as string | undefined,

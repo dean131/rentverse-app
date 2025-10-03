@@ -1,4 +1,5 @@
-// File Path: apps/core-service/src/api/properties/properties.service.ts
+// File Path: core-service/src/api/properties/properties.service.ts
+
 import { Property } from "@prisma/client";
 import { PropertyRepository } from "./properties.repository.js";
 import { ApiError } from "../../utils/ApiError.js";
@@ -71,10 +72,14 @@ export class PropertyService {
 
   async getPublicProperties(filters: {
     searchQuery?: string;
+    listingType?: string;
     propertyType?: string;
     beds?: string;
     page?: number;
-    listingType?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    amenities?: string[];
+    furnishing?: string[];
   }): Promise<any> {
     return this.propertyRepository.findAllPublic(filters);
   }
@@ -87,7 +92,6 @@ export class PropertyService {
         "Property not found or is not approved for public viewing."
       );
     }
-    // Make sure there's an address field to display
     if (!property.address && !property.project?.address) {
       throw new ApiError(404, "Property address details are incomplete.");
     }

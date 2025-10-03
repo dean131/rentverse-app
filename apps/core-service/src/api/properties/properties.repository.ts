@@ -1,4 +1,5 @@
-// File Path: apps/core-service/src/api/properties/properties.repository.ts
+// File Path: core-service/src/api/properties/properties.repository.ts
+
 import { prisma } from "../../lib/prisma.js";
 import {
   Property,
@@ -48,7 +49,6 @@ export class PropertyRepository {
       ];
     }
 
-    // New logic for listingType
     if (filters.listingType) {
       if (filters.listingType === "RENT") {
         whereClause.listingType = { in: ["RENT", "BOTH"] };
@@ -68,7 +68,7 @@ export class PropertyRepository {
       }
     }
 
-    // 1. Price Range Filter
+    // Price Range Filter
     if (filters.minPrice || filters.maxPrice) {
       whereClause.rentalPrice = {};
       if (filters.minPrice) {
@@ -79,14 +79,14 @@ export class PropertyRepository {
       }
     }
 
-    // 2. Furnishing Status Filter
+    // Furnishing Status Filter
     if (filters.furnishing && filters.furnishing.length > 0) {
       whereClause.furnishingStatus = {
         in: filters.furnishing as FurnishingStatus[],
       };
     }
 
-    // 3. Amenities Filter (Many-to-Many)
+    // Amenities Filter (Many-to-Many)
     if (filters.amenities && filters.amenities.length > 0) {
       whereClause.AND = filters.amenities.map((id) => ({
         amenities: { some: { amenityId: parseInt(id, 10) } },
@@ -185,7 +185,7 @@ export class PropertyRepository {
         listedById: userId,
       },
       _count: {
-        id: true, // Count the number of properties in each group
+        id: true,
       },
     });
 

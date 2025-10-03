@@ -189,7 +189,7 @@ async function main() {
     },
   });
 
-  const pendingProperty1 = await prisma.property.create({
+  await prisma.property.create({
     data: {
       title: "Serene Private Pool Villa in Canggu",
       description:
@@ -223,7 +223,7 @@ async function main() {
     },
   });
 
-  const otherProperties = [
+  const otherPropertiesData = [
     {
       title: "Penthouse with Rooftop Jacuzzi",
       description:
@@ -409,7 +409,7 @@ async function main() {
     },
   ];
 
-  for (const propData of otherProperties) {
+  for (const propData of otherPropertiesData) {
     const { imageUrl, ...rest } = propData;
     await prisma.property.create({
       data: {
@@ -425,7 +425,9 @@ async function main() {
       },
     });
   }
-  console.log(`✅ Created ${otherProperties.length} additional properties.`);
+  console.log(
+    `✅ Created ${otherPropertiesData.length} additional properties.`
+  );
 
   // --- 6. CREATE TENANCY AGREEMENTS FOR DEMO ---
   console.log(

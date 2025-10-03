@@ -5,7 +5,7 @@ import { useState, useMemo } from 'react';
 import { PropertyWithLister } from '@/lib/definitions';
 import { Button } from '@/ui/ui/Button';
 import { Pagination } from '@/ui/ui/Pagination';
-import { PropertyReviewModal } from './PropertyReviewModal'; // Import the new modal
+import { PropertyReviewModal } from './PropertyReviewModal';
 
 interface PendingPropertiesListProps {
   initialProperties: PropertyWithLister[];
@@ -35,50 +35,50 @@ export const PendingPropertiesList = ({ initialProperties, onUpdate }: PendingPr
 
   const handleActionInModal = () => {
     if (selectedPropertyId) {
-      onUpdate(selectedPropertyId); // Refresh the list in the parent dashboard
+      onUpdate(selectedPropertyId);
     }
-    handleCloseModal(); // Close the modal
+    handleCloseModal();
   };
-
+  
   if (initialProperties.length === 0) {
-      return <p className="text-gray-500 text-center py-8">No pending properties found.</p>
+      return <div className="p-6"><p className="text-gray-500 text-center py-8">No pending properties found.</p></div>
   }
 
   return (
     <>
-      <div className="overflow-x-auto">
+      <div className="border border-gray-200 rounded-lg overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-          <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Listed By</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-          </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-          {paginatedProperties.map((property) => (
-              <tr key={property.id}>
-              <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{property.title}</div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{property.listedBy?.fullName}</div>
-                  <div className="text-sm text-gray-500">{property.listedBy?.email}</div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{property.propertyType}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                  {property.rentalPrice ? `Rp ${property.rentalPrice.toLocaleString()}` : 'N/A'}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <Button variant="outline" size="sm" onClick={() => handleReviewClick(property.id)}>
-                    Review
-                  </Button>
-              </td>
-              </tr>
-          ))}
-          </tbody>
+            <thead className="bg-gray-50">
+            <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Title</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Listed By</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Price</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Action</th>
+            </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+            {paginatedProperties.map((property) => (
+                <tr key={property.id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{property.title}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{property.listedBy?.fullName}</div>
+                    <div className="text-sm text-gray-500">{property.listedBy?.email}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{property.propertyType}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                    {property.rentalPrice ? `Rp ${property.rentalPrice.toLocaleString()}` : 'N/A'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <Button variant="outline" size="sm" onClick={() => handleReviewClick(property.id)}>
+                        Review
+                    </Button>
+                </td>
+                </tr>
+            ))}
+            </tbody>
         </table>
       </div>
       <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />

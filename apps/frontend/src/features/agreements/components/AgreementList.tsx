@@ -1,4 +1,3 @@
-// File Path: frontend/src/features/agreements/components/AgreementList.tsx
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -9,7 +8,7 @@ import { Button } from '@/ui/ui/Button';
 import Image from 'next/image';
 import axios from 'axios';
 import { Pagination } from '@/ui/ui/Pagination';
-import toast from 'react-hot-toast'; 
+import toast from 'react-hot-toast';
 
 interface AgreementListProps {
   agreements: AgreementDetails[];
@@ -94,21 +93,21 @@ export const AgreementList = ({ agreements, onUpdate }: AgreementListProps) => {
     };
 
     if (agreements.length === 0) {
-        return <p className="text-gray-500 text-center py-10">You have no agreements yet.</p>
+        return <div className="p-6"><p className="text-gray-500 text-center py-10">You have no agreements yet.</p></div>
     }
 
     return (
         <div>
             {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
-            <div className="overflow-x-auto">
+            <div className="border border-gray-200 rounded-lg overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Other Party</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Property</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Other Party</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Dates</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                            <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -118,7 +117,7 @@ export const AgreementList = ({ agreements, onUpdate }: AgreementListProps) => {
                             const isLoading = loadingStates[agreement.id];
 
                             return (
-                                <tr key={agreement.id}>
+                                <tr key={agreement.id} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
                                             <div className="flex-shrink-0 h-10 w-10">

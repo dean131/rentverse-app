@@ -1,11 +1,12 @@
+// File Path: frontend/src/features/dashboard/components/OwnerPropertyList.tsx
 'use client';
 
 import { useState, useMemo } from 'react';
 import { OwnerProperty } from '@/lib/definitions';
 import Image from 'next/image';
 import { Pagination } from '@/ui/ui/Pagination';
-import { Button } from '@/ui/ui/Button'; // Import Button
-import { OwnerPropertyViewModal } from './OwnerPropertyViewModal'; // Import the new modal
+import { Button } from '@/ui/ui/Button';
+import { OwnerPropertyViewModal } from './OwnerPropertyViewModal';
 
 interface OwnerPropertyListProps {
   properties: OwnerProperty[];
@@ -18,9 +19,11 @@ const renderStatusBadge = (status: string) => {
         PENDING: 'bg-yellow-100 text-yellow-800',
         APPROVED: 'bg-green-100 text-green-800',
         REJECTED: 'bg-red-100 text-red-800',
+        RENTED: 'bg-blue-100 text-blue-800',
+        SOLD: 'bg-purple-100 text-purple-800',
     };
     return (
-        <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
+        <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
             {status.toLowerCase()}
         </span>
     );
@@ -38,24 +41,24 @@ export const OwnerPropertyList = ({ properties }: OwnerPropertyListProps) => {
     const totalPages = Math.ceil(properties.length / ITEMS_PER_PAGE);
 
     if (properties.length === 0) {
-        return <p className="text-gray-500 text-center py-10">You have not listed any properties yet.</p>
+        return <div className="p-6"><p className="text-gray-500 text-center py-10">You have not listed any properties yet.</p></div>
     }
 
     return (
         <>
-            <div className="overflow-x-auto">
+            <div className="border border-gray-200 rounded-lg overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Listing</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Listed</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Listing</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date Listed</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                            <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {paginatedProperties.map((property) => (
-                            <tr key={property.id}>
+                            <tr key={property.id} className="hover:bg-gray-50 transition-colors">
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center">
                                         <div className="flex-shrink-0 h-10 w-10">
@@ -70,7 +73,7 @@ export const OwnerPropertyList = ({ properties }: OwnerPropertyListProps) => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(property.createdAt).toLocaleDateString()}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{renderStatusBadge(property.status)}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <Button variant="outline" size="sm" onClick={() => setSelectedPropertyId(property.id)}>
+                                     <Button variant="outline" size="sm" onClick={() => setSelectedPropertyId(property.id)}>
                                         View
                                     </Button>
                                 </td>

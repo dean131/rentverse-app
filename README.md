@@ -124,5 +124,7 @@ This feature automates the entire contract signing process, providing a secure a
 
 ### **4. Submission Links**
 
-- **GitHub Repository**: `[https://github.com/dean131/rentverse-app]`
-- **Demo System**: `[https://rentverse.ilhamdean.cloud]`
+
+- **GitHub Repository**: https://github.com/dean131/rentverse-app
+- **Presentation**: https://www.canva.com/design/DAGyXgrHnfk/gKBoBam0-7xR6QZrQM9OqQ/edit
+- **Figma**: https://www.figma.com/design/ZZ3fkpjjuwtTEElaDDrWr2/MetaAirflow-x-USH?node-id=0-1&t=BI3tS3dOKX1tlJ7L-1
